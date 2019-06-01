@@ -1,0 +1,65 @@
+syntax = "proto3";
+package go;
+import "gamecomm.proto";
+
+//场景
+//入场
+message GameBaccaratEnter{
+	uint64 UserID = 1;					//玩家ID
+	float BankerScore = 2;				//庄家金币
+	int64 TimeStamp = 3;				//时间戳
+	repeated int32 Chips = 4; 			//筹码
+	UserList Players = 5;				//玩家列表
+	repeated bytes AwardAreas = 6;		//开奖记录(路单)
+	uint32 FreeTime = 7;
+	uint32 BetTime = 8;
+	uint32 OpenTime = 9;
+}
+//注:通过mainID->subID 区分游戏状态(subID:101空闲、102游戏、103开奖、104旁观)
+
+//游戏消息
+//抢庄
+message GameBaccaratHost {
+	uint64 UserID = 1;
+     bool IsWant = 2;//true上庄 false取消上庄
+ }
+ //超级抢庄
+ message GameBaccaratSuperHost {
+	 uint64 UserID = 1;
+     bool IsWant = 2;//true上庄 false取消
+ }
+
+//游戏中
+message GameBaccaratBet{
+    int32 BetArea = 1;				//下注区域
+    float BetScore = 2;				//下注金额
+}
+
+//下注结果
+message GameBaccaratBetResult{
+	int32 State = 1;					//状态
+	string Hints = 2;					//提示
+}
+
+//结束
+message GameBaccaratOver{
+	 bytes AwardArea = 1;	//开奖区域
+	 bytes PlayerCard = 2;	//闲家的牌
+	 bytes BankerCard = 3;	//庄家的牌
+	 float Acquire = 4;		//获得金币(结算)
+}
+
+
+
+//比赛
+//旁观者扔鸡蛋
+//下注者掐小妞
+//赢了抱金鸡、金猪
+//局中下注，局外吆喝，局前预热。 局中局玩法
+
+
+//游戏规则:
+//使用3～8副，每副52张纸牌，洗在一起，置於发牌盒中，由荷官从其中分发。
+//各家力争手中有两三张牌总点数为9或接近9，K、Q、J和10都计为0，其他牌按牌面计点。
+//计算时，将各家手中的牌值相加，但仅论最後一位数字。当场付赌金最多者为庄家。
+

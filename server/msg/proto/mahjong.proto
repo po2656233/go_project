@@ -1,0 +1,55 @@
+syntax = "proto3";
+package go;
+
+import "gamecomm.proto";
+
+//场景
+//入场
+message GameMahjongEnter{
+	uint64 UserID = 1;					//玩家ID
+	int64 TimeStamp = 2;				//时间戳
+	UserList Players = 3;				//玩家列表
+	uint32 FreeTime = 4;
+}
+
+//游戏消息
+// 玩家信息
+message GameMahjongPlayer{
+	uint64 UserID = 1;					// 玩家ID
+	uint32 Site = 2;					// 玩家座位
+	bytes Cards = 3;					// 牌
+	bool IsBanker = 4;					// 是否是庄家
+}
+
+// 开始
+message GameMahjongBegins{
+	bytes Dice = 1;						// 骰子数值(两个骰子)
+	repeated GameMahjongPlayer PlayersInfo = 2;
+}
+
+// 出牌
+message GameMahjongOutcard{
+	uint32 Site = 1;					// 玩家座位
+	bytes Cards = 2;					// 牌值
+	string Hints = 3;					// 操作提示
+}
+
+// 操作
+message GameMahjongOperate{
+	int32 Code = 1;						// 操作码
+	bytes Cards = 2;					// 牌值
+	string Hints = 3;					// 操作提示
+}
+
+// 得分
+message GameMahjongAward{
+	uint32 Site = 1;					// 玩家座位
+	bytes Codes = 2;					// 牌型
+	float GetGold = 3;					// 获得的金币
+}
+
+// 结算
+message GameMahjongCheckout{
+	repeated GameMahjongAward players = 1;		// 所有玩家得分
+}
+
