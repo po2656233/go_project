@@ -80,7 +80,7 @@ func handleLogin(args []interface{}) {
 		playerManger.AppandPlayer(player)
 
 		//发送【房间列表】
-		player.SendData(MainLogin, SubMasterInfo, msg)
+		player.WillReceive(MainLogin, SubMasterInfo, msg)
 	} else {
 		//失败信息
 		loginResult := &protoMsg.ResResult{}
@@ -88,7 +88,7 @@ func handleLogin(args []interface{}) {
 		loginResult.Hints = *proto.String("Failed")
 
 		//【返回结果】[MainID|SubID]
-		player.SendData(MainLogin, SubLoginResult, loginResult)
+		player.WillReceive(MainLogin, SubLoginResult, loginResult)
 
 		//日志打印
 		log.Error("Login Failed!")
@@ -106,11 +106,10 @@ func handleEnterRoom(args []interface{}) {
 		player.RoomNum = m.GetRoomNum()
 
 		//找到游戏列表信息
-
 		_, _, msg := sqlHandle.CheckGameList(player.RoomNum)
 
 		//发送数据
-		player.SendData(MainLogin, SubGameList, msg)
+		player.WillReceive(MainLogin, SubGameList, msg)
 
 	} else {
 		//失败信息
@@ -119,7 +118,7 @@ func handleEnterRoom(args []interface{}) {
 		enterResult.Hints = *proto.String("Failed")
 
 		//【返回结果】[MainID|SubID]
-		player.SendData(MainLogin, SubEnterRoomResult, enterResult)
+		player.WillReceive(MainLogin, SubEnterRoomResult, enterResult)
 
 		//日志打印
 		log.Error("Login Failed!")

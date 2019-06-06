@@ -20,7 +20,7 @@ func init() {
 	//游戏节点
 	gameSection()
 
-	//【任务】
+	//任务节点
 	taskSection()
 }
 

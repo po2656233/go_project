@@ -97,7 +97,7 @@ func (self *MahjongGame) Scene(args []interface{}) {
 	default:
 	}
 
-	player.SendData(MainGameSence, self.gameState, senceInfo)
+	player.WillReceive(MainGameSence, self.gameState, senceInfo)
 	log.Debug("[麻将场景]->玩家信息 ID:%v ", player.UserID)
 }
 

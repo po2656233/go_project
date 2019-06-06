@@ -97,7 +97,7 @@ func (self *LandlordGame) Scene(args []interface{}) {
 	default:
 	}
 
-	player.SendData(MainGameSence, self.gameState, senceInfo)
+	player.WillReceive(MainGameSence, self.gameState, senceInfo)
 	log.Debug("[斗地主场景]->玩家信息 ID:%v ", player.UserID)
 }
 

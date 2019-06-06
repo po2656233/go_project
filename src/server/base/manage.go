@@ -19,23 +19,18 @@ import (
 
 /*玩家Courier*/
 type Player struct {
-	UserID  uint64 //ID
-	Name    string //名字(角色)
-	Age     int32
-	Sex     int32
-	Level   int32
-	Account string     //账号(手机号码/邮箱/真名)
-	Money   float32    //金币
-	Agent   gate.Agent // 网络
+	UserID  uint64 		//ID
+	Name    string 		//名字(角色)
+	Age     int32 		//年龄
+	Sex     int32		//性别
+	Level   int32		//游戏级别(1000+ VIP级别)
+	Account string      //账号(手机号码/邮箱/真名)
+	Money   float32     //金币
+	Agent   gate.Agent  //网络
 
-	Sate    byte   // 状态 0:旁观 1:坐下 2:同意  3:站起
-	RoomNum uint32 // 房间号 0:无效
-	GameID  uint32 // 所在游戏ID 0:无效
-
-	//废弃
-	//GameKind uint32		//游戏类别 0:无效
-	//GameLevel uint32	//游戏级别
-	//AsynAgent   IAsynNetwork 	// 异步处理网络结果
+	Sate    byte   		// 状态 0:旁观 1:坐下 2:同意  3:站起
+	RoomNum uint32 		// 房间号 0:无效
+	GameID  uint32 		// 所在游戏ID 0:无效
 }
 
 // 玩家管理
@@ -81,12 +76,13 @@ type RoomManger struct {
 
 //子游戏接口
 type IGameOperate interface {
+	Scene(args []interface{})        //场景
 	Start(args []interface{})        //开始
 	Playing(args []interface{})      //游戏
 	Over(args []interface{})         //结算
-	Scene(args []interface{})        //场景
 	UpdateInfo(args []interface{})   //更新信息
-	SuperControl(args []interface{}) //超级控制 可在检测到没真实玩家时,且处于空闲状态时,自动关闭
+	SuperControl(args []interface{}) //超级控制 可在检测到没真实玩家时,且处于空闲状态时,自动关闭(未实现)
+
 }
 
 //用户行为
@@ -102,7 +98,7 @@ type IUserBehavior interface {
 
 //房间管理接口
 type IRoomMange interface {
-	Create(roomID uint32) *RoomInfo                    //创建房间[房间ID和钥匙配对]
+	Create(roomID uint32) (*RoomInfo,bool)             //创建房间[房间ID和钥匙配对]
 	Check(roomID uint32) (info *RoomInfo, isExit bool) //查找房间
 	Delete(roomID uint32, key string) bool             //删除房间[房间ID和钥匙配对成功后,才能删除]
 	Open(roomID uint32, key string) (*RoomInfo, bool)  //开启房间
@@ -206,7 +202,17 @@ func (self *PlayerManger) NotifyAll(mainID, subID uint32, msg proto.Message) {
 			return true
 		}
 		log.Debug("通知玩家：%v %v", key, player.Agent.LocalAddr())
-		player.SendData(mainID, subID, msg)
+
+		//指令+数据  包体内容
+		//指令+数据  包体内容
+		data, _ := proto.Marshal(msg)
+		packet := &protoMsg.PacketData{
+			MainID:    mainID,
+			SubID:     subID,
+			TransData: data,
+		}
+		fmt.Println("发送数据(But):", len(data), data)
+		player.Agent.NotifyMsg(packet)
 		return true
 	})
 }
@@ -217,7 +223,7 @@ func (self *PlayerManger) NotifyButOthers(userIDs []uint64, mainID, subID uint32
 	self.players.Range(func(key, value interface{}) bool {
 		player := value.(*Player)
 		if nil == player.Agent {
-			log.Debug("无效玩家:%v", key)
+			log.Debug("无法通知:%v", key)
 			return true
 		}
 
@@ -228,8 +234,17 @@ func (self *PlayerManger) NotifyButOthers(userIDs []uint64, mainID, subID uint32
 			}
 		}
 
-		log.Debug("通知玩家：%v %v", key, player.Agent.LocalAddr())
-		player.SendData(mainID, subID, msg)
+		log.Debug("通知玩家(But)：%v %v", key, player.Agent.LocalAddr())
+		//指令+数据  包体内容
+		data, _ := proto.Marshal(msg)
+		packet := &protoMsg.PacketData{
+			MainID:    mainID,
+			SubID:     subID,
+			TransData: data,
+		}
+		fmt.Println("发送数据(But):", len(data), data)
+		player.Agent.NotifyMsg(packet)
+
 		return true
 	})
 }
@@ -238,15 +253,23 @@ func (self *PlayerManger) NotifyOthers(userIDs []uint64, mainID, subID uint32, m
 	self.players.Range(func(key, value interface{}) bool {
 		player := value.(*Player)
 		if nil == player.Agent {
-			log.Debug("无效玩家:%v", key)
+			log.Debug("无法通知:%v", key)
 			return true
 		}
 
 		//不通知该部分玩家
 		for _, uid := range userIDs {
 			if uid == player.UserID {
-				log.Debug("通知玩家：%v %v", key, player.Agent.LocalAddr())
-				player.SendData(mainID, subID, msg)
+				log.Debug("通知玩家(Others)：%v %v", key, player.Agent.LocalAddr())
+				//指令+数据  包体内容
+				data, _ := proto.Marshal(msg)
+				packet := &protoMsg.PacketData{
+					MainID:    mainID,
+					SubID:     subID,
+					TransData: data,
+				}
+				fmt.Println("发送数据(Others):", len(data), data)
+				player.Agent.NotifyMsg(packet)
 				return true
 			}
 		}
@@ -257,7 +280,7 @@ func (self *PlayerManger) NotifyOthers(userIDs []uint64, mainID, subID uint32, m
 //////////////////////////////////////////////////
 
 //数据发送
-func (self *Player) SendData(mainID, subID uint32, message proto.Message) error {
+func (self *Player) WillReceive(mainID, subID uint32, message proto.Message) error {
 	if nil == self || nil == self.Agent {
 		fmt.Println("Not Aget Or Courier")
 		return errors.New("Not Aget Or courier")
@@ -275,11 +298,12 @@ func (self *Player) SendData(mainID, subID uint32, message proto.Message) error 
 	return error
 }
 
+
 //结果反馈
 func (self *Player) Feedback(mainID, subID, flag uint32, reason string) {
 	enterResult := &protoMsg.ResResult{State: flag, Hints: reason}
 	log.Error(reason)
-	self.SendData(mainID, subID, enterResult)
+	self.WillReceive(mainID, subID, enterResult)
 }
 
 //进入场景(限制条件由外部转入)

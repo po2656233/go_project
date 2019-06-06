@@ -6,7 +6,7 @@ import (
 	"runtime"
 	"strconv"
 	"strings"
-	"tea-master/log"
+	"log"
 )
 
 //异常处理
@@ -32,7 +32,7 @@ func PrintFuncInfo(layer int) {
 	file, fileName, line, ok := runtime.Caller(layer + 1)
 	if ok {
 		funcName := runtime.FuncForPC(file).Name()
-		log.Debug("%s:%d -> -> -> %s\n", funcName, line, fileName)
+		log.Println( funcName, " -> ",line," -> ",fileName)
 		//fmt.Printf("%s:%d -> -> ->%s\n", funcName, line, fileName)
 	}
 }
@@ -46,7 +46,7 @@ func GoID() int {
 	if err != nil {
 		panic(fmt.Sprintf("cannot get goroutine id: %v", err))
 	}
-	log.Debug("id:%d", id)
+	log.Println("id:", id)
 	return id
 }
 
