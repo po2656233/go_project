@@ -1,96 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="32706ca2-c68f-403c-83cd-f432cef2c9b5" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/../../server/base/comand.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../server/base/manage.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../server/base/skeleton.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../server/base/units.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../server/conf/conf.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../server/conf/json.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../server/conf/server.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../server/game/external.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../server/game/internal/chanrpc.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../server/game/internal/gameItems/baccarat/baccarat.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../server/game/internal/gameItems/baccarat/baccaratLogic.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../server/game/internal/gameItems/cowcow/cowcow.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../server/game/internal/gameItems/explain" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../server/game/internal/gameItems/fishlord/fishlord.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../server/game/internal/gameItems/gamecomm.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../server/game/internal/gameItems/landlords/landlordLogic.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../server/game/internal/gameItems/landlords/landlords.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../server/game/internal/gameItems/mahjong/README.md" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../server/game/internal/gameItems/mahjong/card/card.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../server/game/internal/gameItems/mahjong/card/cardMap.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../server/game/internal/gameItems/mahjong/card/cardMap_test.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../server/game/internal/gameItems/mahjong/card/config.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../server/game/internal/gameItems/mahjong/card/showCard.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../server/game/internal/gameItems/mahjong/chiken/charge.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../server/game/internal/gameItems/mahjong/chiken/chiken.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../server/game/internal/gameItems/mahjong/chiken/chikenDraw.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../server/game/internal/gameItems/mahjong/chiken/chikenFB.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../server/game/internal/gameItems/mahjong/chiken/chikenTumbling.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../server/game/internal/gameItems/mahjong/chiken/chikenWeek.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../server/game/internal/gameItems/mahjong/chiken/chiken_test.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../server/game/internal/gameItems/mahjong/chiken/responsibility.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../server/game/internal/gameItems/mahjong/chiken/self.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../server/game/internal/gameItems/mahjong/dice/dice.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../server/game/internal/gameItems/mahjong/fbs/Common/OperationCode.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../server/game/internal/gameItems/mahjong/mahjong.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../server/game/internal/gameItems/mahjong/protocal/protocal.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../server/game/internal/gameItems/mahjong/setting/setting.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../server/game/internal/gameItems/mahjong/step/step.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../server/game/internal/gameItems/mahjong/step/step_test.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../server/game/internal/gameItems/mahjong/suggest/config.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../server/game/internal/gameItems/mahjong/suggest/effect.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../server/game/internal/gameItems/mahjong/suggest/example/example.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../server/game/internal/gameItems/mahjong/suggest/selector.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../server/game/internal/gameItems/mahjong/suggest/suggest.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../server/game/internal/gameItems/mahjong/suggest/suggest_test.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../server/game/internal/gameItems/mahjong/ting/ting.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../server/game/internal/gameItems/mahjong/ting/ting_test.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../server/game/internal/gameItems/mahjong/wall/draw.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../server/game/internal/gameItems/mahjong/wall/wall.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../server/game/internal/gameItems/mahjong/wall/wall_test.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../server/game/internal/gameItems/mahjong/weight/weight.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../server/game/internal/gameItems/mahjong/win/win.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../server/game/internal/gameItems/mahjong/win/win_benchmark_test.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../server/game/internal/gameItems/mahjong/win/win_test.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../server/game/internal/handler.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../server/game/internal/module.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../server/gamedata/reader.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../server/gamedata/test.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../server/gate/external.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../server/gate/internal/module.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../server/gate/router.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../server/login/external.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../server/login/internal/handler.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../server/login/internal/module.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../server/main.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../server/msg/go/baccarat.pb.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../server/msg/go/comand.pb.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../server/msg/go/cowcow.pb.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../server/msg/go/fishLord.pb.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../server/msg/go/game.pb.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../server/msg/go/gamecomm.pb.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../server/msg/go/landLords.pb.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../server/msg/go/login.pb.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../server/msg/go/mahjong.pb.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../server/msg/json/login.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../server/msg/msg.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../server/msg/proto/_generate.bat" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../server/msg/proto/baccarat.proto" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../server/msg/proto/comand.proto" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../server/msg/proto/cowcow.proto" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../server/msg/proto/fishLord.proto" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../server/msg/proto/gamecomm.proto" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../server/msg/proto/landLords.proto" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../server/msg/proto/login.proto" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../server/msg/proto/mahjong.proto" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../server/msg/proto/protoc-gen-go.exe" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../server/sql/mysql/mysqlHandle.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../server/sql/mysql/mysql_test.go" beforeDir="false" />
-    </list>
+    <list default="true" id="32706ca2-c68f-403c-83cd-f432cef2c9b5" name="Default Changelist" comment="" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -145,7 +56,7 @@
       <usages-collector id="statistics.file.extensions.open">
         <counts>
           <entry key="bat" value="1" />
-          <entry key="go" value="53" />
+          <entry key="go" value="55" />
           <entry key="json" value="1" />
           <entry key="txt" value="1" />
         </counts>
@@ -153,7 +64,7 @@
       <usages-collector id="statistics.file.types.open">
         <counts>
           <entry key="Bat" value="1" />
-          <entry key="Go" value="53" />
+          <entry key="Go" value="55" />
           <entry key="JSON" value="1" />
           <entry key="PLAIN_TEXT" value="1" />
         </counts>
@@ -188,6 +99,15 @@
         <entry file="file://$USER_HOME$/go/src/github.com/name5566/leaf/gate/agent.go">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="150">
+              <caret line="8" selection-start-line="8" selection-end-line="8" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/../leaf/gate/agent.go">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="150">
               <caret line="8" column="4" selection-start-line="8" selection-start-column="4" selection-end-line="8" selection-end-column="4" />
             </state>
           </provider>
@@ -197,12 +117,12 @@
         <entry file="file://$USER_HOME$/go/src/github.com/name5566/leaf/recordfile/example_test.go">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="75">
-              <caret line="6" lean-forward="true" selection-start-line="6" selection-end-line="6" />
+              <caret line="6" selection-start-line="6" selection-end-line="6" />
             </state>
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/sql/mysql/mysqlHandle.go">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="400">
@@ -212,10 +132,22 @@
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/gamedata/reader.go">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="198">
+              <caret line="8" column="33" selection-start-line="8" selection-start-column="33" selection-end-line="8" selection-end-column="33" />
+              <folding>
+                <element signature="e#18#110#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$USER_HOME$/go/src/github.com/name5566/leaf/recordfile/recordfile.go">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="25">
-              <caret line="18" column="16" lean-forward="true" selection-start-line="18" selection-start-column="16" selection-end-line="18" selection-end-column="16" />
+              <caret line="18" column="16" selection-start-line="18" selection-start-column="16" selection-end-line="18" selection-end-column="16" />
             </state>
           </provider>
         </entry>
@@ -230,19 +162,10 @@
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/game/internal/gameItems/mahjong/mahjong.go">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="340">
-              <caret line="179" column="31" lean-forward="true" selection-start-line="179" selection-start-column="31" selection-end-line="179" selection-end-column="31" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/game/internal/gameItems/gamecomm.go">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="75">
-              <caret line="24" column="1" lean-forward="true" selection-start-line="24" selection-start-column="1" selection-end-line="24" selection-end-column="1" />
+              <caret line="24" column="1" selection-start-line="24" selection-start-column="1" selection-end-line="24" selection-end-column="1" />
             </state>
           </provider>
         </entry>
@@ -252,15 +175,6 @@
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="-37">
               <caret line="21" column="18" selection-start-line="21" selection-start-column="18" selection-end-line="21" selection-end-column="18" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/game/internal/handler.go">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="390">
-              <caret line="158" column="21" lean-forward="true" selection-start-line="158" selection-start-column="21" selection-end-line="158" selection-end-column="21" />
             </state>
           </provider>
         </entry>
@@ -539,6 +453,7 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="-8" y="-8" width="1936" height="1056" extended-state="6" />
+    <editor active="true" />
     <layout>
       <window_info active="true" content_ui="combo" id="Project" order="0" sideWeight="0.6213592" visible="true" weight="0.1705757" />
       <window_info id="Favorites" order="1" sideWeight="0.37864077" side_tool="true" weight="0.1705757" />
@@ -601,16 +516,6 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/gamedata/test.txt">
       <provider selected="true" editor-type-id="text-editor" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/gamedata/reader.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="198">
-          <caret line="8" column="33" selection-start-line="8" selection-start-column="33" selection-end-line="8" selection-end-column="33" />
-          <folding>
-            <element signature="e#18#110#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/gate/router.go">
       <provider selected="true" editor-type-id="text-editor">
@@ -782,14 +687,14 @@
     <entry file="file://$PROJECT_DIR$/game/internal/gameItems/mahjong/mahjong.go">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="340">
-          <caret line="179" column="31" lean-forward="true" selection-start-line="179" selection-start-column="31" selection-end-line="179" selection-end-column="31" />
+          <caret line="179" column="31" selection-start-line="179" selection-start-column="31" selection-end-line="179" selection-end-column="31" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/game/internal/handler.go">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="390">
-          <caret line="158" column="21" lean-forward="true" selection-start-line="158" selection-start-column="21" selection-end-line="158" selection-end-column="21" />
+          <caret line="158" column="21" selection-start-line="158" selection-start-column="21" selection-end-line="158" selection-end-column="21" />
         </state>
       </provider>
     </entry>
@@ -803,7 +708,7 @@
     <entry file="file://$PROJECT_DIR$/game/internal/gameItems/gamecomm.go">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="75">
-          <caret line="24" column="1" lean-forward="true" selection-start-line="24" selection-start-column="1" selection-end-line="24" selection-end-column="1" />
+          <caret line="24" column="1" selection-start-line="24" selection-start-column="1" selection-end-line="24" selection-end-column="1" />
         </state>
       </provider>
     </entry>
@@ -821,24 +726,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$USER_HOME$/go/src/github.com/name5566/leaf/gate/agent.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="150">
-          <caret line="8" column="4" selection-start-line="8" selection-start-column="4" selection-end-line="8" selection-end-column="4" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$USER_HOME$/go/src/github.com/name5566/leaf/recordfile/recordfile.go">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="25">
-          <caret line="18" column="16" lean-forward="true" selection-start-line="18" selection-start-column="16" selection-end-line="18" selection-end-column="16" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$USER_HOME$/go/src/github.com/name5566/leaf/recordfile/example_test.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="75">
-          <caret line="6" lean-forward="true" selection-start-line="6" selection-end-line="6" />
+          <caret line="18" column="16" selection-start-line="18" selection-start-column="16" selection-end-line="18" selection-end-column="16" />
         </state>
       </provider>
     </entry>
@@ -846,6 +737,37 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="400">
           <caret line="100" column="43" selection-start-line="100" selection-start-column="43" selection-end-line="100" selection-end-column="43" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/gamedata/reader.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="198">
+          <caret line="8" column="33" selection-start-line="8" selection-start-column="33" selection-end-line="8" selection-end-column="33" />
+          <folding>
+            <element signature="e#18#110#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/go/src/github.com/name5566/leaf/recordfile/example_test.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="75">
+          <caret line="6" selection-start-line="6" selection-end-line="6" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/go/src/github.com/name5566/leaf/gate/agent.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="150">
+          <caret line="8" selection-start-line="8" selection-end-line="8" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/../leaf/gate/agent.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="150">
+          <caret line="8" column="4" selection-start-line="8" selection-start-column="4" selection-end-line="8" selection-end-column="4" />
         </state>
       </provider>
     </entry>

@@ -1,0 +1,40 @@
+syntax = "proto3";
+package go;
+
+//【百人类游戏】
+//入场 (场景)
+message GameCowcowEnter{
+	repeated int32 AwardAreas = 1;		//开奖记录(路单)
+	repeated string players = 2;		//玩家列表
+	
+	int32 Countdown = 3;				//定时器
+	repeated int32 Chips = 4; 			//筹码
+	repeated int32 Odds = 5; 			//赔率
+	float BankerScore = 6;				//庄家金币
+	float PlayerScore = 7;				//玩家携带金币
+	
+	float Acquire = 8;					//获得金币(结算)
+}
+//注:通过mainID->subID 区分游戏状态(subID:101空闲、102游戏、103开奖、104旁观)
+
+//游戏消息
+//游戏中
+message GameCowcowPlaying{
+    int32 BetArea = 1;					//下注区域
+    float BetScore = 2;				//下注金额
+}
+
+//下注结果
+message GameCowcowBetResult{
+	int32 State = 1;					//状态
+	string Hints = 2;					//提示
+}
+
+//结束
+message GameCowcowOver{
+	 repeated  int32 AwardArea = 1;	//开奖区域
+	 repeated  int32 PlayerCard = 2;	//闲家的牌
+	 repeated  int32 BankerCard = 3;	//庄家的牌
+	 float Acquire = 4;				//获得金币(结算)
+}
+
