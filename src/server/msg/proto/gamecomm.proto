@@ -1,0 +1,65 @@
+syntax = "proto3";
+package go;
+
+//玩家信息
+message PlayerInfo{
+    uint64 UserID = 1;   //ID
+    string Name = 2;    //账号
+    int32 Age = 3;      //年龄
+    int32 Sex = 4;      //性别
+    float Gold = 5;     //金币
+    int32 VipLevel = 6; //vip级别
+}
+//玩家列表
+message UserList{
+    repeated PlayerInfo AllInfos = 1;//所有玩家信息
+}
+
+//玩家记录（从数据库中获取）
+message PlayerRecord{
+    PlayerInfo User = 1; //玩家
+    int32 Twice = 2;    //游戏次数
+    int32 Ranking = 3;  //当前排名
+    int32 Bankroll = 4; //投注额度
+    float WinLos = 5;   //总输赢 （当局）
+}
+
+message GameReady{
+    bool IsReady = 1; // 玩家准备
+}
+
+//下注
+message GameBet{
+    int32 BetArea = 1;				//下注区域
+    float BetScore = 2;				//下注金额
+}
+
+//抢庄
+message GameHost{
+    bool IsWant = 1;//true上庄 false取消上庄
+}
+//超级抢庄
+message GameSuperHost{
+    bool IsWant = 1;//true上庄 false取消
+}
+
+
+//游戏记录
+message GameRecord{
+    bytes Pork = 1;//牌
+    int32 Type = 2;//类型
+    bool isWon = 3;//输赢情况
+}
+//历史记录(保存十二条记录)
+message GameRecordList{
+    repeated GameRecord list = 1;//所有历史信息
+}
+
+
+//反馈结果
+message GameResult{
+    int32 Flag = 1;         //标识 0:成功 1:失败 2:其他
+    bytes Reason = 2;       //原因
+}
+
+//
