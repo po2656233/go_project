@@ -87,6 +87,7 @@ type agent struct {
 	conn     network.Conn
 	gate     *Gate
 	userData interface{}
+	sendChan chan []byte
 }
 
 func (a *agent) Run() {
@@ -131,6 +132,19 @@ func (a *agent) WriteMsg(msg interface{}) {
 		err = a.conn.WriteMsg(data...)
 		if err != nil {
 			log.Error("write message %v error: %v", reflect.TypeOf(msg), err)
+		}
+	}
+}
+func (a *agent) NotifyMsg(msg interface{}){
+	if a.gate.Processor != nil {
+		data, err := a.gate.Processor.Marshal(msg)
+		if err != nil {
+			log.Error("-marshal message %v error: %v", reflect.TypeOf(msg), err)
+			return
+		}
+		err = a.conn.NotifyMsg(data...)
+		if err != nil {
+			log.Error("-write message %v error: %v", reflect.TypeOf(msg), err)
 		}
 	}
 }

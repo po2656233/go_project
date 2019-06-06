@@ -6,6 +6,7 @@ import (
 
 type Agent interface {
 	WriteMsg(msg interface{})
+	NotifyMsg(msg interface{})
 	LocalAddr() net.Addr
 	RemoteAddr() net.Addr
 	Close()

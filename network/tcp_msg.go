@@ -149,6 +149,52 @@ func (p *MsgParser) Write(conn *TCPConn, args ...[]byte) error {
 	}
 
 	conn.Write(msg)
+	return nil
+}
 
+//
+// goroutine safe
+func (p *MsgParser) Notify(conn *TCPConn, args ...[]byte) error {
+	// get len
+	var msgLen uint32
+	for i := 0; i < len(args); i++ {
+		msgLen += uint32(len(args[i]))
+	}
+
+	// check len
+	if msgLen > p.maxMsgLen {
+		return errors.New("message too long")
+	} else if msgLen < p.minMsgLen {
+		return errors.New("message too short")
+	}
+
+	msg := make([]byte, uint32(p.lenMsgLen)+msgLen)
+
+	// write len
+	switch p.lenMsgLen {
+	case 1:
+		msg[0] = byte(msgLen)
+	case 2:
+		if p.littleEndian {
+			binary.LittleEndian.PutUint16(msg, uint16(msgLen))
+		} else {
+			binary.BigEndian.PutUint16(msg, uint16(msgLen))
+		}
+	case 4:
+		if p.littleEndian {
+			binary.LittleEndian.PutUint32(msg, msgLen)
+		} else {
+			binary.BigEndian.PutUint32(msg, msgLen)
+		}
+	}
+
+	// write data
+	l := p.lenMsgLen
+	for i := 0; i < len(args); i++ {
+		copy(msg[l:], args[i])
+		l += len(args[i])
+	}
+
+	conn.Notify(msg)
 	return nil
 }
