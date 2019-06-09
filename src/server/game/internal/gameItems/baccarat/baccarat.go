@@ -287,18 +287,20 @@ func (self *BaccaratGame) onPlay() {
 
 //[结算加法]
 func (self *BaccaratGame) onOver() {
-	log.Release("[百家乐]开奖中..1")
+	log.Release("[百家乐]开牌中...")
 	self.gameState = SubGameSenceOver
 	self.timeStamp = time.Now().Unix()
-	self.Over(nil)
-	log.Release("[百家乐]开奖中..2")
 	if timer == nil {
 		time.AfterFunc(openTime*time.Second, self.onStart)
 	} else {
 		timer.AfterFunc(openTime*time.Second, self.onStart)
 	}
+	//当有玩家结算信息时,该
 	manger.NotifyOthers(self.PlayerList, MainGameState, SubGameStateOver, nil)
-	log.Release("[百家乐]开奖中..3")
+
+	log.Release("[百家乐]结算中...")
+	self.Over(nil)
+	log.Release("[百家乐]完成一轮游戏")
 }
 
 //抢庄
@@ -573,7 +575,7 @@ func (self *BaccaratGame) calculateScore() {
 
 	// 发给没下注玩家
 	self.overResult.Acquire = 0
-	manger.NotifyOthers(others, MainGameFrame, SubGameFrameOver, self.overResult)
+	//manger.NotifyOthers(others, MainGameFrame, SubGameFrameOver, self.overResult)
 	//log.Debug("[百家乐]...结算中....")
 }
 

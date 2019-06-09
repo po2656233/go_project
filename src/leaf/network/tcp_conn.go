@@ -12,19 +12,25 @@ type TCPConn struct {
 	sync.Mutex
 	conn      net.Conn
 	writeChan chan []byte
-	notifyChan chan []byte // 新增异步通知 2019/6/6
 	closeFlag bool
 	msgParser *MsgParser
+	notifyChan chan []byte // 新增异步通知 2019/6/6
+	writeFin bool // 写完成
+	notifyFin bool //通知完成
 }
 
 func newTCPConn(conn net.Conn, pendingWriteNum int, msgParser *MsgParser) *TCPConn {
 	tcpConn := new(TCPConn)
 	tcpConn.conn = conn
 	tcpConn.writeChan = make(chan []byte, pendingWriteNum)
-	tcpConn.notifyChan = make(chan []byte, 10) // 绑定数据不需要过大
+	tcpConn.notifyChan = make(chan []byte, 20) // 绑定数据不需要过大
 	tcpConn.msgParser = msgParser
+	tcpConn.writeFin = false
+	tcpConn.notifyFin = false
+	tcpConn.closeFlag = false
 
 	go func() {
+		tcpConn.writeFin = false
 		for b := range tcpConn.writeChan {
 			if b == nil {
 				break
@@ -35,15 +41,19 @@ func newTCPConn(conn net.Conn, pendingWriteNum int, msgParser *MsgParser) *TCPCo
 				break
 			}
 		}
+		tcpConn.writeFin = true
 
-		conn.Close()
-		tcpConn.Lock()
-		tcpConn.closeFlag = true
-		tcpConn.Unlock()
+		if tcpConn.writeFin && tcpConn.notifyFin && !tcpConn.closeFlag{
+			conn.Close()
+			tcpConn.Lock()
+			tcpConn.closeFlag = true
+			tcpConn.Unlock()
+		}
 	}()
 
 	//异步通知
 	go func() {
+		tcpConn.notifyFin = false
 		for nb := range tcpConn.notifyChan {
 			if nb == nil {
 				break
@@ -54,11 +64,14 @@ func newTCPConn(conn net.Conn, pendingWriteNum int, msgParser *MsgParser) *TCPCo
 				break
 			}
 		}
+		tcpConn.notifyFin = true
 
-		conn.Close()
-		tcpConn.Lock()
-		tcpConn.closeFlag = true
-		tcpConn.Unlock()
+		if tcpConn.writeFin && tcpConn.notifyFin && !tcpConn.closeFlag{
+			conn.Close()
+			tcpConn.Lock()
+			tcpConn.closeFlag = true
+			tcpConn.Unlock()
+		}
 	}()
 
 	return tcpConn
@@ -158,5 +171,5 @@ func (tcpConn *TCPConn) WriteMsg(args ...[]byte) error {
 }
 //// 新增一个异步通知
 func (tcpConn *TCPConn) NotifyMsg(args ...[]byte) error {
-	return tcpConn.msgParser.Write(tcpConn, args...)
+	return tcpConn.msgParser.Notify(tcpConn, args...)
 }
