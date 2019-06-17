@@ -18,7 +18,6 @@ var roomManger *RoomManger = GetRoomManger()
 func init() {
 	skeleton.RegisterChanRPC("NewAgent", rpcNewAgent)
 	skeleton.RegisterChanRPC("CloseAgent", rpcCloseAgent)
-
 	AsyncChan.Register("Broadcast", func(args []interface{}) {
 		fmt.Println("-------------->Broadcast------->Register")
 		//a := args[0].(gate.Agent)

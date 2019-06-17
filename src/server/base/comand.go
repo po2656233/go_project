@@ -33,6 +33,7 @@ const (
 	SubGameFrameHost      = 107 //抢庄
 	SubGameFrameSuperHost = 108 //超级抢庄
 	SubGameFrameResult    = 109 //结果信息
+	SubGameFrameReady     = 110 //准备
 
 	MainGameState       = 401 //游戏状态
 	SubGameStateStart   = 101 //开始

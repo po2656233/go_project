@@ -6,7 +6,7 @@ import "gamecomm.proto";
 //入场
 message GameBaccaratEnter{
 	uint64 UserID = 1;					//玩家ID
-	float BankerScore = 2;				//庄家金币
+	int64 BankerScore = 2;				//庄家金币
 	int64 TimeStamp = 3;				//时间戳
 	repeated int32 Chips = 4; 			//筹码
 	UserList Players = 5;				//玩家列表
@@ -32,7 +32,7 @@ message GameBaccaratHost {
 //游戏中
 message GameBaccaratBet{
     int32 BetArea = 1;				//下注区域
-    float BetScore = 2;				//下注金额
+    int64 BetScore = 2;				//下注金额
 }
 
 //下注结果
@@ -46,7 +46,7 @@ message GameBaccaratOver{
 	 bytes AwardArea = 1;	//开奖区域
 	 bytes PlayerCard = 2;	//闲家的牌
 	 bytes BankerCard = 3;	//庄家的牌
-	 float Acquire = 4;		//获得金币(结算)
+	 int64 Acquire = 4;		//获得金币(结算)
 }
 
 

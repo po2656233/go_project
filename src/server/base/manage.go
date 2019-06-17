@@ -25,7 +25,7 @@ type Player struct {
 	Sex     int32		//性别
 	Level   int32		//游戏级别(1000+ VIP级别)
 	Account string      //账号(手机号码/邮箱/真名)
-	Money   float32     //金币
+	Money   int64       //金币(与真实金币 扩大100倍)
 	Agent   gate.Agent  //网络
 
 	Sate    byte   		// 状态 0:旁观 1:坐下 2:同意  3:站起
@@ -417,6 +417,9 @@ func (self *RoomManger) Delete(roomID uint32, key string) bool { //删除
 	self.rooms.Range(func(index, value interface{}) bool {
 		if roomID == index.(uint32) && key == value.(*RoomInfo).Key {
 			bRet = true
+			//for _,gameHandle :=range value.(*RoomInfo).Things.GameSet{
+			//}
+
 			self.rooms.Delete(index)
 			return false
 		}

@@ -72,7 +72,7 @@ func (self *LandlordGame) Scene(args []interface{}) {
 			playerInfo.UserID = playerItem.UserID
 			playerInfo.Name = playerItem.Name
 			playerInfo.Age = playerItem.Age
-			playerInfo.Gold = sqlHandle.CheckMoney(playerItem.UserID) //玩家积分
+			playerInfo.Gold = int64(sqlHandle.CheckMoney(playerItem.UserID))*100 //玩家积分
 			playerInfo.VipLevel = playerItem.Level
 			playerInfo.Sex = playerItem.Sex
 			playerList.AllInfos = CopyInsert(playerList.AllInfos, len(playerList.AllInfos), &playerInfo).([]*protoMsg.PlayerInfo)
@@ -127,9 +127,14 @@ func (self *LandlordGame) UpdateInfo(args []interface{}) { //更新玩家列表[
 	case GameUpdateReady: //统计准备的玩家
 		self.readyCount++
 		player.Sate = PlayerAgree
+		manger.NotifyOthers(self.PlayerList,MainGameFrame,SubGameFrameReady, &protoMsg.GameReady{IsReady:true,UserID:userID})
 		if tableSite == self.readyCount { //桌面上三个玩家都准备好了,才进行发牌
 			self.Start(nil)
 		}
+
+
+		self.Start(nil)
+		log.Debug("玩家准备就绪...")
 	}
 }
 
@@ -150,7 +155,10 @@ func (self *LandlordGame) Start(args []interface{}) {
 	// 排序其实可以交给客户端,以减少服务端运算压力
 	sortCards := SortCards(playerCard)
 	log.Debug("排序之后:%v\n %v", sortCards, GetCardsText(sortCards))
-
+	msg := &protoMsg.GameLandLordsBegins{}
+	msg.CardsBottom = cards[0:3]
+	msg.CardsHand = sortCards
+	manger.NotifyOthers(self.PlayerList, MainGameState, SubGameStateStart, msg)
 	//return
 	//m := args[0].(*protoMsg.GameLandlordPlaying)
 

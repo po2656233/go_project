@@ -7,7 +7,7 @@ message PlayerInfo{
     string Name = 2;    //账号
     int32 Age = 3;      //年龄
     int32 Sex = 4;      //性别
-    float Gold = 5;     //金币
+    int64 Gold = 5;     //金币
     int32 VipLevel = 6; //vip级别
 }
 //玩家列表
@@ -21,17 +21,26 @@ message PlayerRecord{
     int32 Twice = 2;    //游戏次数
     int32 Ranking = 3;  //当前排名
     int32 Bankroll = 4; //投注额度
-    float WinLos = 5;   //总输赢 （当局）
+    int64 WinLos = 5;   //总输赢 （当局）
 }
 
 message GameReady{
-    bool IsReady = 1; // 玩家准备
+    uint64 UserID = 1;   //ID
+    bool IsReady = 2; // 玩家准备
 }
 
 //下注
 message GameBet{
     int32 BetArea = 1;				//下注区域
-    float BetScore = 2;				//下注金额
+    int64 BetScore = 2;				//下注金额
+}
+//下注结果
+message GameBetResult{
+    uint64 UserID = 1;   //ID
+    int32 State = 2;					//状态
+    string Hints = 3;					//提示
+    int32 BetArea = 4;				//下注区域
+    int64 BetScore = 5;				//下注金额
 }
 
 //抢庄

@@ -8,6 +8,8 @@ import (
 	"server/game"
 	"server/gate"
 	"server/login"
+	"fmt"
+	"runtime"
 )
 
 
@@ -26,7 +28,7 @@ func main() {
 		gate.Module,
 		login.Module,
 	)
-
+	fmt.Println("goroutines:", runtime.NumGoroutine())
 	//加解密数据
 	//对应的模块实现
 	//type Module interface {

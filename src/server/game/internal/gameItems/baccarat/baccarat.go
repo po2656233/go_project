@@ -22,8 +22,8 @@ var playerList protoMsg.UserList  //玩家列表
 //定时器
 const (
 	freeTime = 5
-	betTime  = 9
-	openTime = 7
+	betTime  = 10
+	openTime = 15
 )
 
 //继承于GameItem
@@ -44,7 +44,7 @@ type BaccaratGame struct {
 	hostList    []uint64 //申请列表(默认11个)
 	bankerID    uint64   //庄家ID
 	superHostID uint64   //超级抢庄ID
-	bankerScore float32  //庄家积分
+	bankerScore int64    //庄家积分
 	keepTwice   uint8    //连续坐庄次数
 }
 
@@ -107,7 +107,7 @@ func (self *BaccaratGame) Scene(args []interface{}) {
 			playerInfo.UserID = playerItem.UserID
 			playerInfo.Name = playerItem.Name
 			playerInfo.Age = playerItem.Age
-			playerInfo.Gold = sqlHandle.CheckMoney(playerItem.UserID) //玩家积分
+			playerInfo.Gold = int64(sqlHandle.CheckMoney(playerItem.UserID))*100 //玩家积分
 			playerInfo.VipLevel = playerItem.Level
 			playerInfo.Sex = playerItem.Sex
 			playerList.AllInfos = CopyInsert(playerList.AllInfos, len(playerList.AllInfos), &playerInfo).([]*protoMsg.PlayerInfo)
@@ -167,13 +167,18 @@ func (self *BaccaratGame) Playing(args []interface{}) {
 	}
 
 	//反馈下注情况
-	betResult := &protoMsg.GameBaccaratBetResult{}
+	betResult := &protoMsg.GameBetResult{}
+	betResult.UserID = player.UserID
+	betResult.BetArea = m.BetArea
+	betResult.BetScore = m.BetScore
+	
 	if self.gameState != SubGameSencePlaying {
 		betResult.State = *proto.Int32(1)
 		betResult.Hints = *proto.String("过了下注时间")
 		player.WillReceive(MainGameFrame, SubGameFrameBetResult, betResult)
 		return
 	}
+
 
 	//数据库中扣除玩家金币[下注成功]
 	if money, ok := sqlHandle.DeductMoney(player.UserID, m.BetScore); !ok {
@@ -187,6 +192,7 @@ func (self *BaccaratGame) Playing(args []interface{}) {
 	//下注成功
 	betResult.State = *proto.Int32(0)
 	betResult.Hints = *proto.String("[百家乐]下注成功")
+
 	//
 
 	//通知所有人
@@ -214,7 +220,7 @@ func (self *BaccaratGame) Playing(args []interface{}) {
 
 	//通知其他玩家
 	//manger.NotifyButOthers(self.PlayerList, MainGameFrame, SubGameFramePlaying, m)
-	manger.NotifyAll(MainGameFrame, SubGameFramePlaying, m)
+	manger.NotifyOthers(self.PlayerList, MainGameFrame, SubGameFramePlaying, m)
 }
 
 //结算
@@ -267,6 +273,7 @@ func (self *BaccaratGame) onStart() {
 		timer.AfterFunc(freeTime*time.Second, self.onPlay)
 	}
 
+	self.playerBetInfo = make(map[uint64][]protoMsg.GameBet) // 玩家下注信息
 	m := self.permitHost() //反馈定庄信息
 	manger.NotifyOthers(self.PlayerList, MainGameState, SubGameStateStart, m)
 }
@@ -533,11 +540,11 @@ func (self *BaccaratGame) calculateScore() {
 
 	self.overResult.AwardArea = self.deduceWin()
 
-	userIDs := []uint64{}
+	//userIDs := []uint64{}
 	others := make([]uint64, 10)
 	copy(others, self.PlayerList)
 
-	playerAwardScroe := float32(0)
+	playerAwardScroe := int64(0)
 	for userID, betInfos := range self.playerBetInfo {
 		//每一次的下注信息
 		playerAwardScroe = 0
@@ -561,21 +568,20 @@ func (self *BaccaratGame) calculateScore() {
 		}
 
 		manger.Get(userID).WillReceive(MainGameFrame, SubGameFrameCheckout, self.overResult)
-		userIDs = CopyInsert(userIDs, len(userIDs), userID).([]uint64)
-
-		for k, v := range others { //获取没下注玩家
-			if v == userID {
-				//lock.Lock()
-				//defer lock.Unlock()
-				others = append(others[:k], others[k+1:]...)
-
-			}
-		}
+		//userIDs = CopyInsert(userIDs, len(userIDs), userID).([]uint64)
+		//for k, v := range others { //获取没下注玩家
+		//	if v == userID {
+		//		//lock.Lock()
+		//		//defer lock.Unlock()
+		//		others = append(others[:k], others[k+1:]...)
+		//
+		//	}
+		//}
 	}
 
 	// 发给没下注玩家
 	self.overResult.Acquire = 0
-	//manger.NotifyOthers(others, MainGameFrame, SubGameFrameOver, self.overResult)
+	manger.NotifyOthers(self.PlayerList, MainGameFrame, SubGameFrameOver, self.overResult)
 	//log.Debug("[百家乐]...结算中....")
 }
 
@@ -643,8 +649,8 @@ func (self *BaccaratGame) deduceWin() []byte {
 }
 
 //区域赔额
-func (self *BaccaratGame) bonusArea(area int32, betScore float32) float32 {
-	var multiple float32 = float32(0)
+func (self *BaccaratGame) bonusArea(area int32, betScore int64) int64 {
+	multiple := int64(0)
 	switch area {
 	case AREA_XIAN:
 		multiple = MULTIPLE_XIAN
@@ -663,7 +669,7 @@ func (self *BaccaratGame) bonusArea(area int32, betScore float32) float32 {
 	case AREA_ZHUANG_DUI:
 		multiple = MULTIPLE_ZHUANG_PING
 	default:
-		multiple = float32(0)
+		multiple = int64(0)
 	}
-	return betScore * float32(multiple)
+	return betScore * multiple
 }

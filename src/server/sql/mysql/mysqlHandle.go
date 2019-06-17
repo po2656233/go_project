@@ -207,49 +207,50 @@ func (self *SqlMan) CheckName(userID uint64) string {
 }
 
 //获取玩家信息
-func (self *SqlMan) CheckUserInfo(userID uint64) (name string, age, sex, vipLevel uint32, money float32) {
+func (self *SqlMan) CheckUserInfo(userID uint64) (name string, age, sex, vipLevel uint32, money int64) {
 	rows, err := self.db.Query("SELECT Name,Age,Sex,Money,VipLevel FROM userinfo WHERE ID=?", userID)
 	defer rows.Close()
 	CheckError(err)
 
+	fMoney := 0.0
 	for rows.Next() {
-		if err := rows.Scan(&name, &age, &sex, &money, &vipLevel); err != nil {
+		if err := rows.Scan(&name, &age, &sex, &fMoney, &vipLevel); err != nil {
 			log.Fatal(err.Error())
 		}
 		break
 	}
-
+	money = int64(fMoney*100)
 	return name, age, sex, vipLevel, money
 }
 
 //扣除金币 注:返回类型最好使用error
-func (self *SqlMan) DeductMoney(userID uint64, money float32) (userMoney float32, isOK bool) {
+func (self *SqlMan) DeductMoney(userID uint64, money int64) (nowMoney int64, isOK bool) {
 	rows, err := self.db.Query("SELECT Money FROM userinfo WHERE ID=?", userID)
 	defer rows.Close()
 
 	CheckError(err)
-	userMoney = 0.0
+	preMoney := 0.0
 	isOK = false
 	for rows.Next() {
-		if err := rows.Scan(&userMoney); err != nil {
+		if err := rows.Scan(&preMoney); err != nil {
 			log.Fatal(err.Error())
-			return userMoney, isOK
+			return int64(preMoney*100), isOK
 		}
 		break
 	}
 
-	//log.Debug("%v金额:%v ",userID,userMoney)
-	userMoney -= money
-	if userMoney <= 0 {
-		log.Debug("金额成负数了:%.2f  %.2f %v", userMoney, money, userID)
-		return userMoney, isOK
+	log.Debug("%v金额:%v ",userID,int64(preMoney*100))
+	nowMoney =  int64(preMoney*100) - money
+	if nowMoney <= 0 {
+		log.Debug("金额成负数了:%.2f  %.2f %v", nowMoney/100, money/100, userID)
+		return nowMoney, isOK
 	}
 
 	isOK = true
-	log.Debug("当前:%.3f  扣除%.2f", userMoney, money)
-	_, err = self.db.Exec("UPdate userinfo set money=? where ID=? ", userMoney, userID)
+	log.Debug("当前:%.3f  扣除%.2f", nowMoney/100, money/100)
+	_, err = self.db.Exec("UPdate userinfo set money=? where ID=? ", nowMoney/100, userID)
 	CheckError(err)
-	return userMoney, isOK
+	return nowMoney, isOK
 }
 
 //完成注册 【新增一个玩家】TODO

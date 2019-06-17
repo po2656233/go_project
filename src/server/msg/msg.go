@@ -59,6 +59,7 @@ func registerLoginProtoMsg() {
 	//游戏房间列表
 	RegisterMessage(&protoMsg.GameList{})
 	RegisterMessage(&protoMsg.GameBet{})
+	RegisterMessage(&protoMsg.GameBetResult{})
 	RegisterMessage(&protoMsg.GameHost{})
 	RegisterMessage(&protoMsg.GameSuperHost{})
 	RegisterMessage(&protoMsg.GameReady{})

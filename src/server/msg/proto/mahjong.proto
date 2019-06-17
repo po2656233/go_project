@@ -45,7 +45,7 @@ message GameMahjongOperate{
 message GameMahjongAward{
 	uint32 Site = 1;					// 玩家座位
 	bytes Codes = 2;					// 牌型
-	float GetGold = 3;					// 获得的金币
+	int64 GetGold = 3;					// 获得的金币
 }
 
 // 结算
