@@ -31,6 +31,7 @@ type LandlordGame struct {
 	gameState uint32 //游戏状态
 	timeStamp int64  //时间戳 20秒准备时间,到了20秒后被提出房间
 
+	siteInfo map[uint8]uint64 // 座位上的玩家
 	bankerID    uint64  //庄家ID
 	bankerScore float32 //庄家积分
 	readyCount  uint8   //准备的人数
@@ -52,6 +53,9 @@ func (self *LandlordGame) Init(level uint32, skeleton *module.Skeleton) {
 	self.Level = level                // 房间等级
 	self.gameState = SubGameSenceFree // 场景状态
 	self.bankerID = 0                 //庄家ID
+	self.siteInfo = make(map[uint8]uint64)
+	self.readyCount = 0
+
 }
 
 func (self *LandlordGame) Scene(args []interface{}) {
@@ -63,6 +67,7 @@ func (self *LandlordGame) Scene(args []interface{}) {
 		log.Debug("[Error][斗地主] [未能查找到相关玩家] ID:%v", userID)
 		return
 	}
+
 
 	// 获取玩家列表
 	self.AddPlayer(player.UserID) //加入玩家列表
@@ -81,6 +86,7 @@ func (self *LandlordGame) Scene(args []interface{}) {
 			manger.DeletePlayerIndex(uid)
 		}
 	}
+
 
 	log.Debug("[斗地主] [玩家列表新增] ID:%v", userID)
 	senceInfo := &protoMsg.GameLandLordsEnter{}
@@ -114,24 +120,28 @@ func (self *LandlordGame) UpdateInfo(args []interface{}) { //更新玩家列表[
 		// 判断状态,如果玩家准备了,再进行退出
 		if self.gameState == SubGameSenceFree && player.Sate == PlayerAgree && 0 < self.readyCount {
 			self.readyCount--
+			delete(self.siteInfo,self.readyCount)
 		}
+
 		self.DeletePlayer(userID)
 		manger.NotifyOthers(self.PlayerList, MainGameUpdate, GameUpdatePlayerList, &playerList)
 	case GameUpdatePlayerList: //更新玩家列表
 		self.AddPlayer(userID)
 		manger.NotifyOthers(self.PlayerList, MainGameUpdate, GameUpdatePlayerList, &playerList)
-	case GameUpdateHost: //更新玩家抢庄信息
-	case GameUpdateSuperHost: //更新玩家超级抢庄信息
+	case GameUpdateHost: //更新玩家叫分
+
+	case GameUpdateSuperHost: //更新玩家明牌叫分
 	case GameUpdateOffline: //更新玩家超级抢庄信息
-	case GameUpdateReconnect: //更新玩家超级抢庄信息
+	case GameUpdateReconnect: //更新重入
 	case GameUpdateReady: //统计准备的玩家
-		self.readyCount++
+		self.siteInfo[self.readyCount] = userID 		//保存座位信息
+		self.readyCount++ //统计准备人数
 		player.Sate = PlayerAgree
+
 		manger.NotifyOthers(self.PlayerList,MainGameFrame,SubGameFrameReady, &protoMsg.GameReady{IsReady:true,UserID:userID})
 		if tableSite == self.readyCount { //桌面上三个玩家都准备好了,才进行发牌
 			self.Start(nil)
 		}
-
 
 		self.Start(nil)
 		log.Debug("玩家准备就绪...")
@@ -149,16 +159,33 @@ func (self *LandlordGame) Start(args []interface{}) {
 	log.Debug("洗牌之后:%v", cards)
 
 	// 取54-3张牌
-	playerCard := Deal(cards[0:len(CardListData)-3], 0, 3)
-	log.Debug("玩家的牌:%v", playerCard)
+	for site,userID := range self.siteInfo{
+		player := manger.Get(userID)
+		if player == nil {
+			log.Debug("[Error][斗地主] [未能查找到相关玩家] ID:%v", userID)
+			continue
+		}
+		if SiteCount <= site{
+			continue
+		}
 
-	// 排序其实可以交给客户端,以减少服务端运算压力
-	sortCards := SortCards(playerCard)
-	log.Debug("排序之后:%v\n %v", sortCards, GetCardsText(sortCards))
-	msg := &protoMsg.GameLandLordsBegins{}
-	msg.CardsBottom = cards[0:3]
-	msg.CardsHand = sortCards
-	manger.NotifyOthers(self.PlayerList, MainGameState, SubGameStateStart, msg)
+		playerCard := Deal(cards[0:len(CardListData)-3], int(site), SiteCount)
+		log.Debug("玩家的牌:%v", playerCard)
+
+		// 排序其实可以交给客户端,以减少服务端运算压力
+		sortCards := SortCardX(playerCard)
+		log.Debug("排序之后:%v\n %v", sortCards, GetCardsText(sortCards))
+
+		msg := &protoMsg.GameLandLordsBegins{}
+		msg.CardsBottom = cards[0:3]
+		msg.CardsHand = sortCards
+
+		player.WillReceive(MainGameState,SubGameStateStart,msg)
+	}
+
+
+
+	//manger.NotifyOthers(self.PlayerList, MainGameState, SubGameStateStart, msg)
 	//return
 	//m := args[0].(*protoMsg.GameLandlordPlaying)
 
@@ -177,6 +204,8 @@ func (self *LandlordGame) Playing(args []interface{}) {
 func (self *LandlordGame) Over(args []interface{}) {
 	//直接扣除金币
 	log.Debug("结算")
+	self.readyCount = 0
+	self.siteInfo = make(map[uint8]uint64)
 	//return
 	//m := args[0].(*protoMsg.GameLandlordPlaying)
 
@@ -195,11 +224,11 @@ func (self *LandlordGame) SuperControl(args []interface{}) {
 func (self *LandlordGame) reset() {
 	log.Release("[斗地主]扫地僧出来干活了...")
 
-	//hostList = []uint64{} 										//清理玩家
-
-	//不要清理数据,因为数据清除之后,下一轮没法广播数据
-	//playerCouriers = nil 【清内存】
-	//for k,_:=range playerCouriers {//【数据清理】
+	//hostList = []uint64{}
+	//
+	//	//不要清理数据,因为数据清除之后,下一轮没法广播数据
+	//	//playerCouriers = nil 【清内存】
+	//	//for k,_:=range playerCouriers {//【数据清理】			//清理玩家
 	//	delete(playerCouriers,k)
 	//}
 }

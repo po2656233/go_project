@@ -39,8 +39,9 @@ const (
 	SubGameStateStart   = 101 //开始
 	SubGameStatePlaying = 102 //游戏中(下注)
 	SubGameStateOver    = 103 //开奖
+    SubGameStateCall 	= 104	//叫分
 
-	//状态
+//状态
 	MainPlayerState = 500 //玩家状态
 	PlayerSitDown   = 1   //坐下
 	PlayerAgree     = 2   //同意

@@ -26,6 +26,14 @@ func CopyInsert(slice interface{}, pos int, value interface{}) interface{} {
 	return v.Interface()
 }
 
+// 取整数绝对值
+func IntAbs(n int64) int64 {
+	if n < 0 {
+		return -n
+	}
+	return n
+}
+
 //打印函数名和行号
 func PrintFuncInfo(layer int) {
 	//参数 layer 函数所在的层数

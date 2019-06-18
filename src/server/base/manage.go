@@ -92,7 +92,7 @@ type IUserBehavior interface {
 	Offline(args []interface{})   //离线
 	Reconnect(args []interface{}) //重入
 	Ready(args []interface{})     //准备
-	Host(args []interface{})      //抢庄
+	Host(args []interface{})      //抢庄/地主叫分
 	SuperHost(args []interface{}) //超级抢庄
 }
 
