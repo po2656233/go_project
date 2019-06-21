@@ -133,7 +133,7 @@ func (self *PlayerManger) Get(userID uint64) *Player {
 func (self *PlayerManger) Get_1(agent gate.Agent) *Player {
 	var player *Player = nil
 	self.players.Range(func(key, value interface{}) bool {
-		if value.(*Player).Agent == agent {
+		if value.(*Player).Agent== agent {
 			player = value.(*Player)
 			return false
 		}

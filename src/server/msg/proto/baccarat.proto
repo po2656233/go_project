@@ -5,15 +5,13 @@ import "gamecomm.proto";
 //场景
 //入场
 message GameBaccaratEnter{
-	uint64 UserID = 1;					//玩家ID
-	int64 BankerScore = 2;				//庄家金币
-	int64 TimeStamp = 3;				//时间戳
-	repeated int32 Chips = 4; 			//筹码
-	UserList Players = 5;				//玩家列表
-	repeated bytes AwardAreas = 6;		//开奖记录(路单)
-	uint32 FreeTime = 7;
-	uint32 BetTime = 8;
-	uint32 OpenTime = 9;
+	PlayerInfo UserInfo = 1;				//玩家个人信息
+	int64 TimeStamp = 2;				//时间戳
+	repeated int32 Chips = 3; 			//筹码
+	repeated bytes AwardAreas = 4;		//开奖记录(路单)
+	uint32 FreeTime = 5;
+	uint32 BetTime = 6;
+	uint32 OpenTime = 7;
 }
 //注:通过mainID->subID 区分游戏状态(subID:101空闲、102游戏、103开奖、104旁观)
 

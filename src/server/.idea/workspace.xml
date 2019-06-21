@@ -3,12 +3,12 @@
   <component name="ChangeListManager">
     <list default="true" id="32706ca2-c68f-403c-83cd-f432cef2c9b5" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/base/comand.go" beforeDir="false" afterPath="$PROJECT_DIR$/base/comand.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/base/manage.go" beforeDir="false" afterPath="$PROJECT_DIR$/base/manage.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/base/units.go" beforeDir="false" afterPath="$PROJECT_DIR$/base/units.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/game/internal/gameItems/gamecomm.go" beforeDir="false" afterPath="$PROJECT_DIR$/game/internal/gameItems/gamecomm.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/game/internal/gameItems/landlords/landlordLogic.go" beforeDir="false" afterPath="$PROJECT_DIR$/game/internal/gameItems/landlords/landlordLogic.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/game/internal/gameItems/baccarat/baccarat.go" beforeDir="false" afterPath="$PROJECT_DIR$/game/internal/gameItems/baccarat/baccarat.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/game/internal/gameItems/cowcow/cowcow.go" beforeDir="false" afterPath="$PROJECT_DIR$/game/internal/gameItems/cowcow/cowcow.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/game/internal/gameItems/landlords/landlords.go" beforeDir="false" afterPath="$PROJECT_DIR$/game/internal/gameItems/landlords/landlords.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/msg/go/baccarat.pb.go" beforeDir="false" afterPath="$PROJECT_DIR$/msg/go/baccarat.pb.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/msg/proto/baccarat.proto" beforeDir="false" afterPath="$PROJECT_DIR$/msg/proto/baccarat.proto" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -57,7 +57,7 @@
           <entry key="project.open.time.0" value="1" />
           <entry key="project.open.time.1" value="3" />
           <entry key="project.open.time.17" value="3" />
-          <entry key="project.open.time.18" value="2" />
+          <entry key="project.open.time.18" value="3" />
           <entry key="project.open.time.19" value="2" />
           <entry key="project.open.time.20" value="2" />
           <entry key="project.open.time.23" value="1" />
@@ -65,43 +65,43 @@
           <entry key="project.open.time.4" value="1" />
           <entry key="project.open.time.5" value="1" />
           <entry key="project.open.time.7" value="1" />
-          <entry key="project.opened" value="18" />
+          <entry key="project.opened" value="19" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.open">
         <counts>
           <entry key="bat" value="2" />
           <entry key="explain" value="1" />
-          <entry key="go" value="147" />
+          <entry key="go" value="157" />
           <entry key="json" value="1" />
-          <entry key="proto" value="8" />
+          <entry key="proto" value="10" />
           <entry key="txt" value="1" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.open">
         <counts>
           <entry key="Bat" value="2" />
-          <entry key="Go" value="147" />
+          <entry key="Go" value="157" />
           <entry key="JSON" value="1" />
           <entry key="PLAIN_TEXT" value="2" />
-          <entry key="PROTO" value="8" />
+          <entry key="PROTO" value="10" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.edit">
         <counts>
-          <entry key="go" value="4060" />
-          <entry key="proto" value="19" />
+          <entry key="go" value="4367" />
+          <entry key="proto" value="77" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.edit">
         <counts>
-          <entry key="Go" value="4060" />
-          <entry key="PROTO" value="19" />
+          <entry key="Go" value="4367" />
+          <entry key="PROTO" value="77" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.go.postfix.template.usages.trigger">
         <counts>
-          <entry key=".append" value="2" />
+          <entry key=".append" value="3" />
         </counts>
       </usages-collector>
     </session>
@@ -114,8 +114,11 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/game/internal/gameItems/landlords/landlords.go">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="200">
-              <caret line="8" column="91" lean-forward="true" selection-start-line="8" selection-start-column="4" selection-end-line="8" selection-end-column="91" />
+            <state relative-caret-position="-1700">
+              <caret line="82" column="17" selection-start-line="82" selection-start-column="17" selection-end-line="82" selection-end-column="17" />
+              <folding>
+                <element signature="e#26#277#0" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -123,21 +126,17 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/base/manage.go">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="211">
-              <caret line="364" selection-start-line="364" selection-end-line="364" />
+            <state relative-caret-position="199">
+              <caret line="362" column="31" selection-start-line="362" selection-start-column="31" selection-end-line="362" selection-end-column="31" />
             </state>
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/game/internal/gameItems/landlords/landlordLogic.go">
+      <file pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/game/internal/gameItems/baccarat/baccarat.go">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="2684">
-              <caret line="265" column="38" lean-forward="true" selection-start-line="265" selection-start-column="38" selection-end-line="265" selection-end-column="38" />
-              <folding>
-                <element signature="e#19#50#0" expanded="true" />
-                <element signature="n#!!block;n#Deal#0" />
-              </folding>
+            <state relative-caret-position="424">
+              <caret line="253" column="95" selection-start-line="253" selection-start-column="95" selection-end-line="253" selection-end-column="95" />
             </state>
           </provider>
         </entry>
@@ -145,31 +144,44 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/base/units.go">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="375">
+            <state relative-caret-position="-524">
               <caret line="22" selection-start-line="22" selection-end-line="22" />
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/game/internal/gameItems/gamecomm.go">
+        <entry file="file://$PROJECT_DIR$/game/internal/gameItems/cowcow/cowcow.go">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="250">
-              <caret line="12" column="14" selection-start-line="12" selection-start-column="5" selection-end-line="12" selection-end-column="14" />
+            <state relative-caret-position="300">
+              <caret line="96" column="5" lean-forward="true" selection-start-line="96" selection-start-column="5" selection-end-line="96" selection-end-column="5" />
             </state>
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/msg/proto/baccarat.proto">
-          <provider selected="true" editor-type-id="text-editor" />
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/base/comand.go">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="525">
+              <caret line="56" column="4" selection-start-line="56" selection-start-column="4" selection-end-line="56" selection-end-column="4" />
+            </state>
+          </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://C:/Go/src/sort/sort.go">
+        <entry file="file://$PROJECT_DIR$/msg/proto/baccarat.proto">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="5375">
-              <caret line="215" column="5" selection-start-line="215" selection-start-column="5" selection-end-line="215" selection-end-column="5" />
+            <state relative-caret-position="175">
+              <caret line="7" column="17" selection-start-line="7" selection-start-column="17" selection-end-line="7" selection-end-column="17" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/msg/proto/gamecomm.proto">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="100">
+              <caret line="4" column="18" selection-start-line="4" selection-start-column="8" selection-end-line="4" selection-end-column="18" />
             </state>
           </provider>
         </entry>
@@ -177,26 +189,17 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/game/internal/handler.go">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="211">
-              <caret line="158" selection-start-line="158" selection-end-line="158" />
+            <state relative-caret-position="-575">
+              <caret line="95" column="20" selection-start-line="95" selection-start-column="20" selection-end-line="95" selection-end-column="20" />
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://C:/Go/src/math/abs.go">
+        <entry file="file://$PROJECT_DIR$/game/internal/chanrpc.go">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="275">
-              <caret line="11" column="5" selection-start-line="11" selection-start-column="5" selection-end-line="11" selection-end-column="5" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://C:/Go/src/builtin/builtin.go">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="4700">
-              <caret line="188" column="5" selection-start-line="188" selection-start-column="5" selection-end-line="188" selection-end-column="5" />
+            <state relative-caret-position="226">
+              <caret line="51" column="30" selection-start-line="51" selection-start-column="30" selection-end-line="51" selection-end-column="30" />
             </state>
           </provider>
         </entry>
@@ -225,6 +228,16 @@
       <find>playerBetInfo</find>
       <find>readyCount</find>
       <find>CopyInsert</find>
+      <find>找不到对应的玩家数据:</find>
+      <find>玩家断线:</find>
+      <find>当前玩家总数:</find>
+      <find>updateGameInfo</find>
+      <find>Offline</find>
+      <find>找不到对应的玩家数据</find>
+      <find>Out(</find>
+      <find>UpdateInfo</find>
+      <find>DeletePlayer</find>
+      <find>timeStamp</find>
     </findStrings>
     <replaceStrings>
       <replace>WillReceive</replace>
@@ -258,19 +271,20 @@
         <option value="$PROJECT_DIR$/main.go" />
         <option value="$PROJECT_DIR$/game/internal/handler.go" />
         <option value="$PROJECT_DIR$/game/internal/chanrpc.go" />
-        <option value="$PROJECT_DIR$/game/internal/gameItems/cowcow/cowcow.go" />
         <option value="$PROJECT_DIR$/game/internal/gameItems/mahjong/mahjong.go" />
         <option value="$PROJECT_DIR$/login/internal/handler.go" />
         <option value="$PROJECT_DIR$/msg/proto/login.proto" />
         <option value="$PROJECT_DIR$/msg/proto/gamecomm.proto" />
         <option value="$PROJECT_DIR$/sql/mysql/mysqlHandle.go" />
-        <option value="$PROJECT_DIR$/game/internal/gameItems/baccarat/baccarat.go" />
         <option value="$PROJECT_DIR$/base/comand.go" />
-        <option value="$PROJECT_DIR$/base/manage.go" />
-        <option value="$PROJECT_DIR$/game/internal/gameItems/landlords/landlords.go" />
         <option value="$PROJECT_DIR$/base/units.go" />
         <option value="$PROJECT_DIR$/game/internal/gameItems/gamecomm.go" />
         <option value="$PROJECT_DIR$/game/internal/gameItems/landlords/landlordLogic.go" />
+        <option value="$PROJECT_DIR$/game/internal/gameItems/landlords/landlords.go" />
+        <option value="$PROJECT_DIR$/game/internal/gameItems/cowcow/cowcow.go" />
+        <option value="$PROJECT_DIR$/base/manage.go" />
+        <option value="$PROJECT_DIR$/msg/proto/baccarat.proto" />
+        <option value="$PROJECT_DIR$/game/internal/gameItems/baccarat/baccarat.go" />
       </list>
     </option>
   </component>
@@ -281,10 +295,10 @@
     <sorting>DEFINITION_ORDER</sorting>
   </component>
   <component name="ProjectFrameBounds" extendedState="6">
-    <option name="x" value="212" />
-    <option name="y" value="99" />
-    <option name="width" value="1360" />
-    <option name="height" value="740" />
+    <option name="x" value="1172" />
+    <option name="y" value="69" />
+    <option name="width" value="1400" />
+    <option name="height" value="924" />
   </component>
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="ProjectView">
@@ -294,7 +308,6 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
-      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -360,14 +373,6 @@
             <path>
               <item name="server" type="b2602c69:ProjectViewProjectNode" />
               <item name="server" type="462c0819:PsiDirectoryNode" />
-              <item name="game" type="462c0819:PsiDirectoryNode" />
-              <item name="internal" type="462c0819:PsiDirectoryNode" />
-              <item name="gameItems" type="462c0819:PsiDirectoryNode" />
-              <item name="mahjong" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="server" type="b2602c69:ProjectViewProjectNode" />
-              <item name="server" type="462c0819:PsiDirectoryNode" />
               <item name="login" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
@@ -411,6 +416,7 @@
           <select />
         </subPane>
       </pane>
+      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -461,13 +467,14 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="-8" y="-8" width="1936" height="1056" extended-state="6" />
+    <editor active="true" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" sideWeight="0.6213592" visible="true" weight="0.123667374" />
+      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.6213592" visible="true" weight="0.1652452" />
       <window_info id="Favorites" order="1" sideWeight="0.37864077" side_tool="true" weight="0.1705757" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" />
-      <window_info anchor="bottom" id="Run" order="2" visible="true" weight="0.2548807" />
-      <window_info anchor="bottom" id="Debug" order="3" weight="0.4" />
+      <window_info active="true" anchor="bottom" id="Run" order="2" visible="true" weight="0.3449024" />
+      <window_info anchor="bottom" id="Debug" order="3" weight="0.3991323" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="bottom" id="TODO" order="6" weight="0.329718" />
@@ -478,7 +485,7 @@
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
-      <window_info anchor="right" id="Structure" order="3" visible="true" weight="0.119936034" />
+      <window_info anchor="right" id="Structure" order="3" visible="true" weight="0.22707888" />
       <window_info anchor="right" id="Database" order="4" weight="0.32995737" />
     </layout>
   </component>
@@ -494,13 +501,6 @@
     </ignored-roots>
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$USER_HOME$/go/src/github.com/po2656233/Golang_PRJ/src/server/game/internal/gameItems/baccarat/baccarat.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="5100">
-          <caret line="215" column="18" selection-start-line="215" selection-start-column="18" selection-end-line="215" selection-end-column="18" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/../leaf - 副本/gate/agent.go" />
     <entry file="file://$PROJECT_DIR$/../leaf/network/conn.go">
       <provider selected="true" editor-type-id="text-editor">
@@ -625,13 +625,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/msg/go/gamecomm.pb.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="600">
-          <caret line="28" column="4" selection-start-line="28" selection-start-column="4" selection-end-line="28" selection-end-column="4" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/msg/msg.go">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="1325">
@@ -663,13 +656,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/msg/proto/gamecomm.proto">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="125">
-          <caret line="5" column="17" selection-start-line="5" selection-start-column="11" selection-end-line="5" selection-end-column="17" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/login/internal/handler.go">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="2775">
@@ -682,37 +668,16 @@
         <state relative-caret-position="-931" />
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/game/internal/gameItems/cowcow/cowcow.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-1545">
-          <caret line="91" column="14" selection-start-line="91" selection-start-column="14" selection-end-line="91" selection-end-column="14" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/game/internal/gameItems/explain">
       <provider selected="true" editor-type-id="text-editor" />
     </entry>
     <entry file="file://$PROJECT_DIR$/game/internal/module.go">
       <provider selected="true" editor-type-id="text-editor" />
     </entry>
-    <entry file="file://$PROJECT_DIR$/game/internal/chanrpc.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="400">
-          <caret line="22" column="35" lean-forward="true" selection-start-line="22" selection-start-column="35" selection-end-line="22" selection-end-column="35" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/sql/mysql/mysqlHandle.go">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="-165">
           <caret line="209" column="58" selection-start-line="209" selection-start-column="58" selection-end-line="209" selection-end-column="58" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/base/comand.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1025">
-          <caret line="41" column="20" selection-start-line="41" selection-start-column="4" selection-end-line="41" selection-end-column="20" />
         </state>
       </provider>
     </entry>
@@ -723,13 +688,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/game/internal/gameItems/baccarat/baccarat.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="176">
-          <caret line="69" column="46" lean-forward="true" selection-start-line="69" selection-start-column="46" selection-end-line="69" selection-end-column="46" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/msg/proto/landLords.proto">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="279">
@@ -737,17 +695,27 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/game/internal/gameItems/baccarat/baccaratLogic.go">
+    <entry file="file://$USER_HOME$/go/src/github.com/name5566/leaf/chanrpc/chanrpc.go">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="280">
-          <caret line="28" column="4" selection-start-line="28" selection-start-column="4" selection-end-line="28" selection-end-column="4" />
+        <state relative-caret-position="219">
+          <caret line="103" selection-start-line="103" selection-end-line="103" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/base/units.go">
+    <entry file="file://$PROJECT_DIR$/game/internal/gameItems/landlords/landlordLogic.go">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="375">
-          <caret line="22" selection-start-line="22" selection-end-line="22" />
+        <state relative-caret-position="5800">
+          <caret line="265" column="38" selection-start-line="265" selection-start-column="38" selection-end-line="265" selection-end-column="38" />
+          <folding>
+            <element signature="n#!!block;n#Deal#0" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/game/internal/gameItems/gamecomm.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="250">
+          <caret line="12" column="14" selection-start-line="12" selection-start-column="5" selection-end-line="12" selection-end-column="14" />
         </state>
       </provider>
     </entry>
@@ -765,61 +733,106 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/msg/go/baccarat.pb.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="219">
+          <caret line="29" column="4" selection-start-line="29" selection-start-column="4" selection-end-line="29" selection-end-column="4" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/game/internal/gameItems/baccarat/baccaratLogic.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="280">
+          <caret line="28" column="4" selection-start-line="28" selection-start-column="4" selection-end-line="28" selection-end-column="4" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/msg/go/gamecomm.pb.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="211">
+          <caret line="104" column="35" selection-start-line="104" selection-start-column="35" selection-end-line="104" selection-end-column="35" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://C:/Go/src/builtin/builtin.go">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="4700">
-          <caret line="188" column="5" selection-start-line="188" selection-start-column="5" selection-end-line="188" selection-end-column="5" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/base/manage.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="211">
-          <caret line="364" selection-start-line="364" selection-end-line="364" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/game/internal/handler.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="211">
-          <caret line="158" selection-start-line="158" selection-end-line="158" />
+        <state relative-caret-position="509">
+          <caret line="133" column="5" selection-start-line="133" selection-start-column="5" selection-end-line="133" selection-end-column="5" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/game/internal/gameItems/landlords/landlords.go">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="200">
-          <caret line="8" column="91" lean-forward="true" selection-start-line="8" selection-start-column="4" selection-end-line="8" selection-end-column="91" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/game/internal/gameItems/landlords/landlordLogic.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="2684">
-          <caret line="265" column="38" lean-forward="true" selection-start-line="265" selection-start-column="38" selection-end-line="265" selection-end-column="38" />
+        <state relative-caret-position="-1700">
+          <caret line="82" column="17" selection-start-line="82" selection-start-column="17" selection-end-line="82" selection-end-column="17" />
           <folding>
-            <element signature="e#19#50#0" expanded="true" />
-            <element signature="n#!!block;n#Deal#0" />
+            <element signature="e#26#277#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$USER_HOME$/go/src/github.com/name5566/leaf/chanrpc/chanrpc.go">
+    <entry file="file://$PROJECT_DIR$/game/internal/handler.go">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="219">
-          <caret line="103" selection-start-line="103" selection-end-line="103" />
+        <state relative-caret-position="-575">
+          <caret line="95" column="20" selection-start-line="95" selection-start-column="20" selection-end-line="95" selection-end-column="20" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/game/internal/gameItems/gamecomm.go">
+    <entry file="file://$PROJECT_DIR$/game/internal/chanrpc.go">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="250">
-          <caret line="12" column="14" selection-start-line="12" selection-start-column="5" selection-end-line="12" selection-end-column="14" />
+        <state relative-caret-position="226">
+          <caret line="51" column="30" selection-start-line="51" selection-start-column="30" selection-end-line="51" selection-end-column="30" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/game/internal/gameItems/cowcow/cowcow.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="300">
+          <caret line="96" column="5" lean-forward="true" selection-start-line="96" selection-start-column="5" selection-end-line="96" selection-end-column="5" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/base/comand.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="525">
+          <caret line="56" column="4" selection-start-line="56" selection-start-column="4" selection-end-line="56" selection-end-column="4" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/base/manage.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="199">
+          <caret line="362" column="31" selection-start-line="362" selection-start-column="31" selection-end-line="362" selection-end-column="31" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/msg/proto/gamecomm.proto">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="100">
+          <caret line="4" column="18" selection-start-line="4" selection-start-column="8" selection-end-line="4" selection-end-column="18" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/msg/proto/baccarat.proto">
-      <provider selected="true" editor-type-id="text-editor" />
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="175">
+          <caret line="7" column="17" selection-start-line="7" selection-start-column="17" selection-end-line="7" selection-end-column="17" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/base/units.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-524">
+          <caret line="22" selection-start-line="22" selection-end-line="22" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/game/internal/gameItems/baccarat/baccarat.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="424">
+          <caret line="253" column="95" selection-start-line="253" selection-start-column="95" selection-end-line="253" selection-end-column="95" />
+        </state>
+      </provider>
     </entry>
   </component>
 </project>

@@ -99,29 +99,34 @@ func (self *BaccaratGame) Scene(args []interface{}) {
 		return
 	}
 
+	log.Debug("当前玩家总数:%v %v ",  len(playerList.AllInfos),self.PlayerList )
 	// 获取玩家列表
 	self.AddPlayer(player.UserID) //加入玩家列表
+	senceInfo := &protoMsg.GameBaccaratEnter{}
+	senceInfo.UserInfo = nil
 	for _, uid := range self.PlayerList {
-		if playerItem := manger.Get(uid); nil != playerItem {
-			var playerInfo protoMsg.PlayerInfo
-			playerInfo.UserID = playerItem.UserID
-			playerInfo.Name = playerItem.Name
-			playerInfo.Age = playerItem.Age
-			playerInfo.Gold = int64(sqlHandle.CheckMoney(playerItem.UserID))*100 //玩家积分
-			playerInfo.VipLevel = playerItem.Level
-			playerInfo.Sex = playerItem.Sex
-			playerList.AllInfos = CopyInsert(playerList.AllInfos, len(playerList.AllInfos), &playerInfo).([]*protoMsg.PlayerInfo)
-
+		if playerItem := manger.Get(uid);nil != playerItem {
+			if  uid == player.UserID {
+				var playerInfo protoMsg.PlayerInfo
+				playerInfo.UserID = playerItem.UserID
+				playerInfo.Name = playerItem.Name
+				playerInfo.Age = playerItem.Age
+				playerInfo.Gold = int64(sqlHandle.CheckMoney(playerItem.UserID)) * 100 //玩家积分
+				playerInfo.VipLevel = playerItem.Level
+				playerInfo.Sex = playerItem.Sex
+				senceInfo.UserInfo = &playerInfo
+				playerList.AllInfos = CopyInsert(playerList.AllInfos, len(playerList.AllInfos), &playerInfo).([]*protoMsg.PlayerInfo)
+			}
 		} else {
 			manger.DeletePlayerIndex(uid)
 		}
 	}
+	if senceInfo.UserInfo == nil{
+		log.Debug("[Error][百家乐场景] [获取玩家ID:%v 信息失败]  ", userID)
+		return
+	}
 
-	log.Debug("[百家乐场景] [玩家列表新增] ID:%v", userID)
-	senceInfo := &protoMsg.GameBaccaratEnter{}
-	senceInfo.UserID = player.UserID
-	senceInfo.Players = &playerList //玩家列表[TO DO]
-	senceInfo.BankerScore = self.bankerScore
+	log.Debug("[百家乐场景] [玩家列表新增] ID:%v 当前玩家总数:%v", userID, len(playerList.AllInfos) )
 	senceInfo.FreeTime = freeTime
 	senceInfo.BetTime = betTime
 	senceInfo.OpenTime = openTime
@@ -139,7 +144,10 @@ func (self *BaccaratGame) Scene(args []interface{}) {
 		senceInfo.Chips = []int32{1, 5, 10, 20, 50, 100} //筹码
 	}
 
+	//
 	player.WillReceive(MainGameSence, self.gameState, senceInfo)
+	manger.NotifyOthers(self.PlayerList, MainGameUpdate, GameUpdatePlayerList, &playerList)
+
 	log.Debug("[百家乐场景]->玩家信息 ID:%v ", player.UserID)
 }
 
@@ -171,14 +179,13 @@ func (self *BaccaratGame) Playing(args []interface{}) {
 	betResult.UserID = player.UserID
 	betResult.BetArea = m.BetArea
 	betResult.BetScore = m.BetScore
-	
+
 	if self.gameState != SubGameSencePlaying {
 		betResult.State = *proto.Int32(1)
 		betResult.Hints = *proto.String("过了下注时间")
 		player.WillReceive(MainGameFrame, SubGameFrameBetResult, betResult)
 		return
 	}
-
 
 	//数据库中扣除玩家金币[下注成功]
 	if money, ok := sqlHandle.DeductMoney(player.UserID, m.BetScore); !ok {
@@ -234,12 +241,20 @@ func (self *BaccaratGame) Over(args []interface{}) {
 //更新
 func (self *BaccaratGame) UpdateInfo(args []interface{}) { //更新玩家列表[目前]
 
-	log.Debug("[百家乐]更新信息:%v-> %v\n", args[0].(uint32), args[1])
+	log.Debug("[百家乐]更新信息:%v->*** %v\n", args[0].(uint32), args[1])
 	flag := args[0].(uint32)
 	userID := args[1].(uint64)
 	switch flag {
 	case GameUpdateOut: //玩家离开 不再向该玩家广播消息[] 删除
 		self.DeletePlayer(userID)
+	//
+		for index, info := range playerList.AllInfos {
+			if info.UserID == userID {
+				log.Debug("正在从列表中剔除 玩家 %v", userID)
+				playerList.AllInfos = append(playerList.AllInfos[:index], playerList.AllInfos[index+1:]...)
+				break
+			}
+		}
 		manger.NotifyOthers(self.PlayerList, MainGameUpdate, GameUpdatePlayerList, &playerList)
 	case GameUpdatePlayerList: //更新玩家列表
 		self.AddPlayer(userID)
@@ -274,7 +289,7 @@ func (self *BaccaratGame) onStart() {
 	}
 
 	self.playerBetInfo = make(map[uint64][]protoMsg.GameBet) // 玩家下注信息
-	m := self.permitHost() //反馈定庄信息
+	m := self.permitHost()                                   //反馈定庄信息
 	manger.NotifyOthers(self.PlayerList, MainGameState, SubGameStateStart, m)
 }
 

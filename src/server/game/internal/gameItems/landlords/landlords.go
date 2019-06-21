@@ -143,7 +143,7 @@ func (self *LandlordGame) UpdateInfo(args []interface{}) { //更新玩家列表[
 			self.Start(nil)
 		}
 
-		self.Start(nil)
+		self.Start(nil)//测试用
 		log.Debug("玩家准备就绪...")
 	}
 }

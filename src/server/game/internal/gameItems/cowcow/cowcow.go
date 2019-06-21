@@ -53,14 +53,14 @@ func (self *CowcowGame) Init(level uint32, skeleton *module.Skeleton) {
 	self.bankerID = 0                 //庄家ID
 }
 
-func (self *CowcowGame) Scene(args []interface{}) {
+func (self *CowcowGame) Scene(args []interface{}) bool  {
 	userID := args[0].(uint64)
 	level := args[1].(uint32)
 
 	player := manger.Get(userID)
 	if player == nil {
 		log.Debug("[Error][牛牛] [未能查找到相关玩家] ID:%v", userID)
-		return
+		return false
 	}
 
 	// 获取玩家列表
@@ -98,6 +98,7 @@ func (self *CowcowGame) Scene(args []interface{}) {
 
 	player.WillReceive(MainGameSence, self.gameState, senceInfo)
 	log.Debug("[牛牛场景]->玩家信息 ID:%v ", player.UserID)
+	return true
 }
 
 //更新
