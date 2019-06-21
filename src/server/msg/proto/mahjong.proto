@@ -6,10 +6,9 @@ import "gamecomm.proto";
 //场景
 //入场
 message GameMahjongEnter{
-	uint64 UserID = 1;					//玩家ID
+	PlayerInfo userInfo = 1;			//玩家列表
 	int64 TimeStamp = 2;				//时间戳
-	UserList Players = 3;				//玩家列表
-	uint32 FreeTime = 4;
+	uint32 FreeTime = 3;
 }
 
 //游戏消息

@@ -60,12 +60,15 @@ func (self *MahjongGame) Scene(args []interface{}) {
 
 	player := manger.Get(userID)
 	if player == nil {
-		log.Debug("[Error][麻将] [未能查找到相关玩家] ID:%v", userID)
+		log.Debug("[Error][麻将场景] [未能查找到相关玩家] ID:%v", userID)
 		return
 	}
 
 	// 获取玩家列表z
 	self.AddPlayer(player.UserID) //加入玩家列表
+
+	senceInfo := &protoMsg.GameMahjongEnter{}
+	senceInfo.UserInfo = nil
 	for _, uid := range self.PlayerList {
 		if playerItem := manger.Get(uid); nil != playerItem {
 			var playerInfo protoMsg.PlayerInfo
@@ -75,17 +78,28 @@ func (self *MahjongGame) Scene(args []interface{}) {
 			playerInfo.Gold = int64(sqlHandle.CheckMoney(playerItem.UserID))*100 //玩家积分
 			playerInfo.VipLevel = playerItem.Level
 			playerInfo.Sex = playerItem.Sex
-			playerList.AllInfos = CopyInsert(playerList.AllInfos, len(playerList.AllInfos), &playerInfo).([]*protoMsg.PlayerInfo)
+			senceInfo.UserInfo = &playerInfo
 
+			isHave := false
+			for _, info := range playerList.AllInfos {
+				if info.UserID == uid {
+					isHave = true
+					break
+				}
+			}
+			if !isHave {
+				playerList.AllInfos = CopyInsert(playerList.AllInfos, len(playerList.AllInfos), &playerInfo).([]*protoMsg.PlayerInfo)
+			}
 		} else {
 			manger.DeletePlayerIndex(uid)
 		}
 	}
+	if nil == senceInfo.UserInfo {
+		log.Debug("[Error][麻将场景] [获取玩家ID:%v 信息失败]  ", userID)
+		return
+	}
 
-	log.Debug("[麻将] [玩家列表新增] ID:%v", userID)
-	senceInfo := &protoMsg.GameMahjongEnter{}
-	senceInfo.UserID = player.UserID
-	senceInfo.Players = &playerList //玩家列表[TODO]
+	log.Debug("[麻将场景] [玩家列表新增] ID:%v", userID)
 	senceInfo.FreeTime = freeTime
 	//senceInfo.AwardAreas // 录单
 	//需优化[定时器中计算时长]

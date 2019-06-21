@@ -105,7 +105,7 @@ func handleEnterRoom(args []interface{}) {
 		//获取房间号码
 		player.RoomNum = m.GetRoomNum()
 
-		//找到游戏列表信息
+		//游戏列表信息
 		_, _, msg := sqlHandle.CheckGameList(player.RoomNum)
 
 		//发送数据

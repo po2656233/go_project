@@ -99,14 +99,14 @@ func (self *BaccaratGame) Scene(args []interface{}) {
 		return
 	}
 
-	log.Debug("当前玩家总数:%v %v ",  len(playerList.AllInfos),self.PlayerList )
+	log.Debug("当前玩家总数:%v %v ", len(playerList.AllInfos), self.PlayerList)
 	// 获取玩家列表
 	self.AddPlayer(player.UserID) //加入玩家列表
 	senceInfo := &protoMsg.GameBaccaratEnter{}
 	senceInfo.UserInfo = nil
 	for _, uid := range self.PlayerList {
-		if playerItem := manger.Get(uid);nil != playerItem {
-			if  uid == player.UserID {
+		if playerItem := manger.Get(uid); nil != playerItem {
+			if uid == player.UserID {
 				var playerInfo protoMsg.PlayerInfo
 				playerInfo.UserID = playerItem.UserID
 				playerInfo.Name = playerItem.Name
@@ -115,18 +115,27 @@ func (self *BaccaratGame) Scene(args []interface{}) {
 				playerInfo.VipLevel = playerItem.Level
 				playerInfo.Sex = playerItem.Sex
 				senceInfo.UserInfo = &playerInfo
-				playerList.AllInfos = CopyInsert(playerList.AllInfos, len(playerList.AllInfos), &playerInfo).([]*protoMsg.PlayerInfo)
+				isHave := false
+				for _, info := range playerList.AllInfos {
+					if info.UserID == uid {
+						isHave = true
+						break
+					}
+				}
+				if !isHave {
+					playerList.AllInfos = CopyInsert(playerList.AllInfos, len(playerList.AllInfos), &playerInfo).([]*protoMsg.PlayerInfo)
+				}
 			}
 		} else {
 			manger.DeletePlayerIndex(uid)
 		}
 	}
-	if senceInfo.UserInfo == nil{
+	if senceInfo.UserInfo == nil {
 		log.Debug("[Error][百家乐场景] [获取玩家ID:%v 信息失败]  ", userID)
 		return
 	}
 
-	log.Debug("[百家乐场景] [玩家列表新增] ID:%v 当前玩家总数:%v", userID, len(playerList.AllInfos) )
+	log.Debug("[百家乐场景] [玩家列表新增] ID:%v 当前玩家总数:%v", userID, len(playerList.AllInfos))
 	senceInfo.FreeTime = freeTime
 	senceInfo.BetTime = betTime
 	senceInfo.OpenTime = openTime
@@ -247,7 +256,7 @@ func (self *BaccaratGame) UpdateInfo(args []interface{}) { //更新玩家列表[
 	switch flag {
 	case GameUpdateOut: //玩家离开 不再向该玩家广播消息[] 删除
 		self.DeletePlayer(userID)
-	//
+		//
 		for index, info := range playerList.AllInfos {
 			if info.UserID == userID {
 				log.Debug("正在从列表中剔除 玩家 %v", userID)
