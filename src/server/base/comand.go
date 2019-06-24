@@ -75,4 +75,5 @@ const (
 	Landlords = 3001
 	CowCow    = 1001
 	Mahjong   = 3002
+	ChinessChess = 8002
 )

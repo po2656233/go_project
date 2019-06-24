@@ -5,11 +5,12 @@ import (
 	"github.com/name5566/leaf/log"
 	"reflect"
 	. "server/base"
-	baccarat "server/game/internal/gameItems/baccarat"
-	cowcow "server/game/internal/gameItems/cowcow"
+	"server/game/internal/gameItems/baccarat"
+	"server/game/internal/gameItems/cowcow"
 	landlord "server/game/internal/gameItems/landlords"
-	mahjong "server/game/internal/gameItems/mahjong"
+	"server/game/internal/gameItems/mahjong"
 	protoMsg "server/msg/go"
+	"server/game/internal/gameItems/chineseChess"
 )
 
 //初始化
@@ -45,6 +46,8 @@ func productGame(kindID, level uint32) interface{} {
 		return cowcow.NewCowcow(level, skeleton)
 	case Mahjong:
 		return mahjong.NewMahjong(level, skeleton)
+	case ChinessChess:
+		return chineseChess.NewChineseChess(level, skeleton)
 	}
 
 	return nil
