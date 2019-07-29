@@ -175,7 +175,7 @@ func (self *LandlordGame) Start(args []interface{}) {
 		// 排序其实可以交给客户端,以减少服务端运算压力
 		sortCards := SortCardX(playerCard)
 		log.Debug("排序之后:%v\n %v", sortCards, GetCardsText(sortCards))
-
+		log.Debug("底牌:%v", GetCardsText(cards[0:3]))
 		msg := &protoMsg.GameLandLordsBegins{}
 		msg.CardsBottom = cards[0:3]
 		msg.CardsHand = sortCards

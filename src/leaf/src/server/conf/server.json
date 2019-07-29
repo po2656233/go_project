@@ -1,8 +1,0 @@
-{
-	"LogLevel": "debug",
-	"LogPath": "",
-	"TCPAddr": "127.0.0.1:9560",
-	"WSAddr": "127.0.0.1:9650",
-	"MaxConnNum": 2000000,
-	"ProfilePath":"../msg/go"
-}

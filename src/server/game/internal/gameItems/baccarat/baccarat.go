@@ -21,9 +21,9 @@ var playerList protoMsg.UserList  //玩家列表
 //var lock *sync.Mutex = &sync.Mutex{} //锁
 //定时器
 const (
-	freeTime = 5
+	freeTime = 3
 	betTime  = 10
-	openTime = 15
+	openTime = 6
 )
 
 //继承于GameItem
@@ -144,7 +144,7 @@ func (self *BaccaratGame) Scene(args []interface{}) {
 	senceInfo.TimeStamp = self.timeStamp //////已过时长 应当该为传时间戳
 	switch level {
 	case RoomGeneral:
-		senceInfo.Chips = []int32{1, 5, 10, 100, 500, 1000} //筹码
+		senceInfo.Chips = []int32{1, 5, 25, 50, 100} //筹码
 	case RoomMiddle:
 		senceInfo.Chips = []int32{10, 50, 100, 500, 1000, 5000} //筹码
 	case RoomHigh:

@@ -20,6 +20,8 @@ var lock *sync.Mutex = &sync.Mutex{} //锁
 //定时器
 const (
 	freeTime  = 5
+	betTime = 15
+	openTime = 10
 	tableSite = 4
 )
 
@@ -53,52 +55,74 @@ func (self *CowcowGame) Init(level uint32, skeleton *module.Skeleton) {
 	self.bankerID = 0                 //庄家ID
 }
 
-func (self *CowcowGame) Scene(args []interface{}) bool  {
+func (self *CowcowGame) Scene(args []interface{})   {
 	userID := args[0].(uint64)
 	level := args[1].(uint32)
 
 	player := manger.Get(userID)
 	if player == nil {
-		log.Debug("[Error][牛牛] [未能查找到相关玩家] ID:%v", userID)
-		return false
+		log.Debug("[Error][牛牛场景] [未能查找到相关玩家] ID:%v", userID)
+		return
 	}
 
+	log.Debug("当前玩家总数:%v %v ", len(playerList.AllInfos), self.PlayerList)
 	// 获取玩家列表
 	self.AddPlayer(player.UserID) //加入玩家列表
+	senceInfo := &protoMsg.GameBaccaratEnter{}
+	senceInfo.UserInfo = nil
 	for _, uid := range self.PlayerList {
 		if playerItem := manger.Get(uid); nil != playerItem {
-			var playerInfo protoMsg.PlayerInfo
-			playerInfo.UserID = playerItem.UserID
-			playerInfo.Name = playerItem.Name
-			playerInfo.Age = playerItem.Age
-			playerInfo.Gold = int64(sqlHandle.CheckMoney(playerItem.UserID))*100 //玩家积分
-			playerInfo.VipLevel = playerItem.Level
-			playerInfo.Sex = playerItem.Sex
-			playerList.AllInfos = CopyInsert(playerList.AllInfos, len(playerList.AllInfos), &playerInfo).([]*protoMsg.PlayerInfo)
-
+			if uid == player.UserID {
+				var playerInfo protoMsg.PlayerInfo
+				playerInfo.UserID = playerItem.UserID
+				playerInfo.Name = playerItem.Name
+				playerInfo.Age = playerItem.Age
+				playerInfo.Gold = int64(sqlHandle.CheckMoney(playerItem.UserID)) * 100 //玩家积分
+				playerInfo.VipLevel = playerItem.Level
+				playerInfo.Sex = playerItem.Sex
+				senceInfo.UserInfo = &playerInfo
+				isHave := false
+				for _, info := range playerList.AllInfos {
+					if info.UserID == uid {
+						isHave = true
+						break
+					}
+				}
+				if !isHave {
+					playerList.AllInfos = CopyInsert(playerList.AllInfos, len(playerList.AllInfos), &playerInfo).([]*protoMsg.PlayerInfo)
+				}
+			}
 		} else {
 			manger.DeletePlayerIndex(uid)
 		}
 	}
-
-	log.Debug("[牛牛] [玩家列表新增] ID:%v", userID)
-	senceInfo := &protoMsg.GameCowcowEnter{}
-	//senceInfo.UserID = player.UserID
-	//senceInfo.Players = &playerList //玩家列表[TODO]
-	//senceInfo.FreeTime = freeTime
-	////senceInfo.AwardAreas // 录单
-	////需优化[定时器中计算时长]
-	//senceInfo.TimeStamp = self.timeStamp //////已过时长 应当该为传时间戳
-	switch level {
-	case RoomGeneral:
-	case RoomMiddle:
-	case RoomHigh:
-	default:
+	if senceInfo.UserInfo == nil {
+		log.Debug("[Error][牛牛场景] [获取玩家ID:%v 信息失败]  ", userID)
+		return
 	}
 
+	log.Debug("[牛牛场景] [玩家列表新增] ID:%v 当前玩家总数:%v", userID, len(playerList.AllInfos))
+	senceInfo.FreeTime = freeTime
+	senceInfo.BetTime = betTime
+	senceInfo.OpenTime = openTime
+	//senceInfo.AwardAreas // 录单
+	//需优化[定时器中计算时长]
+	senceInfo.TimeStamp = self.timeStamp //////已过时长 应当该为传时间戳
+	switch level {
+	case RoomGeneral:
+		senceInfo.Chips = []int32{1, 5, 25, 50, 100} //筹码
+	case RoomMiddle:
+		senceInfo.Chips = []int32{10, 50, 100, 500, 1000, 5000} //筹码
+	case RoomHigh:
+		senceInfo.Chips = []int32{50, 100, 200, 500, 1000, 10000} //筹码
+	default:
+		senceInfo.Chips = []int32{1, 5, 10, 20, 50, 100} //筹码
+	}
+
+	//
 	player.WillReceive(MainGameSence, self.gameState, senceInfo)
-	log.Debug("[牛牛场景]->玩家信息 ID:%v ", player.UserID)
-	return true
+	manger.NotifyOthers(self.PlayerList, MainGameUpdate, GameUpdatePlayerList, &playerList)
+	log.Debug("[牛牛场景]->玩家信息 ID:%v  ", player.UserID)
 }
 
 //更新

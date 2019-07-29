@@ -60,6 +60,7 @@ func newAgent(conn *network.TCPConn) network.Agent {
 	return a
 }
 
-func (a *Agent) Run() {}
+func (a *Agent) Run() {
+}
 
 func (a *Agent) OnClose() {}

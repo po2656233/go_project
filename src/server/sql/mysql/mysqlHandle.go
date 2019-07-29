@@ -19,7 +19,7 @@ type SqlMan struct {
 	db       *sql.DB
 }
 
-type ISqlPower interface {
+type ISqlOP interface {
 	ConnectMySql(user, psw, addr, port, db string) //连接数据库
 	CheckServerList() *protoMsg.GameList           //房间列表
 	CheckLogin(user, password string) bool         //登陆

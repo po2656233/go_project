@@ -12,7 +12,6 @@ import (
 	"strconv"
 	"sync"
 	"time"
-	//. "server/sql/mysql"
 )
 
 //---[对象]
@@ -216,6 +215,33 @@ func (self *PlayerManger) NotifyAll(mainID, subID uint32, msg proto.Message) {
 		return true
 	})
 }
+
+//cluster全网广播
+func (self *PlayerManger) NotifyWorld(mainID, subID uint32, msg proto.Message) {
+	self.players.Range(func(key, value interface{}) bool {
+		player := value.(*Player)
+		if nil == player.Agent {
+			log.Debug("无效玩家:%v", key)
+			return true
+		}
+		log.Debug("通知玩家：%v %v", key, player.Agent.LocalAddr())
+
+		//指令+数据  包体内容
+		//指令+数据  包体内容
+		data, _ := proto.Marshal(msg)
+		packet := &protoMsg.PacketData{
+			MainID:    mainID,
+			SubID:     subID,
+			TransData: data,
+		}
+		fmt.Println("发送数据(But):", len(data), data)
+		player.Agent.NotifyMsg(packet)
+		return true
+	})
+}
+
+
+
 
 //通知除指定玩家外的玩家们
 func (self *PlayerManger) NotifyButOthers(userIDs []uint64, mainID, subID uint32, msg proto.Message) {

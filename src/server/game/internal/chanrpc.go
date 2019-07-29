@@ -14,6 +14,7 @@ var agents = make(map[gate.Agent]struct{})
 var sqlHandle = mysql.SqlHandle()
 var playerManger *PlayerManger = GetPlayerManger()
 var roomManger *RoomManger = GetRoomManger()
+//
 
 func init() {
 	skeleton.RegisterChanRPC("NewAgent", rpcNewAgent)
