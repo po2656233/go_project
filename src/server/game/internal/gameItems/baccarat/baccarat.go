@@ -23,7 +23,7 @@ var playerList protoMsg.UserList  //玩家列表
 const (
 	freeTime = 3
 	betTime  = 10
-	openTime = 6
+	openTime = 7
 )
 
 //继承于GameItem

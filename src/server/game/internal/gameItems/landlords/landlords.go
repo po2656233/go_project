@@ -13,11 +13,11 @@ import (
 )
 
 var timer *module.Skeleton = nil  //定时器
+//var lock *sync.Mutex = &sync.Mutex{} //锁
 var sqlHandle = mysql.SqlHandle() //数据库
 var manger = GetPlayerManger()    //玩家管理类
 var playerList protoMsg.UserList  //玩家列表
 
-//var lock *sync.Mutex = &sync.Mutex{} //锁
 //定时器
 const (
 	freeTime  = 5
@@ -144,7 +144,7 @@ func (self *LandlordGame) UpdateInfo(args []interface{}) { //更新玩家列表[
 		}
 
 		self.Start(nil)//测试用
-		log.Debug("玩家准备就绪...")
+		log.Debug("[斗地主]玩家准备就绪...")
 	}
 }
 
@@ -196,7 +196,7 @@ func (self *LandlordGame) Playing(args []interface{}) {
 	//直接扣除金币
 	log.Debug("出牌")
 	//return
-	//m := args[0].(*protoMsg.GameLandlordPlaying)
+	//m := args[0].(*protoMsg.GameLandLordsOutcard)
 
 }
 

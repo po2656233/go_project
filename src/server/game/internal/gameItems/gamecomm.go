@@ -147,3 +147,28 @@ func (s PlayerCards) Less(i, j int) bool {
 func (s PlayerCards) Swap(i, j int) {
 	s[i], s[j] = s[j], s[i]
 }
+
+
+//获取牌点
+func GetCardPip(cbCardData byte) byte {
+	//计算牌点
+	cbCardValue := GetCardValue(cbCardData)
+	var cbPipCount byte = 0
+	if cbCardValue < 10 {
+		cbPipCount = cbCardValue
+	}
+	return cbPipCount
+}
+
+//获取所有牌的最终点数
+func GetCardListPip(cbCardData []byte) byte {
+	//变量定义
+	var cbPipCount byte = 0
+
+	//获取牌点
+	cbCardCount := len(cbCardData)
+	for i := 0; i < cbCardCount; i++ {
+		cbPipCount = (GetCardPip(cbCardData[i]) + cbPipCount) % 10
+	}
+	return cbPipCount
+}

@@ -10,10 +10,31 @@ import (
 	"server/login"
 	"fmt"
 	"runtime"
+	"os"
+	"runtime/pprof"
 )
 
 
 func main() {
+	//确保并发执行
+	runtime.GOMAXPROCS(runtime.NumCPU())
+
+	// 返回当前处理器的数量
+	fmt.Println(runtime.GOMAXPROCS(0))
+	// 返回当前机器的逻辑处理器或者核心的数量
+	fmt.Println(runtime.NumCPU())
+
+
+	//性能测试
+	//cpu
+	cpuProfile, _ := os.Create("cpu_profile")
+	pprof.StartCPUProfile(cpuProfile)
+	defer pprof.StopCPUProfile()
+	//内存
+	memProfile, _ := os.Create("mem_profile")
+	pprof.WriteHeapProfile(memProfile)
+
+
 	lconf.LogLevel = conf.Server.LogLevel
 	lconf.LogPath = conf.Server.LogPath
 	lconf.LogFlag = conf.LogFlag

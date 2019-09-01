@@ -4,11 +4,15 @@ package cowcow
 import (
 	"github.com/name5566/leaf/log"
 	"github.com/name5566/leaf/module"
+	"github.com/name5566/leaf/gate"
 	. "server/base"
 	protoMsg "server/msg/go"
 	"server/sql/mysql"
 	_ "server/sql/mysql"
 	"sync"
+	"time"
+	"github.com/golang/protobuf/proto"
+	. "server/game/internal/gameItems"
 )
 
 var timer *module.Skeleton = nil  //定时器
@@ -19,9 +23,9 @@ var playerList protoMsg.UserList  //玩家列表
 var lock *sync.Mutex = &sync.Mutex{} //锁
 //定时器
 const (
-	freeTime  = 5
-	betTime = 15
-	openTime = 10
+	freeTime  = 3
+	betTime = 10
+	openTime = 7
 	tableSite = 4
 )
 
@@ -35,6 +39,10 @@ type CowcowGame struct {
 	bankerID    uint64  //庄家ID
 	bankerScore float32 //庄家积分
 	readyCount  uint8   //准备的人数
+
+	playerBetInfo map[uint64][]protoMsg.GameBet //下注信息
+
+	overResult    *protoMsg.GameCowcowOver // 游戏结果
 }
 
 //创建百家乐实例
@@ -153,7 +161,10 @@ func (self *CowcowGame) UpdateInfo(args []interface{}) { //更新玩家列表[�
 // 开始
 func (self *CowcowGame) Start(args []interface{}) {
 	//直接扣除金币
-	log.Debug("游戏开始")
+	if !self.bStart {
+		self.onStart()
+		self.bStart = true
+	}
 	//return
 	//m := args[0].(*protoMsg.GameCowcowPlaying)
 
@@ -161,10 +172,73 @@ func (self *CowcowGame) Start(args []interface{}) {
 
 // 出牌
 func (self *CowcowGame) Playing(args []interface{}) {
-	//直接扣除金币
-	log.Debug("出牌")
-	//return
-	//m := args[0].(*protoMsg.GameCowcowPlaying)
+	//【消息】
+	m := args[0].(*protoMsg.GameBet)
+	//【传输对象】
+	agent := args[1].(gate.Agent)
+	log.Debug("[牛牛]BaccaratPlaying:->%v", m)
+
+	//var userID uint64 = 0
+	player := manger.Get_1(agent)
+	if nil == player {
+		log.Debug("下注失败,")
+		return
+	}
+
+	//反馈下注情况
+	betResult := &protoMsg.GameBetResult{}
+	betResult.UserID = player.UserID
+	betResult.BetArea = m.BetArea
+	betResult.BetScore = m.BetScore
+
+	if self.gameState != SubGameSencePlaying {
+		betResult.State = *proto.Int32(1)
+		betResult.Hints = *proto.String("过了下注时间")
+		player.WillReceive(MainGameFrame, SubGameFrameBetResult, betResult)
+		return
+	}
+
+	//数据库中扣除玩家金币[下注成功]
+	if money, ok := sqlHandle.DeductMoney(player.UserID, m.BetScore); !ok {
+		betResult.State = *proto.Int32(1)
+		betResult.Hints = *proto.String("数据库里的钱不够")
+		log.Debug("[牛牛]下注失败 玩家ID:%v 现有金币:%v 下注金币:%v", player.UserID, money, m.BetScore)
+		player.WillReceive(MainGameFrame, SubGameFrameBetResult, betResult)
+		return
+	}
+
+	//下注成功
+	betResult.State = *proto.Int32(0)
+	betResult.Hints = *proto.String("[牛牛]下注成功")
+
+	//
+
+	//通知所有人
+	log.Debug("[牛牛]反馈下注信息:->%v", m)
+
+	//下注数目累加
+	if areaBetInfos, ok := self.playerBetInfo[player.UserID]; ok {
+		ok = false
+		for index, betItem := range areaBetInfos {
+			if betItem.BetArea == m.BetArea {
+				self.playerBetInfo[player.UserID][index].BetScore = betItem.BetScore + m.BetScore
+				log.Debug("[牛牛]玩家:%v 累加:->%v", player.UserID, areaBetInfos[index].BetScore)
+				ok = true
+				break
+			}
+		}
+		if !ok {
+			self.playerBetInfo[player.UserID] = CopyInsert(areaBetInfos, len(areaBetInfos), *m).([]protoMsg.GameBet)
+		}
+	} else {
+		log.Debug("[牛牛]第一次:%v", m)
+		self.playerBetInfo[player.UserID] = CopyInsert(self.playerBetInfo[player.UserID], len(self.playerBetInfo[player.UserID]), *m).([]protoMsg.GameBet)
+	}
+	player.WillReceive(MainGameFrame, SubGameFrameBetResult, betResult)
+
+	//通知其他玩家
+	//manger.NotifyButOthers(self.PlayerList, MainGameFrame, SubGameFramePlaying, m)
+	manger.NotifyOthers(self.PlayerList, MainGameFrame, SubGameFramePlaying, m)
 
 }
 
@@ -172,8 +246,10 @@ func (self *CowcowGame) Playing(args []interface{}) {
 func (self *CowcowGame) Over(args []interface{}) {
 	//直接扣除金币
 	log.Debug("结算")
-	//return
-	//m := args[0].(*protoMsg.GameCowcowPlaying)
+	//【发牌】
+	self.dispatchCard()
+	//【计算结果并反馈】
+	self.calculateScore()
 
 }
 
@@ -189,7 +265,7 @@ func (self *CowcowGame) SuperControl(args []interface{}) {
 //重新初始化
 func (self *CowcowGame) reset() {
 	log.Release("[牛牛]扫地僧出来干活了...")
-
+	self.playerBetInfo = make(map[uint64][]protoMsg.GameBet) //玩家下注信息
 	//hostList = []uint64{} 										//清理玩家
 
 	//不要清理数据,因为数据清除之后,下一轮没法广播数据
@@ -199,8 +275,97 @@ func (self *CowcowGame) reset() {
 	//}
 }
 
+
+func (self *CowcowGame)onStart(){
+	log.Debug("游戏开始")
+	self.reset() //重置
+	log.Release("[牛牛]游戏开始")
+	self.gameState = SubGameSenceStart
+	self.timeStamp = time.Now().Unix()
+	if timer == nil {
+		time.AfterFunc(freeTime*time.Second, self.onPlay)
+	} else {
+		timer.AfterFunc(freeTime*time.Second, self.onPlay)
+	}
+
+	manger.NotifyOthers(self.PlayerList, MainGameState, SubGameStateStart, nil)
+}
+
+func (self *CowcowGame)onPlay(){
+	log.Release("[百家乐]允许下注")
+	self.gameState = SubGameSencePlaying
+	self.timeStamp = time.Now().Unix()
+	if timer == nil {
+		time.AfterFunc(betTime*time.Second, self.onOver)
+	} else {
+		timer.AfterFunc(betTime*time.Second, self.onOver)
+	}
+
+	manger.NotifyOthers(self.PlayerList, MainGameState, SubGameStatePlaying, nil)
+}
+
+func (self *CowcowGame)onOver(){
+	log.Release("[牛牛]开牌中...")
+	self.gameState = SubGameSenceOver
+	self.timeStamp = time.Now().Unix()
+	if timer == nil {
+		time.AfterFunc(openTime*time.Second, self.onStart)
+	} else {
+		timer.AfterFunc(openTime*time.Second, self.onStart)
+	}
+	//当有玩家结算信息时,该
+	manger.NotifyOthers(self.PlayerList, MainGameState, SubGameStateOver, nil)
+
+	log.Release("[牛牛]结算中...")
+	self.Over(nil)
+	log.Release("[牛牛]完成一轮游戏")
+}
+
 //-----------------------逻辑层---------------------------
 //发牌
 func (self *CowcowGame) dispatchCard() {
+	//25 张牌
+	tableCards := RandCardList( PiceCount * AREA_MAX )
+	log.Debug("[牛牛-->开始发牌啦<---]  牌堆中取牌:%v ", GetCardsText(tableCards))
+	copy(self.overResult.BankerCard,tableCards[INDEX_Banker:INDEX_Banker+PiceCount])
+	copy(self.overResult.BankerCard,tableCards[INDEX_Tian: INDEX_Tian+PiceCount])
+	copy(self.overResult.BankerCard,tableCards[INDEX_Xuan: INDEX_Xuan+PiceCount])
+	copy(self.overResult.BankerCard,tableCards[INDEX_Di: INDEX_Di+PiceCount])
+	copy(self.overResult.BankerCard,tableCards[INDEX_Huang: INDEX_Huang+PiceCount])
+}
+//结算
+func (self *CowcowGame) calculateScore() {
 
 }
+func (self *CowcowGame) deduceWin() []byte {
+	pWinArea := make([]byte, AREA_MAX)
+	//庄家的牌
+	//判断牌型
+	//judgeCardType(self.overResult.BankerCard)
+
+	//庄家区域
+	return pWinArea
+}
+
+//区域赔额
+func (self *CowcowGame) bonusArea(CardType int, betScore int64) int64 {
+	multiple := int64(0)
+	switch CardType {
+	case MULTIPLE_Normal:
+		multiple = MULTIPLE_Normal
+	case MULTIPLE_Middle:
+		multiple = MULTIPLE_Middle
+	case MULTIPLE_High:
+		multiple = MULTIPLE_High
+	case MULTIPLE_WuHuaNiu:
+		multiple = MULTIPLE_WuHuaNiu
+	case MULTIPLE_QuanHuaNiu:
+		multiple = MULTIPLE_QuanHuaNiu
+	case MULTIPLE_ZhaDan:
+		multiple = MULTIPLE_ZhaDan
+	default:
+		multiple = int64(0)
+	}
+	return betScore * multiple
+}
+

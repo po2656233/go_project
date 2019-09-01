@@ -7,7 +7,7 @@ message PlayerInfo{
     string Name = 2;    //账号
     int32 Age = 3;      //年龄
     int32 Sex = 4;      //性别
-    int64 Gold = 5;     //金币
+    int64 Gold = 5;     //金币 *100
     int32 VipLevel = 6; //vip级别
 }
 //玩家列表

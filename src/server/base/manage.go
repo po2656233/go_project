@@ -283,7 +283,7 @@ func (self *PlayerManger) NotifyOthers(userIDs []uint64, mainID, subID uint32, m
 			return true
 		}
 
-		//不通知该部分玩家
+		//仅通知该部分玩家
 		for _, uid := range userIDs {
 			if uid == player.UserID {
 				log.Debug("通知玩家(Others)：%v %v", key, player.Agent.LocalAddr())
