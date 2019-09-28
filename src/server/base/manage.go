@@ -294,7 +294,7 @@ func (self *PlayerManger) NotifyOthers(userIDs []uint64, mainID, subID uint32, m
 					SubID:     subID,
 					TransData: data,
 				}
-				fmt.Println("发送数据(Others):", len(data), data)
+				//fmt.Println("发送数据(Others):", len(data), data)
 				player.Agent.NotifyMsg(packet)
 				return true
 			}

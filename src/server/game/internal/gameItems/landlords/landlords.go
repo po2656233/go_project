@@ -77,7 +77,7 @@ func (self *LandlordGame) Scene(args []interface{}) {
 			playerInfo.UserID = playerItem.UserID
 			playerInfo.Name = playerItem.Name
 			playerInfo.Age = playerItem.Age
-			playerInfo.Gold = int64(sqlHandle.CheckMoney(playerItem.UserID))*100 //玩家积分
+			playerInfo.Gold = int64(sqlHandle.CheckMoney(playerItem.UserID)* 100) //玩家积分
 			playerInfo.VipLevel = playerItem.Level
 			playerInfo.Sex = playerItem.Sex
 			playerList.AllInfos = CopyInsert(playerList.AllInfos, len(playerList.AllInfos), &playerInfo).([]*protoMsg.PlayerInfo)
@@ -194,10 +194,9 @@ func (self *LandlordGame) Start(args []interface{}) {
 // 出牌
 func (self *LandlordGame) Playing(args []interface{}) {
 	//直接扣除金币
-	log.Debug("出牌")
-	//return
-	//m := args[0].(*protoMsg.GameLandLordsOutcard)
-
+	log.Debug("------Playing---------")
+	m := args[0].(*protoMsg.GameLandLordsOutcard)
+	log.Debug("出牌:%v 座位:%v 提示:%v",m.Cards, m.Site, m.Hints)
 }
 
 // 结算

@@ -75,7 +75,7 @@ func (self *MahjongGame) Scene(args []interface{}) {
 			playerInfo.UserID = playerItem.UserID
 			playerInfo.Name = playerItem.Name
 			playerInfo.Age = playerItem.Age
-			playerInfo.Gold = int64(sqlHandle.CheckMoney(playerItem.UserID))*100 //玩家积分
+			playerInfo.Gold = int64(sqlHandle.CheckMoney(playerItem.UserID)* 100) //玩家积分
 			playerInfo.VipLevel = playerItem.Level
 			playerInfo.Sex = playerItem.Sex
 			senceInfo.UserInfo = &playerInfo

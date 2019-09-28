@@ -13,6 +13,7 @@ import (
 	"time"
 	"github.com/golang/protobuf/proto"
 	. "server/game/internal/gameItems"
+	"strconv"
 )
 
 var timer *module.Skeleton = nil  //定时器
@@ -24,17 +25,20 @@ var lock *sync.Mutex = &sync.Mutex{} //锁
 //定时器
 const (
 	freeTime  = 3
-	betTime = 10
-	openTime = 7
+	betTime = 4
+	openTime = 5
 	tableSite = 4
 )
 
 //继承于GameItem
 type CowcowGame struct {
 	GameItem
-	bStart    bool   //第一次启动
-	gameState uint32 //游戏状态
-	timeStamp int64  //时间戳
+	bStart    bool   	//第一次启动
+	gameState uint32 	//游戏状态
+	timeStamp int64  	//时间戳
+
+	logic *Game		 	//游戏逻辑
+	roundNumber string 	//游戏局号
 
 	bankerID    uint64  //庄家ID
 	bankerScore float32 //庄家积分
@@ -42,6 +46,11 @@ type CowcowGame struct {
 
 	playerBetInfo map[uint64][]protoMsg.GameBet //下注信息
 
+	cbBankerCards []byte      	// 庄家手牌
+	cbTianCards []byte      	// 天家手牌
+	cbXuanCards []byte      	// 玄家手牌
+	cbDiCards []byte        	// 地家手牌
+	cbHuangCards []byte      	// 黄家手牌
 	overResult    *protoMsg.GameCowcowOver // 游戏结果
 }
 
@@ -56,11 +65,23 @@ func NewCowcow(level uint32, skeleton *module.Skeleton) *CowcowGame {
 //---------------------------牛牛----------------------------------------------//
 //初始化信息
 func (self *CowcowGame) Init(level uint32, skeleton *module.Skeleton) {
+
 	timer = skeleton                  // 定时器的使用
 	self.bStart = false               // 是否第一次启动
 	self.Level = level                // 房间等级
 	self.gameState = SubGameSenceFree // 场景状态
 	self.bankerID = 0                 //庄家ID
+
+	self.logic = &Game{}
+	self.logic.Init()
+	self.roundNumber = ""
+
+	self.cbBankerCards = make([]byte, PiceCount)       // 庄家手牌
+	self.cbTianCards = make([]byte, PiceCount)       	// 天家手牌
+	self.cbXuanCards = make([]byte, PiceCount)       	// 玄家手牌
+	self.cbDiCards = make([]byte, PiceCount)       	// 地家手牌
+	self.cbHuangCards = make([]byte, PiceCount)       	// 黄家手牌
+	self.overResult = &protoMsg.GameCowcowOver{} 		// 结算结果
 }
 
 func (self *CowcowGame) Scene(args []interface{})   {
@@ -85,7 +106,8 @@ func (self *CowcowGame) Scene(args []interface{})   {
 				playerInfo.UserID = playerItem.UserID
 				playerInfo.Name = playerItem.Name
 				playerInfo.Age = playerItem.Age
-				playerInfo.Gold = int64(sqlHandle.CheckMoney(playerItem.UserID)) * 100 //玩家积分
+				playerInfo.Gold = int64(sqlHandle.CheckMoney(playerItem.UserID)* 100)  //玩家积分
+				player.Money = playerInfo.Gold
 				playerInfo.VipLevel = playerItem.Level
 				playerInfo.Sex = playerItem.Sex
 				senceInfo.UserInfo = &playerInfo
@@ -130,7 +152,7 @@ func (self *CowcowGame) Scene(args []interface{})   {
 	//
 	player.WillReceive(MainGameSence, self.gameState, senceInfo)
 	manger.NotifyOthers(self.PlayerList, MainGameUpdate, GameUpdatePlayerList, &playerList)
-	log.Debug("[牛牛场景]->玩家信息 ID:%v  ", player.UserID)
+	log.Debug("[牛牛场景]->玩家信息 ID:%v gold:%v ", player.UserID, player.Money)
 }
 
 //更新
@@ -265,6 +287,11 @@ func (self *CowcowGame) SuperControl(args []interface{}) {
 //重新初始化
 func (self *CowcowGame) reset() {
 	log.Release("[牛牛]扫地僧出来干活了...")
+	self.cbBankerCards = make([]byte, PiceCount)       // 庄家手牌
+	self.cbTianCards = make([]byte, PiceCount)       	// 天家手牌
+	self.cbXuanCards = make([]byte, PiceCount)       	// 玄家手牌
+	self.cbDiCards = make([]byte, PiceCount)       	// 地家手牌
+	self.cbHuangCards = make([]byte, PiceCount)       	// 黄家手牌
 	self.playerBetInfo = make(map[uint64][]protoMsg.GameBet) //玩家下注信息
 	//hostList = []uint64{} 										//清理玩家
 
@@ -279,20 +306,22 @@ func (self *CowcowGame) reset() {
 func (self *CowcowGame)onStart(){
 	log.Debug("游戏开始")
 	self.reset() //重置
-	log.Release("[牛牛]游戏开始")
+
 	self.gameState = SubGameSenceStart
 	self.timeStamp = time.Now().Unix()
+
+	self.roundNumber = strconv.FormatInt(self.timeStamp,10)
 	if timer == nil {
 		time.AfterFunc(freeTime*time.Second, self.onPlay)
 	} else {
 		timer.AfterFunc(freeTime*time.Second, self.onPlay)
 	}
-
+	log.Release("[牛牛:%v]游戏开始",self.roundNumber)
 	manger.NotifyOthers(self.PlayerList, MainGameState, SubGameStateStart, nil)
 }
 
 func (self *CowcowGame)onPlay(){
-	log.Release("[百家乐]允许下注")
+	log.Release("[牛牛]允许下注")
 	self.gameState = SubGameSencePlaying
 	self.timeStamp = time.Now().Unix()
 	if timer == nil {
@@ -322,50 +351,178 @@ func (self *CowcowGame)onOver(){
 }
 
 //-----------------------逻辑层---------------------------
-//发牌
+//发牌(并未实际发送牌值)
 func (self *CowcowGame) dispatchCard() {
 	//25 张牌
 	tableCards := RandCardList( PiceCount * AREA_MAX )
-	log.Debug("[牛牛-->开始发牌啦<---]  牌堆中取牌:%v ", GetCardsText(tableCards))
-	copy(self.overResult.BankerCard,tableCards[INDEX_Banker:INDEX_Banker+PiceCount])
-	copy(self.overResult.BankerCard,tableCards[INDEX_Tian: INDEX_Tian+PiceCount])
-	copy(self.overResult.BankerCard,tableCards[INDEX_Xuan: INDEX_Xuan+PiceCount])
-	copy(self.overResult.BankerCard,tableCards[INDEX_Di: INDEX_Di+PiceCount])
-	copy(self.overResult.BankerCard,tableCards[INDEX_Huang: INDEX_Huang+PiceCount])
+
+	cards := make([]byte,PiceCount * AREA_MAX )
+	for k,v:=range tableCards{
+		cards[k] = byte(v)
+	}
+	log.Debug("[牛牛-->开始发牌啦<---]  牌堆中取牌:%v ", GetCardsText(cards))
+	copy(self.cbBankerCards,cards[INDEX_Banker:INDEX_Banker+PiceCount])
+	copy(self.cbTianCards,cards[INDEX_Tian: INDEX_Tian+PiceCount])
+	copy(self.cbXuanCards,cards[INDEX_Xuan: INDEX_Xuan+PiceCount])
+	copy(self.cbDiCards,cards[INDEX_Di: INDEX_Di+PiceCount])
+	copy(self.cbHuangCards,cards[INDEX_Huang: INDEX_Huang+PiceCount])
+
+
+	log.Debug("[牛牛各家牌值]\n庄家:%v\n天:%v\t\t玄:%v\n地:%v\t\t黄:%v",
+		GetCardsText(self.cbBankerCards),
+		GetCardsText(self.cbTianCards), GetCardsText(self.cbXuanCards),
+		GetCardsText(self.cbDiCards), GetCardsText(self.cbHuangCards))
+
+
+	var banker = Pokers{}
+	var tian = Pokers{}
+	var xuan = Pokers{}
+	var di = Pokers{}
+	var huang = Pokers{}
+
+	pokerList := CreatePoker(tableCards)
+
+	banker.AddPokers(pokerList[0], pokerList[1], pokerList[2], pokerList[3], pokerList[4]).ArrangeByNumber()
+	tian.AddPokers(pokerList[5], pokerList[6], pokerList[7], pokerList[8], pokerList[9]).ArrangeByNumber()
+	xuan.AddPokers(pokerList[10], pokerList[11], pokerList[12], pokerList[13], pokerList[14]).ArrangeByNumber()
+	di.AddPokers(pokerList[15], pokerList[16], pokerList[17], pokerList[18], pokerList[19]).ArrangeByNumber()
+	huang.AddPokers(pokerList[20], pokerList[21], pokerList[22], pokerList[23], pokerList[24]).ArrangeByNumber()
+
+	bankerType := CalcPoker(banker)
+	tianType := CalcPoker(tian)
+	xuanType := CalcPoker(xuan)
+	diType := CalcPoker(di)
+	huangType := CalcPoker(huang)
+
+
+	if self.logic.BetWinInfoMap == nil {
+		self.logic.BetWinInfoMap = &BetWinInfoMap{}
+	}
+
+	if self.logic.BetWinInfoMap.WinInfoMap == nil {
+		self.logic.BetWinInfoMap.Init()
+	}
+
+	// 清空当前彩源的开奖信息
+	self.logic.BetWinInfoMap.InitSourceMap(self.roundNumber)
+
+	//各个区域的开奖结果
+	self.logic.BetWinInfoMap.Set(self.roundNumber, AREA_Tian, self.logic.Compare(AREA_Tian, bankerType, tianType))
+	self.logic.BetWinInfoMap.Set(self.roundNumber, AREA_Xuan, self.logic.Compare(AREA_Xuan, bankerType, xuanType))
+	self.logic.BetWinInfoMap.Set(self.roundNumber, AREA_Di, self.logic.Compare(AREA_Di, bankerType, diType))
+	self.logic.BetWinInfoMap.Set(self.roundNumber, AREA_Huang, self.logic.Compare(AREA_Huang, bankerType, huangType))
+
+	//开奖结果
+	self.overResult.CardValue = make([]byte,AREA_MAX)
+	self.overResult.CardValue[AREA_Banker] = byte(bankerType.Type)
+	self.overResult.CardValue[AREA_Tian] = byte(tianType.Type)
+	self.overResult.CardValue[AREA_Xuan] = byte(xuanType.Type)
+	self.overResult.CardValue[AREA_Di] = byte(diType.Type)
+	self.overResult.CardValue[AREA_Huang] = byte(huangType.Type)
+
+	log.Debug("牌值:Banker:%v ",self.overResult.CardValue)
+
 }
 //结算
 func (self *CowcowGame) calculateScore() {
 
+	self.overResult.BankerCard = self.cbBankerCards
+	self.overResult.TianCard = self.cbTianCards
+	self.overResult.XuanCard = self.cbXuanCards
+	self.overResult.DiCard = self.cbDiCards
+	self.overResult.HuangCard = self.cbHuangCards
+
+	odds := make([]float64, AREA_MAX)
+	self.overResult.AwardArea,odds = self.deduceWin()
+
+	others := make([]uint64, 10)
+	copy(others, self.PlayerList)
+
+	playerAwardScroe := int64(0)
+	for userID, betInfos := range self.playerBetInfo {
+		//每一次的下注信息
+		playerAwardScroe = 0
+		for _, betInfo := range betInfos {
+			log.Debug("玩家:%v,下注区域:%v 下注金额:%v", userID, betInfo.BetArea, betInfo.BetScore)
+			//玩家奖金
+			if Win == self.overResult.AwardArea[betInfo.BetArea] {
+				playerAwardScroe += int64(odds[int(betInfo.BetArea)])*betInfo.BetScore
+			}
+		}
+		//发送给指定玩家
+		checkout := &protoMsg.GameCowcowCheckout{}
+		checkout.Acquire = playerAwardScroe
+
+		//写入数据库
+		if 0 != playerAwardScroe {
+			if money, ok := sqlHandle.DeductMoney(userID, -playerAwardScroe); ok {
+				log.Debug("结算成功:%v 当前金币:%v!!", playerAwardScroe, money)
+			} else {
+				log.Debug("结算失败:%v 当前金币:%v!!", playerAwardScroe, money)
+			}
+		}
+
+		manger.Get(userID).WillReceive(MainGameFrame, SubGameFrameCheckout, checkout)
+		//userIDs = CopyInsert(userIDs, len(userIDs), userID).([]uint64)
+		//for k, v := range others { //获取没下注玩家
+		//	if v == userID {
+		//		//lock.Lock()
+		//		//defer lock.Unlock()
+		//		others = append(others[:k], others[k+1:]...)
+		//
+		//	}
+		//}
+	}
+
+	// 发给没下注玩家
+	manger.NotifyOthers(self.PlayerList, MainGameFrame, SubGameFrameOver, self.overResult)
 }
-func (self *CowcowGame) deduceWin() []byte {
+func (self *CowcowGame) deduceWin() ([]byte,[]float64){
 	pWinArea := make([]byte, AREA_MAX)
-	//庄家的牌
-	//判断牌型
-	//judgeCardType(self.overResult.BankerCard)
+	pOdds := make([]float64, AREA_MAX)
+
+	betTianInfo,_ := self.logic.BetWinInfoMap.Get(self.roundNumber, AREA_Tian)
+	betXuanInfo,_ :=self.logic.BetWinInfoMap.Get(self.roundNumber, AREA_Xuan)
+	betDiInfo,_ :=self.logic.BetWinInfoMap.Get(self.roundNumber, AREA_Di)
+	betHuangInfo,_ :=self.logic.BetWinInfoMap.Get(self.roundNumber, AREA_Huang)
+
+
+
+	if betTianInfo.IsWin{
+		pWinArea[AREA_Tian] = Win
+		pOdds[AREA_Tian] = betTianInfo.WinOdds
+		log.Debug("天赢:%v ->%v",betTianInfo.WinOdds, betTianInfo.LoseOdds)
+	}else{
+		pOdds[AREA_Tian] = 0.0
+	}
+
+	if betXuanInfo.IsWin{
+		pWinArea[AREA_Xuan] = Win
+		pOdds[AREA_Xuan] = betXuanInfo.WinOdds
+		log.Debug("玄赢:%v ->%v",betXuanInfo.WinOdds,betXuanInfo.LoseOdds)
+	}else{
+		pOdds[AREA_Xuan] = 0.0
+	}
+
+
+	if betDiInfo.IsWin{
+		pWinArea[AREA_Di] = Win
+		pOdds[AREA_Di] = betDiInfo.WinOdds
+		log.Debug("地赢:%v ->%v",betDiInfo.WinOdds,betDiInfo.LoseOdds)
+	}else{
+		pOdds[AREA_Di] = 0.0
+	}
+
+
+	if betHuangInfo.IsWin{
+		pWinArea[AREA_Huang] = Win
+		pOdds[AREA_Huang] = betHuangInfo.WinOdds
+		log.Debug("黄赢:%v ->%v",betHuangInfo.WinOdds,betHuangInfo.LoseOdds)
+	}else{
+		pOdds[AREA_Huang] = 0.0
+	}
+
 
 	//庄家区域
-	return pWinArea
+	return pWinArea,pOdds
 }
-
-//区域赔额
-func (self *CowcowGame) bonusArea(CardType int, betScore int64) int64 {
-	multiple := int64(0)
-	switch CardType {
-	case MULTIPLE_Normal:
-		multiple = MULTIPLE_Normal
-	case MULTIPLE_Middle:
-		multiple = MULTIPLE_Middle
-	case MULTIPLE_High:
-		multiple = MULTIPLE_High
-	case MULTIPLE_WuHuaNiu:
-		multiple = MULTIPLE_WuHuaNiu
-	case MULTIPLE_QuanHuaNiu:
-		multiple = MULTIPLE_QuanHuaNiu
-	case MULTIPLE_ZhaDan:
-		multiple = MULTIPLE_ZhaDan
-	default:
-		multiple = int64(0)
-	}
-	return betScore * multiple
-}
-

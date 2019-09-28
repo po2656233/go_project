@@ -172,15 +172,15 @@ func (self *SqlMan) CheckLogin(user, password string) (uid uint64, isSuccessful 
 }
 
 //获取玩家账户金币
-func (self *SqlMan) CheckMoney(userID uint64) float32 {
+func (self *SqlMan) CheckMoney(userID uint64) float64 {
 
 	//rows,err := db.Query("SELECT 'ID','money-count' FROM userinfo WHERE ID=?",userID)
-	rows, err := self.db.Query("SELECT Money FROM userinfo WHERE ID=?", userID)
+	rows, err := self.db.Query("SELECT Money FROM userinfo WHERE ID in(?)", userID)
 	defer rows.Close()
 
 	CheckError(err)
 
-	var userMoney float32 = float32(0)
+	 userMoney := float64(0.0)
 	for rows.Next() {
 		if err := rows.Scan(&userMoney); err != nil {
 			log.Fatal(err.Error())
@@ -192,7 +192,7 @@ func (self *SqlMan) CheckMoney(userID uint64) float32 {
 
 func (self *SqlMan) CheckName(userID uint64) string {
 	var name string = ""
-	rows, err := self.db.Query("SELECT Name FROM userinfo WHERE ID=?", userID)
+	rows, err := self.db.Query("SELECT Name FROM userinfo WHERE ID in(?)", userID)
 	defer rows.Close()
 	CheckError(err)
 
@@ -208,7 +208,7 @@ func (self *SqlMan) CheckName(userID uint64) string {
 
 //获取玩家信息
 func (self *SqlMan) CheckUserInfo(userID uint64) (name string, age, sex, vipLevel uint32, money int64) {
-	rows, err := self.db.Query("SELECT Name,Age,Sex,Money,VipLevel FROM userinfo WHERE ID=?", userID)
+	rows, err := self.db.Query("SELECT Name,Age,Sex,Money,VipLevel FROM userinfo WHERE ID in(?)", userID)
 	defer rows.Close()
 	CheckError(err)
 
@@ -239,16 +239,16 @@ func (self *SqlMan) DeductMoney(userID uint64, money int64) (nowMoney int64, isO
 		break
 	}
 
-	log.Debug("%v金额:%v ",userID,int64(preMoney*100))
+	log.Debug("ID:%v 金额:%v ",userID, int64(preMoney*100))
 	nowMoney =  int64(preMoney*100) - money
 	if nowMoney <= 0 {
-		log.Debug("金额成负数了:%.2f  %.2f %v", nowMoney/100, money/100, userID)
+		log.Debug("金额成负数了:%v  %v %v", nowMoney/100, money/100, userID)
 		return nowMoney, isOK
 	}
 
 	isOK = true
-	log.Debug("当前:%.3f  扣除%.2f", nowMoney/100, money/100)
-	_, err = self.db.Exec("UPdate userinfo set money=? where ID=? ", nowMoney/100, userID)
+	log.Debug("当前:%.3f  扣除%.2f", float64(nowMoney/100), float64(money/100))
+	_, err = self.db.Exec("UPdate userinfo set money=? where ID in(?)  ", nowMoney/100, userID)
 	CheckError(err)
 	return nowMoney, isOK
 }

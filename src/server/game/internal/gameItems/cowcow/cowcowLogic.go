@@ -5,9 +5,7 @@ import (
 	"time"
 	"sync"
 	"fmt"
-	"strings"
-	"strconv"
-	"log"
+	"leaf/log"
 )
 
 const (
@@ -24,17 +22,20 @@ const (
 	AREA_Xuan 		= 3
 	AREA_Di 		= 4
 	AREA_Huang 	= 5
-	AREA_MAX   	= 5 //最大区域
+	AREA_MAX   	= 6//最大区域
 
 	//区域倍数multiple
-	MULTIPLE_NULL		= 0
-	MULTIPLE_Normal   = 2  //标准赔率
-	MULTIPLE_Middle   = 3  //中等赔率(即牛七~牛九)
-	MULTIPLE_High   	= 4  //高等赔率(牛牛)
-	MULTIPLE_WuHuaNiu = 5  //五花牛
-	MULTIPLE_QuanHuaNiu = 6  //全花牛
-	MULTIPLE_ZhaDan 	= 7  //炸弹
-
+	MULTIPLE_NULL	 = 0.0
+	MULTIPLE_ONE   = 2.0
+	MULTIPLE_TWO   = 2.0
+	MULTIPLE_THREE = 2.0
+	MULTIPLE_FOUR  = 2.0
+	MULTIPLE_FIVE  = 2.0
+	MULTIPLE_SIX 	= 6.0
+	MULTIPLE_SEVEN 	= 7.0
+	MULTIPLE_EIGHT 	= 8.0
+	MULTIPLE_NINE 	= 9.0
+	MULTIPLE_TEN 	= 10.0
 
 
 	//牌数
@@ -46,23 +47,23 @@ const (
 )
 
 //混乱扑克
-func RandCardList(cbBufferCount int32) []byte {
+func RandCardList(cbBufferCount int) []int {
 	if cbBufferCount <= 0 {
-		return []byte{0}
+		return []int{0}
 	}
 
 	//混乱准备
 	var (
-		cbCardBuffer            []byte = make([]byte, cbBufferCount)
-		tempCardListData        [CardCount]byte
-		cbRandCount, cbPosition int32 = 0, 0
+		cbCardBuffer            []int = make([]int, cbBufferCount)
+		tempCardListData        [CardCount]int
+		cbRandCount, cbPosition int = 0, 0
 	)
 	copy(tempCardListData[:CardCount], CardListData[:CardCount])
 
 	//混乱扑克
 	for {
 		rand.Seed(time.Now().Unix())
-		cbPosition = rand.Int31n(CardCount - cbRandCount)
+		cbPosition = rand.Intn(CardCount - cbRandCount)
 		cbCardBuffer[cbRandCount] = tempCardListData[cbPosition]
 		cbRandCount++
 		tempCardListData[cbPosition] = tempCardListData[CardCount-cbRandCount]
@@ -72,6 +73,7 @@ func RandCardList(cbBufferCount int32) []byte {
 	}
 	return cbCardBuffer
 }
+
 //----------------------------------
 type WinType struct {
 	Name string
@@ -89,25 +91,27 @@ type Game struct {
 func (g *Game) Init() {
 	g.SameAsOdds = 1.0
 
-	g.AddBetType("天", 800, 10.0)
-	g.AddBetType("地", 801, 10.0)
-	g.AddBetType("玄", 802, 10.0)
-	g.AddBetType("黄", 803, 10.0)
+	//下注类型
+	g.AddBetType("天", AREA_Tian, MULTIPLE_TEN)
+	g.AddBetType("地", AREA_Di, MULTIPLE_TEN)
+	g.AddBetType("玄", AREA_Xuan, MULTIPLE_TEN)
+	g.AddBetType("黄", AREA_Huang, MULTIPLE_TEN)
 
-	g.AddWinType("五小牛", 13, 10.0)
-	g.AddWinType("炸弹牛", 12, 10.0)
-	g.AddWinType("五花牛", 11, 10.0)
-	g.AddWinType("牛牛", 10, 10.0)
-	g.AddWinType("牛九", 9, 9.0)
-	g.AddWinType("牛八", 8, 8.0)
-	g.AddWinType("牛七", 7, 7.0)
-	g.AddWinType("牛六", 6, 6.0)
-	g.AddWinType("牛五", 5, 5.0)
-	g.AddWinType("牛四", 4, 4.0)
-	g.AddWinType("牛三", 3, 3.0)
-	g.AddWinType("牛二", 2, 2.0)
-	g.AddWinType("牛一", 1, 1.0)
-	g.AddWinType("无牛", 0, 1.0)
+	//赔率
+	g.AddWinType("五小牛", 13, MULTIPLE_TEN)
+	g.AddWinType("炸弹牛", 12, MULTIPLE_TEN)
+	g.AddWinType("五花牛", 11, MULTIPLE_TEN)
+	g.AddWinType("牛牛", 10, MULTIPLE_TEN)
+	g.AddWinType("牛九", 9, MULTIPLE_NINE)
+	g.AddWinType("牛八", 8, MULTIPLE_EIGHT)
+	g.AddWinType("牛七", 7, MULTIPLE_SEVEN)
+	g.AddWinType("牛六", 6, MULTIPLE_SIX)
+	g.AddWinType("牛五", 5, MULTIPLE_FIVE)
+	g.AddWinType("牛四", 4, MULTIPLE_FOUR)
+	g.AddWinType("牛三", 3, MULTIPLE_THREE)
+	g.AddWinType("牛二", 2, MULTIPLE_TWO)
+	g.AddWinType("牛一", 1, MULTIPLE_ONE)
+	g.AddWinType("无牛", 0, MULTIPLE_ONE)
 
 }
 
@@ -149,7 +153,7 @@ func (g *Game) GetWinInfoByWinType(winType int) (*WinType, error) {
 			return v, nil
 		}
 	}
-	return nil, fmt.Errorf("win is not exists")
+	return nil, fmt.Errorf("win is not exists:%v",winType)
 }
 
 // 获取赔率最大的类型
@@ -175,7 +179,11 @@ func (g *Game) Compare(betType int, bankerType PokerType, playerType PokerType) 
 		// 如果庄家赢了 根据相应赔率算钱
 		// 获取专家牌型的赔率
 		// log.Printf("%+v",bankerType)
-		isWin, _ := g.GetWinInfoByWinType(bankerType.Type)
+		isWin, err := g.GetWinInfoByWinType(bankerType.Type)
+		if err!=nil{
+			log.Debug(err.Error())
+			return nil
+		}
 		betWinInfo = &BetWinInfo{
 			LoseOdds: isWin.Odds,
 			WinOdds:  0,
@@ -184,7 +192,11 @@ func (g *Game) Compare(betType int, bankerType PokerType, playerType PokerType) 
 		}
 	} else {
 		// log.Printf("%+v",playerType)
-		isWin, _ := g.GetWinInfoByWinType(playerType.Type)
+		isWin, err := g.GetWinInfoByWinType(playerType.Type)
+		if err!=nil{
+			log.Debug(err.Error())
+			return nil
+		}
 		betWinInfo = &BetWinInfo{
 			LoseOdds: 0,
 			WinOdds:  isWin.Odds,
@@ -285,74 +297,6 @@ func CalcPoker(pokers Pokers) PokerType {
 
 	pokerType.Type = 0
 	return pokerType
-}
-
-// 开奖规则
-func (g *Game) GetWinType(sourceName string, code string) (*BetWinInfoMap, error) {
-
-	if g.BetWinInfoMap == nil {
-		g.BetWinInfoMap = &BetWinInfoMap{}
-	}
-
-	if g.BetWinInfoMap.WinInfoMap == nil {
-		g.BetWinInfoMap.Init()
-	}
-
-	// 清空当前彩源的开奖信息
-	g.BetWinInfoMap.InitSourceMap(sourceName)
-
-	stringSlice := strings.Split(code, ",")
-
-	if len(stringSlice) != 10 {
-		return nil, fmt.Errorf("source code is error")
-	}
-
-	var codeSlice []int
-
-	for _, v := range stringSlice {
-		i, err := strconv.Atoi(v)
-		if err != nil {
-			return nil, err
-		}
-		if i == 0 {
-			i = 10
-		}
-		codeSlice = append(codeSlice, i)
-	}
-
-	var pokerList = CreatePoker(codeSlice)
-
-	var banker = Pokers{}
-	var one = Pokers{}
-	var two = Pokers{}
-	var three = Pokers{}
-	var four = Pokers{}
-
-	banker.AddPokers(pokerList[0], pokerList[1], pokerList[2], pokerList[3], pokerList[4]).ArrangeByNumber()
-	one.AddPokers(pokerList[1], pokerList[2], pokerList[3], pokerList[4], pokerList[5]).ArrangeByNumber()
-	two.AddPokers(pokerList[2], pokerList[3], pokerList[4], pokerList[5], pokerList[6]).ArrangeByNumber()
-	three.AddPokers(pokerList[3], pokerList[4], pokerList[5], pokerList[6], pokerList[7]).ArrangeByNumber()
-	four.AddPokers(pokerList[4], pokerList[5], pokerList[6], pokerList[7], pokerList[8]).ArrangeByNumber()
-
-	bankerType := CalcPoker(banker)
-	oneType := CalcPoker(one)
-	twoType := CalcPoker(two)
-	threeType := CalcPoker(three)
-	fourType := CalcPoker(four)
-
-	g.BetWinInfoMap.Set(sourceName, 800, g.Compare(800, bankerType, oneType))
-	g.BetWinInfoMap.Set(sourceName, 801, g.Compare(801, bankerType, twoType))
-	g.BetWinInfoMap.Set(sourceName, 802, g.Compare(802, bankerType, threeType))
-	g.BetWinInfoMap.Set(sourceName, 803, g.Compare(803, bankerType, fourType))
-
-	for sourceName := range g.BetWinInfoMap.WinInfoMap {
-		winMap, _ := g.BetWinInfoMap.GetMap(sourceName)
-		for _, v := range winMap {
-			log.Printf("%s %+v %+v", sourceName, v, v.BetType)
-		}
-	}
-
-	return g.BetWinInfoMap, nil
 }
 
 // IsBankerWin IsBankerWin
@@ -498,7 +442,7 @@ type PokerType struct {
 	MaxPoint int
 	// 第三位:最大点数的花色
 	MaxColor int
-	// MaxRaw
+	// 最大牌值
 	MaxRaw int
 	// 第四位:是否是同花
 	SameColor bool
@@ -554,31 +498,31 @@ func CreatePoker(list []int) []Poker {
 	for _, v := range list {
 
 		// 牌面
-		var number = v % 13
+		var number = int(v % 16)
 		if number == 0 {
 			number = 13
 		}
 
 		// 点数
-		var point = v % 13
+		var point = int(v % 16)
 		if point == 0 {
 			point = 13
 		}
-		if point == 1 {
-			point = 14
-		}
+		//if point == 1 {//A作为10时可解开
+		//	point = 14
+		//}
 
 		var mark = point
-		if mark >= 11 && mark <= 13 {
+		if mark >= 11 && mark <= 16 {
 			mark = 10
 		}
 		if mark == 14 {
 			mark = 1
 		}
 
-		var color = (v-1)/13 + 1
+		var color = int((v-1)/16 + 1)
 
-		var poker = Poker{Number: number, Color: color, Points: point, Mark: mark, Raw: v}
+		var poker = Poker{Number: number, Color: color, Points: point, Mark: mark, Raw: int(v)}
 
 		pokerList = append(pokerList, poker)
 	}
@@ -590,7 +534,7 @@ func CreatePoker(list []int) []Poker {
 
 
 //大数定义统一置文本后
-var CardListData = [CardCount]byte{
+var CardListData = [CardCount]int{
 	0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, //方块 A - K
 	0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18, 0x19, 0x1A, 0x1B, 0x1C, 0x1D, //梅花 A - K
 	0x21, 0x22, 0x23, 0x24, 0x25, 0x26, 0x27, 0x28, 0x29, 0x2A, 0x2B, 0x2C, 0x2D, //红桃 A - K

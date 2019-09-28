@@ -31,6 +31,8 @@ func handlerBehavior() {
 	handlerMsg(&protoMsg.GameHost{}, host)
 	handlerMsg(&protoMsg.GameSuperHost{}, superHost)
 	handlerMsg(&protoMsg.GameReady{}, ready)
+	//斗地主出牌
+	handlerMsg(&protoMsg.GameLandLordsOutcard{}, playing)
 
 }
 

@@ -140,7 +140,7 @@ func (m *UserList) GetAllInfos() []*PlayerInfo {
 	return nil
 }
 
-//玩家记录（从数据库中获取）
+//玩家记录（从数据库中获取）ResResult
 type PlayerRecord struct {
 	User                 *PlayerInfo `protobuf:"bytes,1,opt,name=User,proto3" json:"User,omitempty"`
 	Twice                int32       `protobuf:"varint,2,opt,name=Twice,proto3" json:"Twice,omitempty"`

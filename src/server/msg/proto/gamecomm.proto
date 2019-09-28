@@ -15,7 +15,7 @@ message UserList{
     repeated PlayerInfo AllInfos = 1;//所有玩家信息
 }
 
-//玩家记录（从数据库中获取）
+//玩家记录（从数据库中获取）ResResult
 message PlayerRecord{
     PlayerInfo User = 1; //玩家
     int32 Twice = 2;    //游戏次数

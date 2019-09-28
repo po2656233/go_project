@@ -44,7 +44,11 @@ message GameBaccaratOver{
 	 bytes AwardArea = 1;	//开奖区域
 	 bytes PlayerCard = 2;	//闲家的牌
 	 bytes BankerCard = 3;	//庄家的牌
-	 int64 Acquire = 4;		//获得金币(结算)
+}
+
+//结算
+message GameBaccaratCheckout{
+	int64 Acquire = 1;		//获得金币(结算)
 }
 
 

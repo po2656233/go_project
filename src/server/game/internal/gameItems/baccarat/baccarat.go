@@ -111,7 +111,7 @@ func (self *BaccaratGame) Scene(args []interface{}) {
 				playerInfo.UserID = playerItem.UserID
 				playerInfo.Name = playerItem.Name
 				playerInfo.Age = playerItem.Age
-				playerInfo.Gold = int64(sqlHandle.CheckMoney(playerItem.UserID)) * 100 //玩家积分
+				playerInfo.Gold = int64(sqlHandle.CheckMoney(playerItem.UserID)* 100)  //玩家积分
 				playerInfo.VipLevel = playerItem.Level
 				playerInfo.Sex = playerItem.Sex
 				senceInfo.UserInfo = &playerInfo
@@ -580,7 +580,8 @@ func (self *BaccaratGame) calculateScore() {
 			}
 		}
 		//发送给指定玩家
-		self.overResult.Acquire = playerAwardScroe
+		checkout := &protoMsg.GameBaccaratCheckout{}
+		checkout.Acquire = playerAwardScroe
 
 		//写入数据库
 		if 0 != playerAwardScroe {
@@ -591,7 +592,7 @@ func (self *BaccaratGame) calculateScore() {
 			}
 		}
 
-		manger.Get(userID).WillReceive(MainGameFrame, SubGameFrameCheckout, self.overResult)
+		manger.Get(userID).WillReceive(MainGameFrame, SubGameFrameCheckout, checkout)
 		//userIDs = CopyInsert(userIDs, len(userIDs), userID).([]uint64)
 		//for k, v := range others { //获取没下注玩家
 		//	if v == userID {
@@ -604,7 +605,6 @@ func (self *BaccaratGame) calculateScore() {
 	}
 
 	// 发给没下注玩家
-	self.overResult.Acquire = 0
 	manger.NotifyOthers(self.PlayerList, MainGameFrame, SubGameFrameOver, self.overResult)
 	//log.Debug("[百家乐]...结算中....")
 }

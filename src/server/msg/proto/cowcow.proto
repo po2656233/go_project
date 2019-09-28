@@ -44,8 +44,13 @@ message GameCowcowOver{
 	 bytes BankerCard = 2;	//庄家的牌
 	 bytes TianCard = 3;	//闲家的牌
 	 bytes XuanCard = 4;	//庄家的牌
-	 bytes DiCard = 5;	//闲家的牌
+	 bytes DiCard = 5;		//闲家的牌
 	 bytes HuangCard = 6;	//闲家的牌
-	 int64 Acquire = 7;		//获得金币(结算)
+	 bytes CardValue = 7;	//五个区域的牌值(点数)
+}
+
+//结算
+message GameCowcowCheckout{
+	int64 Acquire = 1;		//获得金币(结算)
 }
 
