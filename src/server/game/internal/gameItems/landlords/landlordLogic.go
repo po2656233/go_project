@@ -264,8 +264,16 @@ func JudgeCarType(cards []byte) *CardInfo {
 
 //是否连续
 func IsContinuous(cards []byte) bool {
-	sortCards := SortCards(cards)
-	for i := 0; i < len(sortCards); i++ {
+	tempCards := make([]byte,len(cards))
+	copy(tempCards,cards)
+
+	for i := 0; i < len(tempCards); i++ {
+		if 1 == tempCards[i]{
+			tempCards[i] = 14
+		}
+	}
+	sortCards := SortCards(tempCards)
+	for i := 0; i < len(sortCards)-1; i++ {
 		if sortCards[i+1]-sortCards[i] != 1 {
 			return false
 		}
@@ -276,7 +284,7 @@ func IsContinuous(cards []byte) bool {
 //是否所有牌值 都小于2
 func IsLessTwo(cards []byte) bool {
 	for i := 0; i < len(cards); i++ {
-		if 0x02 == GetCardValue(cards[i]) || 0x0E == GetCardValue(cards[i]) || 0x0F == GetCardValue(cards[i]){
+		if 0x02 == cards[i] || 0x0E == cards[i] || 0x0F == cards[i]{
 			return false
 		}
 	}

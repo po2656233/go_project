@@ -25,8 +25,8 @@ var lock *sync.Mutex = &sync.Mutex{} //锁
 //定时器
 const (
 	freeTime  = 3
-	betTime = 4
-	openTime = 5
+	betTime = 3
+	openTime = 6
 	tableSite = 4
 )
 

@@ -7,7 +7,7 @@ import (
 
 var (
 	// log conf
-	LogFlag = log.LstdFlags ////Lshortfile:输出文件名和行号 LstdFlags：标准输出
+	LogFlag = log.LstdFlags|log.Lshortfile ////Lshortfile:输出文件名和行号 LstdFlags：标准输出
 
 	// gate conf
 	PendingWriteNum        = 2000             //挂起数目

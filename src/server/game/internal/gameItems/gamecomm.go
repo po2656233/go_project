@@ -62,6 +62,14 @@ func SortCardX(cards []byte) []byte{
 func GetCardValue(cbCardData byte) byte {
 	return cbCardData & LOGIC_MASK_VALUE
 }
+//获取所有数值
+func GetCardValues(cbCardData []byte) []byte {
+	var cards   []byte
+	for _,v :=range cbCardData {
+		cards = append(cards,GetCardValue(v))
+	}
+	return cards
+}
 
 //获取花色
 func GetCardColor(cbCardData byte) byte {

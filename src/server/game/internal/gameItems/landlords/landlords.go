@@ -10,6 +10,7 @@ import (
 	protoMsg "server/msg/go"
 	"server/sql/mysql"
 	_ "server/sql/mysql"
+	"leaf/gate"
 )
 
 var timer *module.Skeleton = nil  //定时器
@@ -122,7 +123,6 @@ func (self *LandlordGame) UpdateInfo(args []interface{}) { //更新玩家列表[
 			self.readyCount--
 			delete(self.siteInfo,self.readyCount)
 		}
-
 		self.DeletePlayer(userID)
 		manger.NotifyOthers(self.PlayerList, MainGameUpdate, GameUpdatePlayerList, &playerList)
 	case GameUpdatePlayerList: //更新玩家列表
@@ -142,7 +142,7 @@ func (self *LandlordGame) UpdateInfo(args []interface{}) { //更新玩家列表[
 		if tableSite == self.readyCount { //桌面上三个玩家都准备好了,才进行发牌
 			self.Start(nil)
 		}
-
+		self.readyCount = 0
 		self.Start(nil)//测试用
 		log.Debug("[斗地主]玩家准备就绪...")
 	}
@@ -170,7 +170,7 @@ func (self *LandlordGame) Start(args []interface{}) {
 		}
 
 		playerCard := Deal(cards[0:len(CardListData)-3], int(site), SiteCount)
-		log.Debug("玩家的牌:%v", playerCard)
+		log.Debug("玩家:%v 座位:%v 的牌:%v", userID, site, playerCard)
 
 		// 排序其实可以交给客户端,以减少服务端运算压力
 		sortCards := SortCardX(playerCard)
@@ -196,7 +196,36 @@ func (self *LandlordGame) Playing(args []interface{}) {
 	//直接扣除金币
 	log.Debug("------Playing---------")
 	m := args[0].(*protoMsg.GameLandLordsOutcard)
-	log.Debug("出牌:%v 座位:%v 提示:%v",m.Cards, m.Site, m.Hints)
+	agent := args[1].(gate.Agent)
+	player := manger.Get_1(agent)
+	if nil == player {
+		log.Debug("无效玩家")
+		return
+	}
+
+	//牌的合法性
+	carInfo := JudgeCarType( GetCardValues(m.Cards) )
+	flag := int32(0)
+	reason:=[]byte("")
+	if ERROR_CARD == carInfo.Type{
+		flag = 1
+		reason = []byte("no allow")
+	}else{
+		//通知其他玩家
+		manger.NotifyOthers(self.PlayerList,MainGameState, SubGameStatePlaying, &protoMsg.GameLandLordsOperate{
+			Code:carInfo.Type,
+			Cards: m.Cards,
+			Hints:string("ok"),
+		})
+	}
+
+	//比牌(首次不需要)
+
+	player.WillReceive(MainGameFrame,SubGameFrameResult,&protoMsg.GameResult{
+		Flag:flag,
+		Reason:reason,
+	})
+	log.Debug("出牌:%v 座位:%v 结果:%v 牌型:%v",m.Cards, m.Site, flag, carInfo.Type)
 }
 
 // 结算

@@ -17,7 +17,7 @@ import (
 
 func main() {
 	//确保并发执行
-	runtime.GOMAXPROCS(runtime.NumCPU())
+	runtime.GOMAXPROCS( runtime.NumCPU()*64 )
 
 	// 返回当前处理器的数量
 	fmt.Println(runtime.GOMAXPROCS(0))
