@@ -23,6 +23,7 @@ func newWSConn(conn *websocket.Conn, pendingWriteNum int, maxMsgLen uint32) *WSC
 	wsConn := new(WSConn)
 	wsConn.conn = conn
 	wsConn.writeChan = make(chan []byte, pendingWriteNum)
+	wsConn.notifyChan = make(chan []byte, pendingWriteNum)
 	wsConn.maxMsgLen = maxMsgLen
 
 	go func() {
