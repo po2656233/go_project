@@ -4,6 +4,7 @@ import (
 	"github.com/name5566/leaf/log"
 	"github.com/name5566/leaf/module"
 	. "server/base"
+	. "server/manger"
 	protoMsg "server/msg/go"
 	"server/sql/mysql"
 	_ "server/sql/mysql"
@@ -43,71 +44,9 @@ func (self *ChineseChessGame) Init(level uint32, skeleton *module.Skeleton) {
 //游戏接口
 //场景
 func (self *ChineseChessGame) Scene(args []interface{}) {
-	userID := args[0].(uint64)
-	level := args[1].(uint32)
 
-	player := manger.Get(userID)
-	if player == nil {
-		log.Debug("[Error][中国象棋场景] [未能查找到相关玩家] ID:%v", userID)
-		return
-	}
 
-	log.Debug("当前玩家总数:%v %v ", len(playerList.AllInfos), self.PlayerList)
-	// 获取玩家列表
-	self.AddPlayer(player.UserID) //加入玩家列表
-	senceInfo := &protoMsg.GameBaccaratEnter{}
-	senceInfo.UserInfo = nil
-	for _, uid := range self.PlayerList {
-		if playerItem := manger.Get(uid); nil != playerItem {
-			if uid == player.UserID {
-				var playerInfo protoMsg.PlayerInfo
-				playerInfo.UserID = playerItem.UserID
-				playerInfo.Name = playerItem.Name
-				playerInfo.Age = playerItem.Age
-				playerInfo.Gold = int64(sqlHandle.CheckMoney(playerItem.UserID)* 100)  //玩家积分
-				playerInfo.VipLevel = playerItem.Level
-				playerInfo.Sex = playerItem.Sex
-				senceInfo.UserInfo = &playerInfo
-				isHave := false
-				for _, info := range playerList.AllInfos {
-					if info.UserID == uid {
-						isHave = true
-						break
-					}
-				}
-				if !isHave {
-					playerList.AllInfos = CopyInsert(playerList.AllInfos, len(playerList.AllInfos), &playerInfo).([]*protoMsg.PlayerInfo)
-				}
-			}
-		} else {
-			manger.DeletePlayerIndex(uid)
-		}
-	}
-	if senceInfo.UserInfo == nil {
-		log.Debug("[Error][中国象棋场景] [获取玩家ID:%v 信息失败]  ", userID)
-		return
-	}
 
-	log.Debug("[中国象棋场景] [玩家列表新增] ID:%v 当前玩家总数:%v", userID, len(playerList.AllInfos))
-	//senceInfo.AwardAreas // 录单
-	//需优化[定时器中计算时长]
-	senceInfo.TimeStamp = self.timeStamp //////已过时长 应当该为传时间戳
-	switch level {
-	case RoomGeneral:
-		senceInfo.Chips = []int32{1, 5, 10, 100, 500, 1000} //筹码
-	case RoomMiddle:
-		senceInfo.Chips = []int32{10, 50, 100, 500, 1000, 5000} //筹码
-	case RoomHigh:
-		senceInfo.Chips = []int32{50, 100, 200, 500, 1000, 10000} //筹码
-	default:
-		senceInfo.Chips = []int32{1, 5, 10, 20, 50, 100} //筹码
-	}
-
-	//
-	player.WillReceive(MainGameSence, self.gameState, senceInfo)
-	manger.NotifyOthers(self.PlayerList, MainGameUpdate, GameUpdatePlayerList, &playerList)
-
-	log.Debug("[中国象棋场景]->玩家信息 ID:%v ", player.UserID)
 }
 //开始
 func (self *ChineseChessGame) Start(args []interface{}) {

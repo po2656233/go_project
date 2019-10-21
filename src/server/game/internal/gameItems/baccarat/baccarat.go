@@ -6,16 +6,14 @@ import (
 	"github.com/name5566/leaf/log"
 	"github.com/name5566/leaf/module"
 	. "server/base"
+	. "server/manger"
 	. "server/game/internal/gameItems"
 	protoMsg "server/msg/go"
-	"server/sql/mysql"
-	_ "server/sql/mysql"
+	_ "server/sql/mysql"//仅仅希望导入 包内的init函数
 	"time"
 )
 
 var timer *module.Skeleton = nil  //定时器
-var sqlHandle = mysql.SqlHandle() //数据库
-var manger = GetPlayerManger()    //玩家管理类
 var playerList protoMsg.UserList  //玩家列表
 
 //var lock *sync.Mutex = &sync.Mutex{} //锁
@@ -90,52 +88,39 @@ func (self *BaccaratGame) Init(level uint32, skeleton *module.Skeleton) {
 ////////////////////////////////////////////////////////////////
 //场景信息
 func (self *BaccaratGame) Scene(args []interface{}) {
-	userID := args[0].(uint64)
-	level := args[1].(uint32)
-
-	player := manger.Get(userID)
-	if player == nil {
-		log.Debug("[Error][百家乐场景] [未能查找到相关玩家] ID:%v", userID)
+	level := args[0].(uint32)
+	agent := args[1].(gate.Agent)
+	userData := agent.UserData()
+	if userData == nil {
+		log.Debug("[Error][百家乐场景] [未能查找到相关玩家] ")
 		return
 	}
+	player := userData.(*Player)
 
 	log.Debug("当前玩家总数:%v %v ", len(playerList.AllInfos), self.PlayerList)
-	// 获取玩家列表
-	self.AddPlayer(player.UserID) //加入玩家列表
+
+	//加入玩家列表
+	self.AddPlayer(player.UserID)
+
+	//场景信息
 	senceInfo := &protoMsg.GameBaccaratEnter{}
-	senceInfo.UserInfo = nil
-	for _, uid := range self.PlayerList {
-		if playerItem := manger.Get(uid); nil != playerItem {
-			if uid == player.UserID {
-				var playerInfo protoMsg.PlayerInfo
-				playerInfo.UserID = playerItem.UserID
-				playerInfo.Name = playerItem.Name
-				playerInfo.Age = playerItem.Age
-				playerInfo.Gold = int64(sqlHandle.CheckMoney(playerItem.UserID)* 100)  //玩家积分
-				playerInfo.VipLevel = playerItem.Level
-				playerInfo.Sex = playerItem.Sex
-				senceInfo.UserInfo = &playerInfo
-				isHave := false
-				for _, info := range playerList.AllInfos {
-					if info.UserID == uid {
-						isHave = true
-						break
-					}
-				}
-				if !isHave {
-					playerList.AllInfos = CopyInsert(playerList.AllInfos, len(playerList.AllInfos), &playerInfo).([]*protoMsg.PlayerInfo)
-				}
-			}
-		} else {
-			manger.DeletePlayerIndex(uid)
-		}
-	}
+
+	//玩家信息
+	var playerInfo protoMsg.PlayerInfo
+	playerInfo.UserID = player.UserID
+	playerInfo.Name = player.Name
+	playerInfo.Age = player.Age
+	playerInfo.Gold = int64(GlobalSqlHandle.CheckMoney(player.UserID)* 100)  //玩家积分
+	playerInfo.VipLevel = player.Level
+	playerInfo.Sex = player.Sex
+	senceInfo.UserInfo = &playerInfo
+
 	if senceInfo.UserInfo == nil {
-		log.Debug("[Error][百家乐场景] [获取玩家ID:%v 信息失败]  ", userID)
+		log.Debug("[Error][百家乐场景] [获取玩家ID:%v 信息失败]  ", player.UserID)
 		return
 	}
 
-	log.Debug("[百家乐场景] [玩家列表新增] ID:%v 当前玩家总数:%v", userID, len(playerList.AllInfos))
+	log.Debug("[百家乐场景] [玩家列表新增] ID:%v 当前玩家总数:%v", player.UserID, len(playerList.AllInfos))
 	senceInfo.FreeTime = freeTime
 	senceInfo.BetTime = betTime
 	senceInfo.OpenTime = openTime
@@ -154,8 +139,8 @@ func (self *BaccaratGame) Scene(args []interface{}) {
 	}
 
 	//
-	player.WillReceive(MainGameSence, self.gameState, senceInfo)
-	manger.NotifyOthers(self.PlayerList, MainGameUpdate, GameUpdatePlayerList, &playerList)
+	agent.WriteMsg( senceInfo )
+	GlobalClientManger.NotifyOthers(self.PlayerList, MainGameUpdate, GameUpdatePlayerList, &playerList)
 
 	log.Debug("[百家乐场景]->玩家信息 ID:%v ", player.UserID)
 }
@@ -173,16 +158,15 @@ func (self *BaccaratGame) Playing(args []interface{}) {
 	//【消息】
 	m := args[0].(*protoMsg.GameBet)
 	//【传输对象】
-	agent := args[1].(gate.Agent)
+	sender := args[1].(gate.Agent)
 	log.Debug("[百家乐]BaccaratPlaying:->%v", m)
 
-	//var userID uint64 = 0
-	player := manger.Get_1(agent)
-	if nil == player {
-		log.Debug("下注失败,")
+	userData := sender.UserData()
+	if nil == userData{
+		log.Debug("[百家乐]BaccaratPlaying:->%v 无效玩家", m)
 		return
 	}
-
+	player:=userData.(*Player)
 	//反馈下注情况
 	betResult := &protoMsg.GameBetResult{}
 	betResult.UserID = player.UserID
@@ -192,16 +176,16 @@ func (self *BaccaratGame) Playing(args []interface{}) {
 	if self.gameState != SubGameSencePlaying {
 		betResult.State = *proto.Int32(1)
 		betResult.Hints = *proto.String("过了下注时间")
-		player.WillReceive(MainGameFrame, SubGameFrameBetResult, betResult)
+		sender.WriteMsg(betResult)
 		return
 	}
 
 	//数据库中扣除玩家金币[下注成功]
-	if money, ok := sqlHandle.DeductMoney(player.UserID, m.BetScore); !ok {
+	if money, ok := GlobalSqlHandle.DeductMoney(player.UserID, m.BetScore); !ok {
 		betResult.State = *proto.Int32(1)
 		betResult.Hints = *proto.String("数据库里的钱不够")
 		log.Debug("下注失败 玩家ID:%v 现有金币:%v 下注金币:%v", player.UserID, money, m.BetScore)
-		player.WillReceive(MainGameFrame, SubGameFrameBetResult, betResult)
+		sender.WriteMsg(betResult)
 		return
 	}
 
@@ -232,11 +216,11 @@ func (self *BaccaratGame) Playing(args []interface{}) {
 		log.Debug("[百家乐]第一次:%v", m)
 		self.playerBetInfo[player.UserID] = CopyInsert(self.playerBetInfo[player.UserID], len(self.playerBetInfo[player.UserID]), *m).([]protoMsg.GameBet)
 	}
-	player.WillReceive(MainGameFrame, SubGameFrameBetResult, betResult)
+	sender.WriteMsg(betResult)
 
 	//通知其他玩家
 	//manger.NotifyButOthers(self.PlayerList, MainGameFrame, SubGameFramePlaying, m)
-	manger.NotifyOthers(self.PlayerList, MainGameFrame, SubGameFramePlaying, m)
+	GlobalClientManger.NotifyOthers(self.PlayerList, MainGameFrame, SubGameFramePlaying, m)
 }
 
 //结算
@@ -264,10 +248,10 @@ func (self *BaccaratGame) UpdateInfo(args []interface{}) { //更新玩家列表[
 				break
 			}
 		}
-		manger.NotifyOthers(self.PlayerList, MainGameUpdate, GameUpdatePlayerList, &playerList)
+		GlobalClientManger.NotifyOthers(self.PlayerList, MainGameUpdate, GameUpdatePlayerList, &playerList)
 	case GameUpdatePlayerList: //更新玩家列表
 		self.AddPlayer(userID)
-		manger.NotifyOthers(self.PlayerList, MainGameUpdate, GameUpdatePlayerList, &playerList)
+		GlobalClientManger.NotifyOthers(self.PlayerList, MainGameUpdate, GameUpdatePlayerList, &playerList)
 	case GameUpdateHost: //更新玩家抢庄信息
 		self.host(args)
 	case GameUpdateSuperHost: //更新玩家超级抢庄信息
@@ -299,7 +283,7 @@ func (self *BaccaratGame) onStart() {
 
 	self.playerBetInfo = make(map[uint64][]protoMsg.GameBet) // 玩家下注信息
 	m := self.permitHost()                                   //反馈定庄信息
-	manger.NotifyOthers(self.PlayerList, MainGameState, SubGameStateStart, m)
+	GlobalClientManger.NotifyOthers(self.PlayerList, MainGameState, SubGameStateStart, m)
 }
 
 //[下注减法]
@@ -313,7 +297,7 @@ func (self *BaccaratGame) onPlay() {
 		timer.AfterFunc(betTime*time.Second, self.onOver)
 	}
 
-	manger.NotifyOthers(self.PlayerList, MainGameState, SubGameStatePlaying, nil)
+	GlobalClientManger.NotifyOthers(self.PlayerList, MainGameState, SubGameStatePlaying, nil)
 }
 
 //[结算加法]
@@ -327,7 +311,7 @@ func (self *BaccaratGame) onOver() {
 		timer.AfterFunc(openTime*time.Second, self.onStart)
 	}
 	//当有玩家结算信息时,该
-	manger.NotifyOthers(self.PlayerList, MainGameState, SubGameStateOver, nil)
+	GlobalClientManger.NotifyOthers(self.PlayerList, MainGameState, SubGameStateOver, nil)
 
 	log.Release("[百家乐]结算中...")
 	self.Over(nil)
@@ -337,13 +321,20 @@ func (self *BaccaratGame) onOver() {
 //抢庄
 func (self *BaccaratGame) host(args []interface{}) {
 	//【消息】
-	userID := args[1].(uint64)
+	sender := args[1].(gate.Agent)
 	host := args[2].(*protoMsg.GameHost)
 	msg := &protoMsg.GameResult{
-		Flag:   0,
-		Reason: []byte("success"),
+		Flag:   1,
+		Reason: []byte("无效玩家"),
 	}
 
+	userData := sender.UserData()
+	if nil == userData{
+		sender.WriteMsg(msg)
+		return
+	}
+
+	userID := userData.(*Player).UserID
 	size := len(self.hostList)
 	if self.bankerID == userID {
 		msg.Flag = 1
@@ -381,29 +372,33 @@ func (self *BaccaratGame) host(args []interface{}) {
 
 	log.Debug("[百家乐]有人来抢庄啦:%d 列表人数%d", userID, len(self.hostList))
 
-	if player := manger.Get(userID); player != nil { //通知请求方
-		player.WillReceive(MainGameFrame, SubGameFrameResult, msg)
-	}
+	sender.WriteMsg(msg)
 
 	if msg.Flag == 0 { //广播申请上庄成功的玩家
 		msgAll := &protoMsg.GameBaccaratHost{
 			UserID: userID,
 			IsWant: host.IsWant,
 		}
-		manger.NotifyOthers(self.PlayerList, MainGameFrame, SubGameFrameHost, msgAll)
+		GlobalClientManger.NotifyOthers(self.PlayerList, MainGameFrame, SubGameFrameHost, msgAll)
 	}
 }
 
 //超级抢庄
 func (self *BaccaratGame) superHost(args []interface{}) {
 	//【消息】
-	userID := args[1].(uint64)
+	sender := args[1].(gate.Agent)
 	host := args[2].(*protoMsg.GameHost)
 	msg := &protoMsg.GameResult{
 		Flag:   0,
 		Reason: []byte("success"),
 	}
 
+	userData := sender.UserData()
+	if nil == userData{
+		sender.WriteMsg(msg)
+		return
+	}
+	userID := userData.(*Player).UserID
 	log.Debug("[百家乐]有人要超级抢庄--->:%d", userID)
 	if host.IsWant {
 		if self.superHostID == 0 {
@@ -415,7 +410,7 @@ func (self *BaccaratGame) superHost(args []interface{}) {
 			}
 			//超级抢庄放申请列表首位
 			self.hostList = CopyInsert(self.hostList, 0, userID).([]uint64)
-			manger.NotifyOthers(self.PlayerList, MainGameFrame, SubGameFrameSuperHost, msgAll)
+			GlobalClientManger.NotifyOthers(self.PlayerList, MainGameFrame, SubGameFrameSuperHost, msgAll)
 		} else {
 			msg.Flag = 1
 			msg.Reason = []byte("faild")
@@ -423,9 +418,7 @@ func (self *BaccaratGame) superHost(args []interface{}) {
 	}
 
 	//反馈
-	if player := manger.Get(userID); player != nil {
-		player.WillReceive(MainGameFrame, SubGameFrameResult, msg)
-	}
+	sender.WriteMsg(msg)
 }
 
 //重新初始化
@@ -452,16 +445,16 @@ func (self *BaccaratGame) permitHost() *protoMsg.GameBaccaratHost {
 
 	//befBankerId := self.bankerID 避免重复
 	for index, pid := range tempList {
-		player := manger.Get(pid)
+		player := GlobalPlayerManger.Get(pid)
 		if player == nil {
 			continue
 		}
 		if 2 == self.keepTwice && self.bankerID == player.UserID {
-			log.Debug("[百家乐]不再连续坐庄：%v", player.Money)
+			log.Debug("[百家乐]不再连续坐庄：%v", player.Gold)
 			self.hostList = append(self.hostList[:index], self.hostList[index+1:]...)
 			self.keepTwice = 0
-		} else if player.Money < 5000 {
-			log.Debug("[百家乐]玩家%d 金币%lf 少于5000不能申请坐庄", player.UserID, player.Money)
+		} else if player.Gold < 5000 {
+			log.Debug("[百家乐]玩家%d 金币%lf 少于5000不能申请坐庄", player.UserID, player.Gold)
 			self.hostList = append(self.hostList[:index], self.hostList[index+1:]...)
 		}
 
@@ -477,8 +470,8 @@ func (self *BaccaratGame) permitHost() *protoMsg.GameBaccaratHost {
 		}
 		self.bankerID = self.hostList[0]
 
-		if banker := manger.Get(self.bankerID); banker != nil {
-			self.bankerScore = banker.Money
+		if banker := GlobalPlayerManger.Get(self.bankerID); banker != nil {
+			self.bankerScore = banker.Gold
 		}
 
 		log.Debug("[百家乐]确定庄家:%d", self.bankerID)
@@ -585,14 +578,14 @@ func (self *BaccaratGame) calculateScore() {
 
 		//写入数据库
 		if 0 != playerAwardScroe {
-			if money, ok := sqlHandle.DeductMoney(userID, -playerAwardScroe); ok {
+			if money, ok := GlobalSqlHandle.DeductMoney(userID, -playerAwardScroe); ok {
 				log.Debug("结算成功:%v 当前金币:%v!!", playerAwardScroe, money)
 			} else {
 				log.Debug("结算失败:%v 当前金币:%v!!", playerAwardScroe, money)
 			}
 		}
 
-		manger.Get(userID).WillReceive(MainGameFrame, SubGameFrameCheckout, checkout)
+		//GlobalClientManger.Get(userID).WillReceive(MainGameFrame, SubGameFrameCheckout, checkout)
 		//userIDs = CopyInsert(userIDs, len(userIDs), userID).([]uint64)
 		//for k, v := range others { //获取没下注玩家
 		//	if v == userID {
@@ -605,7 +598,7 @@ func (self *BaccaratGame) calculateScore() {
 	}
 
 	// 发给没下注玩家
-	manger.NotifyOthers(self.PlayerList, MainGameFrame, SubGameFrameOver, self.overResult)
+	//manger.NotifyOthers(self.PlayerList, MainGameFrame, SubGameFrameOver, self.overResult)
 	//log.Debug("[百家乐]...结算中....")
 }
 

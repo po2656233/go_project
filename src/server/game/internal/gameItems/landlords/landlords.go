@@ -6,17 +6,14 @@ import (
 	"github.com/name5566/leaf/log"
 	"github.com/name5566/leaf/module"
 	. "server/base"
+	. "server/manger"
 	. "server/game/internal/gameItems" // 注意这里不能这样导入 "../../gameItems" 因为本地导入是根据gopath路径设定的
 	protoMsg "server/msg/go"
-	"server/sql/mysql"
 	_ "server/sql/mysql"
-	"leaf/gate"
 )
 
 var timer *module.Skeleton = nil  //定时器
 //var lock *sync.Mutex = &sync.Mutex{} //锁
-var sqlHandle = mysql.SqlHandle() //数据库
-var manger = GetPlayerManger()    //玩家管理类
 var playerList protoMsg.UserList  //玩家列表
 
 //定时器
@@ -60,92 +57,47 @@ func (self *LandlordGame) Init(level uint32, skeleton *module.Skeleton) {
 }
 
 func (self *LandlordGame) Scene(args []interface{}) {
-	userID := args[0].(uint64)
-	level := args[1].(uint32)
 
-	player := manger.Get(userID)
-	if player == nil {
-		log.Debug("[Error][斗地主] [未能查找到相关玩家] ID:%v", userID)
-		return
-	}
-
-
-	// 获取玩家列表
-	self.AddPlayer(player.UserID) //加入玩家列表
-	for _, uid := range self.PlayerList {
-		if playerItem := manger.Get(uid); nil != playerItem {
-			var playerInfo protoMsg.PlayerInfo
-			playerInfo.UserID = playerItem.UserID
-			playerInfo.Name = playerItem.Name
-			playerInfo.Age = playerItem.Age
-			playerInfo.Gold = int64(sqlHandle.CheckMoney(playerItem.UserID)* 100) //玩家积分
-			playerInfo.VipLevel = playerItem.Level
-			playerInfo.Sex = playerItem.Sex
-			playerList.AllInfos = CopyInsert(playerList.AllInfos, len(playerList.AllInfos), &playerInfo).([]*protoMsg.PlayerInfo)
-
-		} else {
-			manger.DeletePlayerIndex(uid)
-		}
-	}
-
-
-	log.Debug("[斗地主] [玩家列表新增] ID:%v", userID)
-	senceInfo := &protoMsg.GameLandLordsEnter{}
-	senceInfo.UserID = player.UserID
-	senceInfo.Players = &playerList //玩家列表[TODO]
-	senceInfo.FreeTime = freeTime
-	//senceInfo.AwardAreas // 录单
-	//需优化[定时器中计算时长]
-	senceInfo.TimeStamp = self.timeStamp //////已过时长 应当该为传时间戳
-	switch level {
-	case RoomGeneral:
-	case RoomMiddle:
-	case RoomHigh:
-	default:
-	}
-
-	player.WillReceive(MainGameSence, self.gameState, senceInfo)
-	log.Debug("[斗地主场景]->玩家信息 ID:%v ", player.UserID)
 }
 
 //更新
 func (self *LandlordGame) UpdateInfo(args []interface{}) { //更新玩家列表[目前]
-
-	log.Debug("[斗地主]更新信息:%v-> %v\n", args[0].(uint32), args[1])
-	flag := args[0].(uint32)
-	userID := args[1].(uint64)
-	player := manger.Get(userID)
-
-	switch flag {
-	case GameUpdateOut: //玩家离开 不再向该玩家广播消息[] 删除
-		// 判断状态,如果玩家准备了,再进行退出
-		if self.gameState == SubGameSenceFree && player.Sate == PlayerAgree && 0 < self.readyCount {
-			self.readyCount--
-			delete(self.siteInfo,self.readyCount)
-		}
-		self.DeletePlayer(userID)
-		manger.NotifyOthers(self.PlayerList, MainGameUpdate, GameUpdatePlayerList, &playerList)
-	case GameUpdatePlayerList: //更新玩家列表
-		self.AddPlayer(userID)
-		manger.NotifyOthers(self.PlayerList, MainGameUpdate, GameUpdatePlayerList, &playerList)
-	case GameUpdateHost: //更新玩家叫分
-
-	case GameUpdateSuperHost: //更新玩家明牌叫分
-	case GameUpdateOffline: //更新玩家超级抢庄信息
-	case GameUpdateReconnect: //更新重入
-	case GameUpdateReady: //统计准备的玩家
-		self.siteInfo[self.readyCount] = userID 		//保存座位信息
-		self.readyCount++ //统计准备人数
-		player.Sate = PlayerAgree
-
-		manger.NotifyOthers(self.PlayerList,MainGameFrame,SubGameFrameReady, &protoMsg.GameReady{IsReady:true,UserID:userID})
-		if tableSite == self.readyCount { //桌面上三个玩家都准备好了,才进行发牌
-			self.Start(nil)
-		}
-		self.readyCount = 0
-		self.Start(nil)//测试用
-		log.Debug("[斗地主]玩家准备就绪...")
-	}
+	//
+	//log.Debug("[斗地主]更新信息:%v-> %v\n", args[0].(uint32), args[1])
+	//flag := args[0].(uint32)
+	//userID := args[1].(uint64)
+	//player := manger.Get(userID)
+	//
+	//switch flag {
+	//case GameUpdateOut: //玩家离开 不再向该玩家广播消息[] 删除
+	//	// 判断状态,如果玩家准备了,再进行退出
+	//	if self.gameState == SubGameSenceFree && player.Sate == PlayerAgree && 0 < self.readyCount {
+	//		self.readyCount--
+	//		delete(self.siteInfo,self.readyCount)
+	//	}
+	//	self.DeletePlayer(userID)
+	//	GlobalClientManger.NotifyOthers(self.PlayerList, MainGameUpdate, GameUpdatePlayerList, &playerList)
+	//case GameUpdatePlayerList: //更新玩家列表
+	//	self.AddPlayer(userID)
+	//	GlobalClientManger.NotifyOthers(self.PlayerList, MainGameUpdate, GameUpdatePlayerList, &playerList)
+	//case GameUpdateHost: //更新玩家叫分
+	//
+	//case GameUpdateSuperHost: //更新玩家明牌叫分
+	//case GameUpdateOffline: //更新玩家超级抢庄信息
+	//case GameUpdateReconnect: //更新重入
+	//case GameUpdateReady: //统计准备的玩家
+	//	self.siteInfo[self.readyCount] = userID 		//保存座位信息
+	//	self.readyCount++ //统计准备人数
+	//	player.Sate = PlayerAgree
+	//
+	//	manger.NotifyOthers(self.PlayerList,MainGameFrame,SubGameFrameReady, &protoMsg.GameReady{IsReady:true,UserID:userID})
+	//	if tableSite == self.readyCount { //桌面上三个玩家都准备好了,才进行发牌
+	//		self.Start(nil)
+	//	}
+	//	self.readyCount = 0
+	//	self.Start(nil)//测试用
+	//	log.Debug("[斗地主]玩家准备就绪...")
+	//}
 }
 
 // 开始
@@ -160,7 +112,7 @@ func (self *LandlordGame) Start(args []interface{}) {
 
 	// 取54-3张牌
 	for site,userID := range self.siteInfo{
-		player := manger.Get(userID)
+		player := GlobalPlayerManger.Get(userID)
 		if player == nil {
 			log.Debug("[Error][斗地主] [未能查找到相关玩家] ID:%v", userID)
 			continue
@@ -180,7 +132,7 @@ func (self *LandlordGame) Start(args []interface{}) {
 		msg.CardsBottom = cards[0:3]
 		msg.CardsHand = sortCards
 
-		player.WillReceive(MainGameState,SubGameStateStart,msg)
+		//player.WillReceive(MainGameState,SubGameStateStart,msg)
 	}
 
 
@@ -193,39 +145,39 @@ func (self *LandlordGame) Start(args []interface{}) {
 
 // 出牌
 func (self *LandlordGame) Playing(args []interface{}) {
-	//直接扣除金币
-	log.Debug("------Playing---------")
-	m := args[0].(*protoMsg.GameLandLordsOutcard)
-	agent := args[1].(gate.Agent)
-	player := manger.Get_1(agent)
-	if nil == player {
-		log.Debug("无效玩家")
-		return
-	}
-
-	//牌的合法性
-	carInfo := JudgeCarType( GetCardValues(m.Cards) )
-	flag := int32(0)
-	reason:=[]byte("")
-	if ERROR_CARD == carInfo.Type{
-		flag = 1
-		reason = []byte("no allow")
-	}else{
-		//通知其他玩家
-		manger.NotifyOthers(self.PlayerList,MainGameState, SubGameStatePlaying, &protoMsg.GameLandLordsOperate{
-			Code:carInfo.Type,
-			Cards: m.Cards,
-			Hints:string("ok"),
-		})
-	}
-
-	//比牌(首次不需要)
-
-	player.WillReceive(MainGameFrame,SubGameFrameResult,&protoMsg.GameResult{
-		Flag:flag,
-		Reason:reason,
-	})
-	log.Debug("出牌:%v 座位:%v 结果:%v 牌型:%v",m.Cards, m.Site, flag, carInfo.Type)
+	////直接扣除金币
+	//log.Debug("------Playing---------")
+	//m := args[0].(*protoMsg.GameLandLordsOutcard)
+	//agent := args[1].(gate.Agent)
+	//player := manger.Get_1(agent)
+	//if nil == player {
+	//	log.Debug("无效玩家")
+	//	return
+	//}
+	//
+	////牌的合法性
+	//carInfo := JudgeCarType( GetCardValues(m.Cards) )
+	//flag := int32(0)
+	////reason:=[]byte("")
+	//if ERROR_CARD == carInfo.Type{
+	//	flag = 1
+	//	//reason = []byte("no allow")
+	//}else{
+	//	//通知其他玩家
+	//	GlobalClientManger.NotifyOthers(self.PlayerList,MainGameState, SubGameStatePlaying, &protoMsg.GameLandLordsOperate{
+	//		Code:carInfo.Type,
+	//		Cards: m.Cards,
+	//		Hints:string("ok"),
+	//	})
+	//}
+	//
+	////比牌(首次不需要)
+	//
+	////player.WillReceive(MainGameFrame,SubGameFrameResult,&protoMsg.GameResult{
+	////	Flag:flag,
+	////	Reason:reason,
+	////})
+	//log.Debug("出牌:%v 座位:%v 结果:%v 牌型:%v",m.Cards, m.Site, flag, carInfo.Type)
 }
 
 // 结算

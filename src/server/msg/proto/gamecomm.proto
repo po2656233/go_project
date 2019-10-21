@@ -3,12 +3,17 @@ package go;
 
 //玩家信息
 message PlayerInfo{
-    uint64 UserID = 1;   //ID
-    string Name = 2;    //账号
-    int32 Age = 3;      //年龄
-    int32 Sex = 4;      //性别
-    int64 Gold = 5;     //金币 *100
-    int32 VipLevel = 6; //vip级别
+    uint64 UserID = 1;          //ID
+    string Name = 2;            //账号
+    int32 Age = 3;              //年龄
+    int32 Sex = 4;              //性别
+    int64 Gold = 5;             //金币 *100
+    int32 VipLevel = 6;         //vip级别
+    string Account = 7;         // 账号(手机号码/邮箱/真名)
+    int32 Sate = 8;	            // 状态 0:旁观 1:坐下 2:同意  3:站起
+    uint32 PlatformID = 9;      // 平台ID 0:无效
+    uint32 RoomNum  = 10;  		// 房间号 0:无效
+    uint32 GameID  = 11;   		// 所在游戏ID 0:无效
 }
 //玩家列表
 message UserList{

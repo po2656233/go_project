@@ -77,3 +77,4 @@ const (
 	Mahjong   = 3002
 	ChinessChess = 8002
 )
+

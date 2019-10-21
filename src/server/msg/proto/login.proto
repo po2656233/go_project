@@ -58,7 +58,7 @@ message UserInfo{
 	uint32 Gender = 5;			//性别
 	uint32 Age = 6;				//年龄
 	uint32 Level = 7;			//VIP级别
-	int64 Money = 8;			//金币
+	int64  Gold = 8;			//金币
 	string PassPortID = 9;		//证件号
 	string Compellation =10;	//真实名字
 	uint32 AgentID = 11;		//代理标识

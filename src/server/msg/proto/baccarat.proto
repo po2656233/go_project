@@ -12,6 +12,7 @@ message GameBaccaratEnter{
 	uint32 FreeTime = 5;
 	uint32 BetTime = 6;
 	uint32 OpenTime = 7;
+
 }
 //注:通过mainID->subID 区分游戏状态(subID:101空闲、102游戏、103开奖、104旁观)
 

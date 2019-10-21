@@ -5,15 +5,14 @@ import (
 	"github.com/name5566/leaf/gate"
 	"github.com/name5566/leaf/log"
 	"reflect"
+	. "server/manger"
 	. "server/base"
 	protoMsg "server/msg/go"
 	"server/sql/mysql"
-	_ "server/sql/mysql"
 )
 
 var sqlHandle = mysql.SqlHandle()    //数据库管理
 var playerManger = GetPlayerManger() //玩家管理
-var roomManger = GetRoomManger()     //房间管理
 
 func init() {
 	// 向当前模块（login 模块）注册 Login 消息的消息处理函数 handleTest
@@ -44,8 +43,9 @@ func handleLogin(args []interface{}) {
 	m := args[0].(*protoMsg.Login)
 	log.Debug("[receive]LoginInfo:->%v", m)
 
-	//绑定代理
-	player := &Player{Agent: args[1].(gate.Agent)}
+	//
+	agent := args[1].(gate.Agent)
+	player := &Player{}
 	//数据库校验玩家数据
 	if uid, ok := sqlHandle.CheckLogin(m.GetAccount(), m.GetPassword()); ok {
 		log.Debug("Login Success!")
@@ -55,7 +55,7 @@ func handleLogin(args []interface{}) {
 		//for index, item := range gameList.Items {
 		//	log.Debug("%d->[游戏名称:%s\t类型:%d\t标识:%v\t房间:%v  入场:%v\t坐下:%v]\n", index+1, item.Name, item.Type, item.KindID, item.RoomID, item.EnterScore, item.LessScore)
 		//}
-		name, age, sex, vipLevel, money := sqlHandle.CheckUserInfo(uid)
+		name, age, sex, vipLevel, gold := sqlHandle.CheckUserInfo(uid)
 		//房间列表
 		msg := &protoMsg.MasterInfo{}
 		userInfo := &protoMsg.UserInfo{}
@@ -64,7 +64,7 @@ func handleLogin(args []interface{}) {
 		userInfo.Age = age
 		userInfo.Gender = sex
 		userInfo.Level = vipLevel
-		userInfo.Money = money
+		userInfo.Gold = gold
 		msg.UserInfo = userInfo
 		msg.RoomsInfo = sqlHandle.CheckRoomList(uid)
 		log.Debug("房间号列表%v", msg.RoomsInfo)
@@ -73,14 +73,20 @@ func handleLogin(args []interface{}) {
 		player.UserID = uid
 		player.Name = name
 		player.Account = name
-		player.Money = money
+		player.Gold = gold
 		player.Sate = INVALID
+		player.PlatformID = INVALID
 		player.RoomNum = INVALID
 		player.GameID = INVALID
-		playerManger.AppandPlayer(player)
+
+		// 保存玩家数据
+		playerManger.Append(player)
+
+		// 往agent里添加数据
+		agent.SetUserData(player)
 
 		//发送【房间列表】
-		player.WillReceive(MainLogin, SubMasterInfo, msg)
+		agent.WriteMsg( msg )
 	} else {
 		//失败信息
 		loginResult := &protoMsg.ResResult{}
@@ -88,7 +94,7 @@ func handleLogin(args []interface{}) {
 		loginResult.Hints = *proto.String("Failed")
 
 		//【返回结果】[MainID|SubID]
-		player.WillReceive(MainLogin, SubLoginResult, loginResult)
+		agent.WriteMsg( loginResult )
 
 		//日志打印
 		log.Error("Login Failed!")
@@ -98,10 +104,13 @@ func handleLogin(args []interface{}) {
 //进入房间(游戏列表)
 func handleEnterRoom(args []interface{}) {
 	m := args[0].(*protoMsg.ReqEnterRoom)
-	player := &Player{Agent: args[1].(gate.Agent)}
+	agent := args[1].(gate.Agent)
+
 	log.Error("[进入房间]:%v", m)
 	//查找代理信息
-	if player = playerManger.Get_1(args[1].(gate.Agent)); player != nil {
+	if userData := agent.UserData(); userData != nil { //[0
+		//用户信息
+		player := userData.(*Player)
 		//获取房间号码
 		player.RoomNum = m.GetRoomNum()
 
@@ -109,7 +118,7 @@ func handleEnterRoom(args []interface{}) {
 		_, _, msg := sqlHandle.CheckGameList(player.RoomNum)
 
 		//发送数据
-		player.WillReceive(MainLogin, SubGameList, msg)
+		agent.WriteMsg(msg)
 
 	} else {
 		//失败信息
@@ -118,7 +127,7 @@ func handleEnterRoom(args []interface{}) {
 		enterResult.Hints = *proto.String("Failed")
 
 		//【返回结果】[MainID|SubID]
-		player.WillReceive(MainLogin, SubEnterRoomResult, enterResult)
+		agent.WriteMsg(enterResult)
 
 		//日志打印
 		log.Error("Login Failed!")

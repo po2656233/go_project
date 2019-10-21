@@ -12,6 +12,7 @@ import (
 // 使用默认的 JSON 消息处理器（默认还提供了 protobuf 消息处理器）
 var ProcessorJson = json.NewProcessor()
 var ProcessorProto = protobuf.NewProcessor()
+var wg sync.WaitGroup
 
 func init() {
 	//这里的注册顺序，必须，必须，必须与【客户端】一致
@@ -32,7 +33,7 @@ func init() {
 
 //对外接口 【这里的注册函数并非线程安全】
 func RegisterMessage(message proto.Message) {
-	var wg sync.WaitGroup
+
 	wg.Add(1)
 	ProcessorProto.Register(message)
 	wg.Done()

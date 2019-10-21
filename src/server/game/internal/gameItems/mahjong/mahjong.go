@@ -10,6 +10,7 @@ import (
 	"server/sql/mysql"
 	_ "server/sql/mysql"
 	"sync"
+	. "server/manger"
 )
 
 var timer *module.Skeleton = nil  //定时器
@@ -56,7 +57,7 @@ func (self *MahjongGame) Init(level uint32, skeleton *module.Skeleton) {
 
 func (self *MahjongGame) Scene(args []interface{}) {
 	userID := args[0].(uint64)
-	level := args[1].(uint32)
+	//level := args[1].(uint32)
 
 	player := manger.Get(userID)
 	if player == nil {
@@ -64,80 +65,11 @@ func (self *MahjongGame) Scene(args []interface{}) {
 		return
 	}
 
-	// 获取玩家列表z
-	self.AddPlayer(player.UserID) //加入玩家列表
-
-	senceInfo := &protoMsg.GameMahjongEnter{}
-	senceInfo.UserInfo = nil
-	for _, uid := range self.PlayerList {
-		if playerItem := manger.Get(uid); nil != playerItem {
-			var playerInfo protoMsg.PlayerInfo
-			playerInfo.UserID = playerItem.UserID
-			playerInfo.Name = playerItem.Name
-			playerInfo.Age = playerItem.Age
-			playerInfo.Gold = int64(sqlHandle.CheckMoney(playerItem.UserID)* 100) //玩家积分
-			playerInfo.VipLevel = playerItem.Level
-			playerInfo.Sex = playerItem.Sex
-			senceInfo.UserInfo = &playerInfo
-
-			isHave := false
-			for _, info := range playerList.AllInfos {
-				if info.UserID == uid {
-					isHave = true
-					break
-				}
-			}
-			if !isHave {
-				playerList.AllInfos = CopyInsert(playerList.AllInfos, len(playerList.AllInfos), &playerInfo).([]*protoMsg.PlayerInfo)
-			}
-		} else {
-			manger.DeletePlayerIndex(uid)
-		}
-	}
-	if nil == senceInfo.UserInfo {
-		log.Debug("[Error][麻将场景] [获取玩家ID:%v 信息失败]  ", userID)
-		return
-	}
-
-	log.Debug("[麻将场景] [玩家列表新增] ID:%v", userID)
-	senceInfo.FreeTime = freeTime
-	//senceInfo.AwardAreas // 录单
-	//需优化[定时器中计算时长]
-	senceInfo.TimeStamp = self.timeStamp //////已过时长 应当该为传时间戳
-	switch level {
-	case RoomGeneral:
-	case RoomMiddle:
-	case RoomHigh:
-	default:
-	}
-
-	player.WillReceive(MainGameSence, self.gameState, senceInfo)
-	log.Debug("[麻将场景]->玩家信息 ID:%v ", player.UserID)
 }
 
 //更新
 func (self *MahjongGame) UpdateInfo(args []interface{}) { //更新玩家列表[目前]
 
-	log.Debug("[麻将]更新信息:%v-> %v\n", args[0].(uint32), args[1])
-	flag := args[0].(uint32)
-	userID := args[1].(uint64)
-	switch flag {
-	case GameUpdateOut: //玩家离开 不再向该玩家广播消息[] 删除
-		self.DeletePlayer(userID)
-		manger.NotifyOthers(self.PlayerList, MainGameUpdate, GameUpdatePlayerList, &playerList)
-	case GameUpdatePlayerList: //更新玩家列表
-		self.AddPlayer(userID)
-		manger.NotifyOthers(self.PlayerList, MainGameUpdate, GameUpdatePlayerList, &playerList)
-	case GameUpdateHost: //更新玩家抢庄信息
-	case GameUpdateSuperHost: //更新玩家超级抢庄信息
-	case GameUpdateOffline: //更新玩家超级抢庄信息
-	case GameUpdateReconnect: //更新玩家超级抢庄信息
-	case GameUpdateReady: //统计准备的玩家
-		self.readyCount++
-		if tableSite == self.readyCount {
-			self.Start(nil)
-		}
-	}
 }
 
 // 开始

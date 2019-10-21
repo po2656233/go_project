@@ -3,12 +3,18 @@ package gameItems
 import (
 	"sort"
 	"encoding/binary"
+	"server/sql/mysql"
+	"server/manger"
 )
 
 const (
 	LOGIC_MASK_COLOR = 0xF0 //花色掩码
 	LOGIC_MASK_VALUE = 0x0F //数值掩码
 )
+var GlobalSqlHandle = mysql.SqlHandle()
+var GlobalClientManger *manger.ClientManger = manger.GetClientManger()
+var GlobalPlatformManger *manger.PlatformManger = manger.GetPlatformManger()
+var GlobalPlayerManger *manger.PlayerManger = manger.GetPlayerManger()
 
 // 排序
 func SortCards(cards []byte) []byte {
