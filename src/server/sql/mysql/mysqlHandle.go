@@ -63,7 +63,7 @@ func (self *SqlMan) CloseMysql() {
 //游戏信息
 func (self *SqlMan) CheckGameInfo(gameID uint32) *protoMsg.GameBaseInfo {
 	//数据库查询
-	rows, err := self.db.Query("SELECT Name,Type,Level,KindID,EnterScore,LessScore FROM gameinfo where ID=?;", gameID)
+	rows, err := self.db.Query("SELECT Name,Type,Level,KindID,EnterScore,LessScore FROM game where ID=?;", gameID)
 	defer rows.Close()
 	CheckError(err)
 
@@ -82,7 +82,7 @@ func (self *SqlMan) CheckGameInfo(gameID uint32) *protoMsg.GameBaseInfo {
 func (self *SqlMan) CheckGameList(roomID uint32) (name, key string, games *protoMsg.GameList) {
 	//从房间中找到kindID和Level
 	//数据库查询
-	rows, err := self.db.Query("SELECT Name,roomKey,GameList FROM roominfo where Num =?;", roomID)
+	rows, err := self.db.Query("SELECT Name,RoomKey,Games FROM room where Num =?;", roomID)
 	defer rows.Close()
 	CheckError(err)
 	var strGames string
@@ -113,7 +113,7 @@ func (self *SqlMan) CheckGameList(roomID uint32) (name, key string, games *proto
 //获取房间列表
 func (self *SqlMan) CheckRoomList(userID uint64) (roomsInfo []*protoMsg.RoomInfo) {
 	//数据库查询
-	rows, err := self.db.Query("SELECT RoomNums FROM userinfo where ID=?;", userID)
+	rows, err := self.db.Query("SELECT RoomNums FROM user where ID=?;", userID)
 	defer rows.Close()
 	CheckError(err)
 
@@ -146,7 +146,7 @@ func (self *SqlMan) CheckTaskList(userID uint64) (tasks []uint32) {
 //登录查询，改为redis
 func (self *SqlMan) CheckLogin(user, password string) (uid uint64, isSuccessful bool) {
 	isSuccessful = false
-	rows, err := self.db.Query("SELECT ID,Name,Password FROM userinfo where Name = ? and Password=?;", user, password)
+	rows, err := self.db.Query("SELECT ID,Name,Password FROM user where Name = ? and Password=?;", user, password)
 	defer rows.Close()
 	CheckError(err)
 
@@ -175,7 +175,7 @@ func (self *SqlMan) CheckLogin(user, password string) (uid uint64, isSuccessful 
 func (self *SqlMan) CheckMoney(userID uint64) float64 {
 
 	//rows,err := db.Query("SELECT 'ID','money-count' FROM userinfo WHERE ID=?",userID)
-	rows, err := self.db.Query("SELECT Money FROM userinfo WHERE ID in(?)", userID)
+	rows, err := self.db.Query("SELECT Money FROM user WHERE ID in(?)", userID)
 	defer rows.Close()
 
 	CheckError(err)
@@ -192,7 +192,7 @@ func (self *SqlMan) CheckMoney(userID uint64) float64 {
 
 func (self *SqlMan) CheckName(userID uint64) string {
 	var name string = ""
-	rows, err := self.db.Query("SELECT Name FROM userinfo WHERE ID in(?)", userID)
+	rows, err := self.db.Query("SELECT Name FROM user WHERE ID in(?)", userID)
 	defer rows.Close()
 	CheckError(err)
 
@@ -208,7 +208,7 @@ func (self *SqlMan) CheckName(userID uint64) string {
 
 //获取玩家信息
 func (self *SqlMan) CheckUserInfo(userID uint64) (name string, age, sex, vipLevel uint32, money int64) {
-	rows, err := self.db.Query("SELECT Name,Age,Sex,Money,VipLevel FROM userinfo WHERE ID in(?)", userID)
+	rows, err := self.db.Query("SELECT Name,Age,Sex,Money,VipLevel FROM user WHERE ID in(?)", userID)
 	defer rows.Close()
 	CheckError(err)
 
@@ -223,9 +223,12 @@ func (self *SqlMan) CheckUserInfo(userID uint64) (name string, age, sex, vipLeve
 	return name, age, sex, vipLevel, money
 }
 
+
+
+
 //扣除金币 注:返回类型最好使用error
 func (self *SqlMan) DeductMoney(userID uint64, money int64) (nowMoney int64, isOK bool) {
-	rows, err := self.db.Query("SELECT Money FROM userinfo WHERE ID=?", userID)
+	rows, err := self.db.Query("SELECT Money FROM user WHERE ID=?", userID)
 	defer rows.Close()
 
 	CheckError(err)
@@ -248,7 +251,7 @@ func (self *SqlMan) DeductMoney(userID uint64, money int64) (nowMoney int64, isO
 
 	isOK = true
 	log.Debug("当前:%.3f  扣除%.2f", float64(nowMoney/100), float64(money/100))
-	_, err = self.db.Exec("UPdate userinfo set money=? where ID in(?)  ", nowMoney/100, userID)
+	_, err = self.db.Exec("UPdate user set money=? where ID in(?)  ", nowMoney/100, userID)
 	CheckError(err)
 	return nowMoney, isOK
 }
@@ -260,6 +263,26 @@ func (self *SqlMan) AddUser(user, password, adress, port, dbName string) error {
 	CheckError(err)
 	return err
 }
+
+
+//获取平台信息
+func (self *SqlMan) CheckPlatformInfo(platformID uint64) (name string, age, sex, vipLevel uint32, money int64) {
+	rows, err := self.db.Query("SELECT Name,Age,Sex,Money,VipLevel FROM user WHERE ID in(?)", platformID)
+	defer rows.Close()
+	CheckError(err)
+
+	fMoney := 0.0
+	for rows.Next() {
+		if err := rows.Scan(&name, &age, &sex, &fMoney, &vipLevel); err != nil {
+			log.Fatal(err.Error())
+		}
+		break
+	}
+	money = int64(fMoney*100)
+	return name, age, sex, vipLevel, money
+}
+
+
 
 //数据库连接
 func (self *SqlMan) ConnectMySql(user, password, adress, port, dbName string) (*sql.DB, error) {

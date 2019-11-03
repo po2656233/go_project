@@ -138,10 +138,9 @@ func (self *BaccaratGame) Scene(args []interface{}) {
 		senceInfo.Chips = []int32{1, 5, 10, 20, 50, 100} //筹码
 	}
 
-	//
-	agent.WriteMsg( senceInfo )
-	GlobalClientManger.NotifyOthers(self.PlayerList, MainGameUpdate, GameUpdatePlayerList, &playerList)
-
+	//数据回包
+	GlobalSender.SendData(agent,MainGameSence,self.gameState, senceInfo)
+	GlobalSender.NotifyOthers(self.PlayerList, MainGameUpdate, GameUpdatePlayerList, &playerList)
 	log.Debug("[百家乐场景]->玩家信息 ID:%v ", player.UserID)
 }
 
@@ -220,7 +219,7 @@ func (self *BaccaratGame) Playing(args []interface{}) {
 
 	//通知其他玩家
 	//manger.NotifyButOthers(self.PlayerList, MainGameFrame, SubGameFramePlaying, m)
-	GlobalClientManger.NotifyOthers(self.PlayerList, MainGameFrame, SubGameFramePlaying, m)
+	GlobalSender.NotifyOthers(self.PlayerList, MainGameFrame, SubGameFramePlaying, m)
 }
 
 //结算
@@ -248,10 +247,10 @@ func (self *BaccaratGame) UpdateInfo(args []interface{}) { //更新玩家列表[
 				break
 			}
 		}
-		GlobalClientManger.NotifyOthers(self.PlayerList, MainGameUpdate, GameUpdatePlayerList, &playerList)
+		GlobalSender.NotifyOthers(self.PlayerList, MainGameUpdate, GameUpdatePlayerList, &playerList)
 	case GameUpdatePlayerList: //更新玩家列表
 		self.AddPlayer(userID)
-		GlobalClientManger.NotifyOthers(self.PlayerList, MainGameUpdate, GameUpdatePlayerList, &playerList)
+		GlobalSender.NotifyOthers(self.PlayerList, MainGameUpdate, GameUpdatePlayerList, &playerList)
 	case GameUpdateHost: //更新玩家抢庄信息
 		self.host(args)
 	case GameUpdateSuperHost: //更新玩家超级抢庄信息
@@ -283,7 +282,7 @@ func (self *BaccaratGame) onStart() {
 
 	self.playerBetInfo = make(map[uint64][]protoMsg.GameBet) // 玩家下注信息
 	m := self.permitHost()                                   //反馈定庄信息
-	GlobalClientManger.NotifyOthers(self.PlayerList, MainGameState, SubGameStateStart, m)
+	GlobalSender.NotifyOthers(self.PlayerList, MainGameState, SubGameStateStart, m)
 }
 
 //[下注减法]
@@ -297,7 +296,7 @@ func (self *BaccaratGame) onPlay() {
 		timer.AfterFunc(betTime*time.Second, self.onOver)
 	}
 
-	GlobalClientManger.NotifyOthers(self.PlayerList, MainGameState, SubGameStatePlaying, nil)
+	GlobalSender.NotifyOthers(self.PlayerList, MainGameState, SubGameStatePlaying, nil)
 }
 
 //[结算加法]
@@ -311,7 +310,7 @@ func (self *BaccaratGame) onOver() {
 		timer.AfterFunc(openTime*time.Second, self.onStart)
 	}
 	//当有玩家结算信息时,该
-	GlobalClientManger.NotifyOthers(self.PlayerList, MainGameState, SubGameStateOver, nil)
+	GlobalSender.NotifyOthers(self.PlayerList, MainGameState, SubGameStateOver, nil)
 
 	log.Release("[百家乐]结算中...")
 	self.Over(nil)
@@ -379,7 +378,7 @@ func (self *BaccaratGame) host(args []interface{}) {
 			UserID: userID,
 			IsWant: host.IsWant,
 		}
-		GlobalClientManger.NotifyOthers(self.PlayerList, MainGameFrame, SubGameFrameHost, msgAll)
+		GlobalSender.NotifyOthers(self.PlayerList, MainGameFrame, SubGameFrameHost, msgAll)
 	}
 }
 
@@ -410,7 +409,7 @@ func (self *BaccaratGame) superHost(args []interface{}) {
 			}
 			//超级抢庄放申请列表首位
 			self.hostList = CopyInsert(self.hostList, 0, userID).([]uint64)
-			GlobalClientManger.NotifyOthers(self.PlayerList, MainGameFrame, SubGameFrameSuperHost, msgAll)
+			GlobalSender.NotifyOthers(self.PlayerList, MainGameFrame, SubGameFrameSuperHost, msgAll)
 		} else {
 			msg.Flag = 1
 			msg.Reason = []byte("faild")

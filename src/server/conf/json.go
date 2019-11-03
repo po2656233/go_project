@@ -16,6 +16,7 @@ var Server struct {
 	MaxConnNum  int
 	ConsolePort int
 	ProfilePath string
+	CarryMainSubID bool //传输的时候 是否需要携带mainID 或 subID
 }
 
 func init() {

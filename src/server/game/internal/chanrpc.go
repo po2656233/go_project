@@ -36,7 +36,7 @@ func rpcCloseAgent(args []interface{}) {
 	a := args[0].(gate.Agent)
 	_ = a
 
-	log.Debug("玩家断线:%v", a.LocalAddr())
+	log.Debug("玩家断线:%v", a.RemoteAddr())
 
 	//断线通知
 	GetClientManger().Delete(a)
@@ -47,9 +47,9 @@ func rpcCloseAgent(args []interface{}) {
 			// 平台维度
 			platformManger := GetPlatformManger().Get(player.PlatformID)
 			// 房间维度
-			if nil != platformManger.Roomer {
+			if nil != platformManger && nil != platformManger.Roomer {
 				if room, ok := platformManger.Roomer.Check(player.RoomNum); ok {
-					// 游戏维度 【重中之重】只有gameID的话，需要从数据库中查出KindID和Level 因为当kindID和Level一样是就是同一款游戏，游戏不是通过GameID区分的
+					// 游戏维度 【重中之重】只有gameID的话，则需要从数据库中查出KindID和Level. 因为当kindID和Level一样时才是同一款游戏，游戏不是通过GameID区分的
 					if gameInfo := mysql.SqlHandle().CheckGameInfo(player.GameID); gameInfo != nil {
 						if game, isOk := room.GetGameHandle(gameInfo.KindID, gameInfo.Level); isOk {
 							// 更新游戏内部信息

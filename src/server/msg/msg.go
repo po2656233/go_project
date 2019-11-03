@@ -15,20 +15,9 @@ var ProcessorProto = protobuf.NewProcessor()
 var wg sync.WaitGroup
 
 func init() {
-	//这里的注册顺序，必须，必须，必须与【客户端】一致
-
-	///[protobuf]格式消息
-	//数据包
+	//这里的注册顺序，必须，必须，必须与【客户端】一致 因为rpc根据ID解析字段的
+	/////[protobuf]格式消息
 	registerPacket()
-
-	//登录
-	registerLoginProtoMsg()
-	//游戏
-	registerGameProtoMsg()
-
-	///[json]格式消息
-	//登录
-	registerLoginJsonMsg()
 }
 
 //对外接口 【这里的注册函数并非线程安全】
@@ -43,7 +32,67 @@ func RegisterMessage(message proto.Message) {
 //-----------Protobuf-------------------
 //【统一数据包】
 func registerPacket() {
+	RegisterMessage(&protoMsg.GameBaccaratEnter{})
+	RegisterMessage(&protoMsg.GameBaccaratHost{})
+	RegisterMessage(&protoMsg.GameBaccaratSuperHost{})
+	RegisterMessage(&protoMsg.GameBaccaratBet{})
+	RegisterMessage(&protoMsg.GameBaccaratBetResult{})
+	RegisterMessage(&protoMsg.GameBaccaratOver{})
+	RegisterMessage(&protoMsg.GameBaccaratCheckout{})
 	RegisterMessage(&protoMsg.PacketData{})
+	RegisterMessage(&protoMsg.GameCowcowEnter{})
+	RegisterMessage(&protoMsg.GameCowcowHost{})
+	RegisterMessage(&protoMsg.GameCowcowSuperHost{})
+	RegisterMessage(&protoMsg.GameCowcowPlaying{})
+	RegisterMessage(&protoMsg.GameCowcowBetResult{})
+	RegisterMessage(&protoMsg.GameCowcowOver{})
+	RegisterMessage(&protoMsg.GameCowcowCheckout{})
+	RegisterMessage(&protoMsg.GameFishLordEnter{})
+	RegisterMessage(&protoMsg.GameFishLordPlaying{})
+	RegisterMessage(&protoMsg.GameFishLordBetResult{})
+	RegisterMessage(&protoMsg.GameFishLordOver{})
+	RegisterMessage(&protoMsg.PlayerInfo{})
+	RegisterMessage(&protoMsg.UserList{})
+	RegisterMessage(&protoMsg.PlayerRecord{})
+	RegisterMessage(&protoMsg.GameReady{})
+	RegisterMessage(&protoMsg.GameBet{})
+	RegisterMessage(&protoMsg.GameBetResult{})
+	RegisterMessage(&protoMsg.GameHost{})
+	RegisterMessage(&protoMsg.GameSuperHost{})
+	RegisterMessage(&protoMsg.GameRecord{})
+	RegisterMessage(&protoMsg.GameRecordList{})
+	RegisterMessage(&protoMsg.GameResult{})
+	RegisterMessage(&protoMsg.GameLandLordsEnter{})
+	RegisterMessage(&protoMsg.GameLandLordsPlayer{})
+	RegisterMessage(&protoMsg.GameLandLordsBegins{})
+	RegisterMessage(&protoMsg.GameLandLordsOutcard{})
+	RegisterMessage(&protoMsg.GameLandLordsOperate{})
+	RegisterMessage(&protoMsg.GameLandLordsAward{})
+	RegisterMessage(&protoMsg.GameLandLordsCheckout{})
+	RegisterMessage(&protoMsg.Register{})
+	RegisterMessage(&protoMsg.RegisterResult{})
+	RegisterMessage(&protoMsg.Login{})
+	RegisterMessage(&protoMsg.ResResult{})
+	RegisterMessage(&protoMsg.TaskItem{})
+	RegisterMessage(&protoMsg.TaskList{})
+	RegisterMessage(&protoMsg.GameList{})
+	RegisterMessage(&protoMsg.UserInfo{})
+	RegisterMessage(&protoMsg.RoomInfo{})
+	RegisterMessage(&protoMsg.GameBaseInfo{})
+	RegisterMessage(&protoMsg.GameItem{})
+	RegisterMessage(&protoMsg.MasterInfo{})
+	RegisterMessage(&protoMsg.ReqEnterRoom{})
+	RegisterMessage(&protoMsg.ReqEnterGame{})
+	RegisterMessage(&protoMsg.ReqExitGame{})
+	RegisterMessage(&protoMsg.GameMahjongEnter{})
+	RegisterMessage(&protoMsg.GameMahjongPlayer{})
+	RegisterMessage(&protoMsg.GameMahjongBegins{})
+	RegisterMessage(&protoMsg.GameMahjongOutcard{})
+	RegisterMessage(&protoMsg.GameMahjongOperate{})
+	RegisterMessage(&protoMsg.GameMahjongAward{})
+	RegisterMessage(&protoMsg.GameMahjongCheckout{})
+
+	//RegisterMessage(&protoMsg.PacketData{})
 }
 
 //登录
@@ -51,6 +100,7 @@ func registerLoginProtoMsg() {
 	// 这个是protobuf的消息体
 	//登录注册
 	RegisterMessage(&protoMsg.Login{})
+	RegisterMessage(&protoMsg.MasterInfo{})
 	RegisterMessage(&protoMsg.ResResult{})
 	RegisterMessage(&protoMsg.Register{})
 	RegisterMessage(&protoMsg.ReqEnterRoom{})

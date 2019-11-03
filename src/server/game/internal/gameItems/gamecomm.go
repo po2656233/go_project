@@ -12,7 +12,7 @@ const (
 	LOGIC_MASK_VALUE = 0x0F //数值掩码
 )
 var GlobalSqlHandle = mysql.SqlHandle()
-var GlobalClientManger *manger.ClientManger = manger.GetClientManger()
+var GlobalSender *manger.ClientManger = manger.GetClientManger()
 var GlobalPlatformManger *manger.PlatformManger = manger.GetPlatformManger()
 var GlobalPlayerManger *manger.PlayerManger = manger.GetPlayerManger()
 

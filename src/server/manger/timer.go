@@ -35,7 +35,7 @@ func GetTimerManager() *TimerManager {
 
 func (m *TimerManager) addTimer(obj interface{}, key string, cb func(), interval int, loop bool) {
 	m.skeleton.AfterFunc(time.Millisecond*time.Duration(interval), func() {
-		if !m.timerVaild(obj, key) {
+		if !m.timerValid(obj, key) {
 			return
 		}
 		if !loop {
@@ -58,7 +58,7 @@ func (m *TimerManager) getTimerIndex(l []*Timer, key string) int {
 	return -1
 }
 
-func (m *TimerManager) timerVaild(obj interface{}, key string) bool {
+func (m *TimerManager) timerValid(obj interface{}, key string) bool {
 	l, ok := m.timerMap[obj]
 	if !ok {
 		return false

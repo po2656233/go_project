@@ -6,6 +6,7 @@ import (
 	"sync"
 	"github.com/name5566/leaf/log"
 	"leaf/gate"
+	"server/conf"
 )
 
 //
@@ -62,6 +63,11 @@ func (self *ClientManger) DeleteClient(userID uint64) {
 		self.Delete(agent)
 	}
 }
+
+///
+
+
+
 ///------------------------广播---------------------------------------///
 //全网广播
 func (self *ClientManger) NotifyAll(mainID, subID uint32, msg proto.Message) {
@@ -97,8 +103,21 @@ func (self *ClientManger) NotifyAll(mainID, subID uint32, msg proto.Message) {
 	})
 }
 
+//
+func (self *ClientManger) SendData(agent gate.Agent, mainID, subID uint32, msg proto.Message){
+	if conf.Server.CarryMainSubID{
+		data, _ := proto.Marshal(msg)
+		packet := &protoMsg.PacketData{
+			MainID:    mainID,
+			SubID:     subID,
+			TransData: data,
+		}
+		agent.WriteMsg(packet)
+		return
+	}
 
-
+	agent.WriteMsg(msg)
+}
 
 
 

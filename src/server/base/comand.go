@@ -1,12 +1,8 @@
 package base
 
 //MainID 200+ || SubID 100+
-
 const (
 	//注册
-	MainRegister = 200 //-> 注册
-	SubRegister  = 101 //-> 注册
-
 	//登录
 	MainLogin          = 201 //-> 登录
 	SubLoginResult     = 101 //-> 登录结果
@@ -35,13 +31,14 @@ const (
 	SubGameFrameResult    = 109 //结果信息
 	SubGameFrameReady     = 110 //准备
 
+	//游戏状态=
 	MainGameState       = 401 //游戏状态
 	SubGameStateStart   = 101 //开始
 	SubGameStatePlaying = 102 //游戏中(下注)
 	SubGameStateOver    = 103 //开奖
-    SubGameStateCall 	= 104	//叫分
+	SubGameStateCall    = 104 //叫分
 
-//状态
+	//玩家状态=
 	MainPlayerState = 500 //玩家状态
 	PlayerSitDown   = 1   //坐下
 	PlayerAgree     = 2   //同意
@@ -61,8 +58,8 @@ const (
 
 	//源码中重要标识
 	INVALID = 0 //无效(切记有效初始化,不要从零开始)
-	FAILD   = 0 //失败
-	SUCCESS = 1 //成功
+	FAILD   = 0  //失败
+	SUCCESS = 1  //成功
 
 	//房间级别
 	RoomGeneral = 0 //普通
@@ -70,11 +67,10 @@ const (
 	RoomHigh    = 2 //高级
 
 	//游戏kindID
-	Baccarat  = 2001
-	FishLord  = 3003
-	Landlords = 3001
-	CowCow    = 1001
-	Mahjong   = 3002
+	Baccarat     = 2001
+	FishLord     = 3003
+	Landlords    = 3001
+	CowCow       = 1001
+	Mahjong      = 3002
 	ChinessChess = 8002
 )
-

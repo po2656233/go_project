@@ -71,10 +71,10 @@ func enter(args []interface{}) {
 		var enterArgs []interface{}
 
 		//todo 先确定平台里能获取到指定玩家
-		roomManger := GetPlatformManger().Get(player.PlatformID)
-		if gameLimit := mysql.SqlHandle().CheckGameInfo(player.GameID); gameLimit != nil { //[1-0
+		platformer := GetPlatformManger().Get(player.PlatformID)
+		if gameLimit := mysql.SqlHandle().CheckGameInfo(player.GameID); nil != platformer && gameLimit != nil { //[1-0
 			//补充游戏实例
-			if room, _ := roomManger.Roomer.Create(player.RoomNum); room != nil { //[1
+			if room, _ := platformer.Roomer.Create(player.RoomNum); room != nil { //[1
 				if _, isOk := room.GetGameHandle(gameLimit.KindID, gameLimit.Level); !isOk { //[2
 					//创建游戏实例
 					if instance := productGame(gameLimit.KindID, gameLimit.Level); instance != nil { //[3

@@ -9,6 +9,7 @@ import (
 	"log"
 )
 
+
 //异常处理
 func CheckError(err error) {
 	if err != nil {

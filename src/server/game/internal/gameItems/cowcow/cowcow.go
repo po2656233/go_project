@@ -96,10 +96,10 @@ func (self *CowcowGame) UpdateInfo(args []interface{}) { //更新玩家列表[�
 	switch flag {
 	case GameUpdateOut: //玩家离开 不再向该玩家广播消息[] 删除
 		self.DeletePlayer(userID)
-		GlobalClientManger.NotifyOthers(self.PlayerList, MainGameUpdate, GameUpdatePlayerList, &playerList)
+		GlobalSender.NotifyOthers(self.PlayerList, MainGameUpdate, GameUpdatePlayerList, &playerList)
 	case GameUpdatePlayerList: //更新玩家列表
 		self.AddPlayer(userID)
-		GlobalClientManger.NotifyOthers(self.PlayerList, MainGameUpdate, GameUpdatePlayerList, &playerList)
+		GlobalSender.NotifyOthers(self.PlayerList, MainGameUpdate, GameUpdatePlayerList, &playerList)
 	case GameUpdateHost: //更新玩家抢庄信息
 	case GameUpdateSuperHost: //更新玩家超级抢庄信息
 	case GameUpdateOffline: //更新玩家超级抢庄信息
@@ -147,7 +147,7 @@ func (self *CowcowGame) Playing(args []interface{}) {
 	if self.gameState != SubGameSencePlaying {
 		betResult.State = *proto.Int32(1)
 		betResult.Hints = *proto.String("过了下注时间")
-		sender.WriteMsg(betResult)
+		GlobalSender.SendData(sender,MainGameFrame,SubGameFramePlaying, betResult)
 		return
 	}
 
@@ -156,7 +156,7 @@ func (self *CowcowGame) Playing(args []interface{}) {
 		betResult.State = *proto.Int32(1)
 		betResult.Hints = *proto.String("数据库里的钱不够")
 		log.Debug("下注失败 玩家ID:%v 现有金币:%v 下注金币:%v", player.UserID, money, m.BetScore)
-		sender.WriteMsg(betResult)
+		GlobalSender.SendData(sender,MainGameFrame,SubGameFramePlaying, betResult)
 		return
 	}
 
@@ -187,11 +187,11 @@ func (self *CowcowGame) Playing(args []interface{}) {
 		log.Debug("[百家乐]第一次:%v", m)
 		self.playerBetInfo[player.UserID] = CopyInsert(self.playerBetInfo[player.UserID], len(self.playerBetInfo[player.UserID]), *m).([]protoMsg.GameBet)
 	}
-	sender.WriteMsg(betResult)
+	GlobalSender.SendData(sender,MainGameFrame,SubGameFramePlaying, betResult)
 
 	//通知其他玩家
 	//manger.NotifyButOthers(self.PlayerList, MainGameFrame, SubGameFramePlaying, m)
-	GlobalClientManger.NotifyOthers(self.PlayerList, MainGameFrame, SubGameFramePlaying, m)
+	GlobalSender.NotifyOthers(self.PlayerList, MainGameFrame, SubGameFramePlaying, m)
 }
 
 // 结算
@@ -247,7 +247,7 @@ func (self *CowcowGame)onStart(){
 		timer.AfterFunc(freeTime*time.Second, self.onPlay)
 	}
 	log.Release("[牛牛:%v]游戏开始",self.roundNumber)
-	GlobalClientManger.NotifyOthers(self.PlayerList, MainGameState, SubGameStateStart, nil)
+	GlobalSender.NotifyOthers(self.PlayerList, MainGameState, SubGameStateStart, nil)
 }
 
 func (self *CowcowGame)onPlay(){
@@ -260,7 +260,7 @@ func (self *CowcowGame)onPlay(){
 		timer.AfterFunc(betTime*time.Second, self.onOver)
 	}
 
-	GlobalClientManger.NotifyOthers(self.PlayerList, MainGameState, SubGameStatePlaying, nil)
+	GlobalSender.NotifyOthers(self.PlayerList, MainGameState, SubGameStatePlaying, nil)
 }
 
 func (self *CowcowGame)onOver(){
@@ -273,7 +273,7 @@ func (self *CowcowGame)onOver(){
 		timer.AfterFunc(openTime*time.Second, self.onStart)
 	}
 	//当有玩家结算信息时,该
-	GlobalClientManger.NotifyOthers(self.PlayerList, MainGameState, SubGameStateOver, nil)
+	GlobalSender.NotifyOthers(self.PlayerList, MainGameState, SubGameStateOver, nil)
 
 	log.Release("[牛牛]结算中...")
 	self.Over(nil)
@@ -405,7 +405,7 @@ func (self *CowcowGame) calculateScore() {
 	}
 
 	// 发给没下注玩家
-	GlobalClientManger.NotifyOthers(self.PlayerList, MainGameFrame, SubGameFrameOver, self.overResult)
+	GlobalSender.NotifyOthers(self.PlayerList, MainGameFrame, SubGameFrameOver, self.overResult)
 }
 func (self *CowcowGame) deduceWin() ([]byte,[]float64){
 	pWinArea := make([]byte, AREA_MAX)
