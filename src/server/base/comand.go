@@ -24,7 +24,7 @@ const (
 	SubGameFramePlaying   = 102 //游戏中(下注)
 	SubGameFrameOver      = 103 //开奖
 	SubGameFrameBetResult = 104 //下注结果
-	SubGameFrameCheckout  = 105 //下注结果
+	SubGameFrameCheckout  = 105 //结算
 	SubGameFrameSetHost   = 106 //定庄
 	SubGameFrameHost      = 107 //抢庄
 	SubGameFrameSuperHost = 108 //超级抢庄
@@ -42,7 +42,7 @@ const (
 	MainPlayerState = 500 //玩家状态
 	PlayerSitDown   = 1   //坐下
 	PlayerAgree     = 2   //同意
-	PlayerAction    = 3   //游戏
+	PlayerPlaying    = 3   //游戏
 	PlayerStandUp   = 4   //站起
 	PlayerLookOn    = 5   //旁观
 

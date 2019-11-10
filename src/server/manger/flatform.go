@@ -34,14 +34,14 @@ func GetPlatformManger() *PlatformManger {
 //添加玩家
 func (self *PlatformManger) Append(plat *PlatformInfo) bool {
 	if _, ok := self.Load(plat.ID); !ok {
-		log.Debug("新增一个玩家ID:%v", plat.ID)
+		log.Debug("新增平台ID:%v NAME:%v", plat.ID,plat.Name)
 		if nil == plat.Roomer{
 			plat.Roomer = CreateRoomManger()
 		}
 		self.Store(plat.ID, plat)
 		return true
 	} else {
-		log.Debug("玩家ID:%v 已經存在", plat.ID)
+		log.Debug("平台ID:%v 已經存在 NAME:%v", plat.ID,plat.Name)
 		return false
 	}
 }
@@ -59,6 +59,7 @@ func (self *PlatformManger) Get(platformID uint32) *PlatformInfo {
 func (self *PlatformManger) Exist(platformID uint32) bool {
 	isHas := false
 	self.Range(func(key, value interface{}) bool {
+
 		if key.(uint32) == platformID {
 			isHas = true
 			return false
@@ -66,4 +67,18 @@ func (self *PlatformManger) Exist(platformID uint32) bool {
 		return true
 	})
 	return isHas
+}
+
+func (self *PlatformManger) GetForName(platformName string) *PlatformInfo {
+	isHas := false
+	var plat *PlatformInfo = nil
+	self.Range(func(key, value interface{}) bool {
+		plat = value.(*PlatformInfo)
+		if plat.Name == platformName {
+			isHas = true
+			return false
+		}
+		return true
+	})
+	return plat
 }

@@ -19,9 +19,10 @@ type Player struct {
 	Account    string // 账号(手机号码/邮箱/真名)
 	Gold       int64  // 金币(与真实金币 扩大100倍)
 	Sate       byte   // 状态 0:旁观 1:坐下 2:同意  3:站起
-	PlatformID uint32 // 平台ID 0:无效
-	RoomNum    uint32 // 房间号 0:无效
-	GameID     uint32 // 所在游戏ID 0:无效
+	PlatformID  uint32 // 平台ID 0:无效
+	RoomNum     uint32 // 房间号 0:无效
+	GameID		uint32 // 所在游戏ID 0:无效
+	Game  		*GameItem //所在游戏
 }
 
 //玩家行为
@@ -136,50 +137,51 @@ func (self *Player) Enter(args []interface{}) { //入场
 						game.Scene(sceneArgs) // 【进入-> 游戏场景】
 					} else { //2]
 						//MainLogin, SubEnterGameResult
-						sender.WriteMsg(&protoMsg.ResResult{State: 1, Hints: string("error:not allow to enter!")})
+						GetClientManger().SendData(sender,MainLogin,SubEnterGameResult,&protoMsg.ResResult{State: FAILD, Hints: string("error:not allow to enter!")})
 					}
 					log.Debug("[进入游戏]---游戏准入条件(LessScore:%v EnterScore:%v)--->user money:%v", gameInfo.LessScore, gameInfo.EnterScore, self.Gold)
 
 				} else { //1]
-					sender.WriteMsg(&protoMsg.ResResult{State: 1, Hints: string("error:not game handle!")})
+					GetClientManger().SendData(sender,MainLogin,SubEnterGameResult,&protoMsg.ResResult{State:FAILD, Hints: string("error:not game handle!")})
 				}
 			} else { //0]]
-				sender.WriteMsg(&protoMsg.ResResult{State: 1, Hints: string("error:not room info!")})
+				GetClientManger().SendData(sender,MainLogin,SubEnterGameResult,&protoMsg.ResResult{State:FAILD, Hints: string("error:not room info!")})
 			}
 		}
 	}
 }
 
 func (self *Player) Out(args []interface{}) { //出场
-	gameInfo := args[0].(*protoMsg.GameBaseInfo)
-	self.updateGameInfo(gameInfo.KindID, gameInfo.Level, uint32(GameUpdateOut), args[1], nil)
+	_=args[2]
+	self.updateGameInfo(args[0].(uint32), args[1].(uint32), uint32(GameUpdateOut), args[2], nil)
 }
 func (self *Player) Offline(args []interface{}) { //离线
-	gameInfo := args[0].(*protoMsg.GameBaseInfo)
-	self.updateGameInfo(gameInfo.KindID, gameInfo.Level, uint32(GameUpdateOffline), args[1], nil)
+	_=args[2]
+	self.updateGameInfo(args[0].(uint32), args[1].(uint32), uint32(GameUpdateOffline), args[2], nil)
 }
 func (self *Player) Reconnect(args []interface{}) { //重入
-	gameInfo := args[0].(*protoMsg.GameBaseInfo)
-	self.updateGameInfo(gameInfo.KindID, gameInfo.Level, uint32(GameUpdateReconnect), args[1], nil)
+	_=args[2]
+	self.updateGameInfo(args[0].(uint32), args[1].(uint32), uint32(GameUpdateReconnect), args[2], nil)
 }
 func (self *Player) Ready(args []interface{}) { //准备
-	gameInfo := args[0].(*protoMsg.GameBaseInfo)
-	self.updateGameInfo(gameInfo.KindID, gameInfo.Level, uint32(GameUpdateReady), args[1], nil)
+	_=args[2]
+	self.updateGameInfo(args[0].(uint32), args[1].(uint32), uint32(GameUpdateReady), args[2], nil)
 
 }
 func (self *Player) Host(args []interface{}) { //抢庄
-	gameInfo := args[0].(*protoMsg.GameBaseInfo)
-	host := args[1].(*protoMsg.GameHost)
-	self.updateGameInfo(gameInfo.KindID, gameInfo.Level, uint32(GameUpdateHost), args[2], host)
+	_=args[3]
+	host := args[2].(*protoMsg.GameHost)
+	self.updateGameInfo(args[0].(uint32), args[1].(uint32), uint32(GameUpdateHost), args[3], host)
+
 }
 
 func (self *Player) SuperHost(args []interface{}) { //超级抢庄
-	gameInfo := args[0].(*protoMsg.GameBaseInfo)
-	superHost := args[1].(*protoMsg.GameSuperHost)
-	self.updateGameInfo(gameInfo.KindID, gameInfo.Level, uint32(GameUpdateSuperHost), args[2], superHost)
+	_=args[3]
+	superHost := args[2].(*protoMsg.GameSuperHost)
+	self.updateGameInfo(args[0].(uint32), args[1].(uint32), uint32(GameUpdateHost), args[3], superHost)
 }
 
-func (self *Player) updateGameInfo(kindID, level, flag uint32, agent interface{}, message proto.Message, ) bool {
+func (self *Player) updateGameInfo(kindID, level, flag uint32, agent interface{}, message proto.Message) bool {
 	// 平台维度
 	platformManger := GetPlatformManger().Get(self.PlatformID)
 	// 房间维度
@@ -188,7 +190,7 @@ func (self *Player) updateGameInfo(kindID, level, flag uint32, agent interface{}
 			// 游戏维度
 			if handle, ok := room.GetGameHandle(kindID, level); ok { //[1-0
 				var updateArgs []interface{}
-				updateArgs = append(updateArgs, flag, agent, message)
+				updateArgs = append(updateArgs, flag, agent, self.UserID, message)
 				handle.UpdateInfo(updateArgs)
 				return true
 			}

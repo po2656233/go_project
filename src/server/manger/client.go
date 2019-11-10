@@ -71,8 +71,8 @@ func (self *ClientManger) DeleteClient(userID uint64) {
 ///------------------------广播---------------------------------------///
 //全网广播
 func (self *ClientManger) NotifyAll(mainID, subID uint32, msg proto.Message) {
-	defer wait.Done()
-	wait.Add(1)
+	//defer wait.Done()
+	//wait.Add(1)
 	self.Range(func(key, value interface{}) bool {
 		agent := key.(gate.Agent)
 		if nil == agent {
@@ -80,11 +80,13 @@ func (self *ClientManger) NotifyAll(mainID, subID uint32, msg proto.Message) {
 			return true
 		}
 		//指令+数据  包体内容
-		data, _ := proto.Marshal(msg)
-		packet := &protoMsg.PacketData{
-			MainID:    mainID,
-			SubID:     subID,
-			TransData: data,
+		if conf.Server.CarryMainSubID{
+			data, _ := proto.Marshal(msg)
+			msg = &protoMsg.PacketData{
+				MainID:    mainID,
+				SubID:     subID,
+				TransData: data,
+			}
 		}
 
 
@@ -98,7 +100,7 @@ func (self *ClientManger) NotifyAll(mainID, subID uint32, msg proto.Message) {
 		}
 
 		//广播给客户端
-		agent.NotifyMsg(packet)
+		agent.NotifyMsg(msg)
 		return true
 	})
 }
@@ -118,13 +120,10 @@ func (self *ClientManger) SendData(agent gate.Agent, mainID, subID uint32, msg p
 
 	agent.WriteMsg(msg)
 }
-
-
-
-//通知除指定玩家外的玩家们
-func (self *ClientManger) NotifyButOthers(userIDs []uint64, mainID, subID uint32, msg proto.Message) {
-	defer wait.Done()
-	wait.Add(1)
+//
+func (self *ClientManger) SendTo(userID uint64, mainID, subID uint32, msg proto.Message){
+	//defer wait.Done()
+	//wait.Add(1)
 	self.Range(func(key, value interface{}) bool {
 		agent := key.(gate.Agent)
 		if nil == agent {
@@ -132,13 +131,48 @@ func (self *ClientManger) NotifyButOthers(userIDs []uint64, mainID, subID uint32
 			return true
 		}
 		//指令+数据  包体内容
-		data, _ := proto.Marshal(msg)
-		packet := &protoMsg.PacketData{
-			MainID:    mainID,
-			SubID:     subID,
-			TransData: data,
+		if conf.Server.CarryMainSubID{
+			data, _ := proto.Marshal(msg)
+			msg = &protoMsg.PacketData{
+				MainID:    mainID,
+				SubID:     subID,
+				TransData: data,
+			}
 		}
 
+		//获取用户ID
+		userData := agent.UserData()
+		if nil != userData && userData.(*Player).UserID == userID{
+			//广播给客户端
+			agent.WriteMsg(msg)
+			log.Debug("发送[指定]玩家：%v", userID)
+			return false
+		}
+		log.Debug("err:发送客户端IP：%v 无效玩家信息", agent.RemoteAddr())
+		return true
+	})
+}
+
+
+//通知除指定玩家外的玩家们
+func (self *ClientManger) NotifyButOthers(userIDs []uint64, mainID, subID uint32, msg proto.Message) {
+	//defer wait.Done()
+	//wait.Add(1)
+	self.Range(func(key, value interface{}) bool {
+		agent := key.(gate.Agent)
+		if nil == agent {
+			log.Debug("无效客户端:%v", key)
+			return true
+		}
+		//指令+数据  包体内容
+		if conf.Server.CarryMainSubID{
+			data, _ := proto.Marshal(msg)
+			msg = &protoMsg.PacketData{
+				MainID:    mainID,
+				SubID:     subID,
+				TransData: data,
+			}
+		}
 
 		//获取用户ID
 		userData := agent.UserData()
@@ -156,15 +190,15 @@ func (self *ClientManger) NotifyButOthers(userIDs []uint64, mainID, subID uint32
 		}
 
 		//广播给客户端
-		agent.NotifyMsg(packet)
+		agent.NotifyMsg(msg)
 		return true
 	})
 }
 
 func (self *ClientManger) NotifyOthers(userIDs []uint64, mainID, subID uint32, msg proto.Message) {
-
-	defer wait.Done()
-	wait.Add(1)
+	//线程安全无需添加
+	//defer wait.Done()
+	//wait.Add(1)
 	self.Range(func(key, value interface{}) bool {
 		agent := key.(gate.Agent)
 		if nil == agent {
@@ -172,23 +206,24 @@ func (self *ClientManger) NotifyOthers(userIDs []uint64, mainID, subID uint32, m
 			return true
 		}
 		//指令+数据  包体内容
-		data, _ := proto.Marshal(msg)
-		packet := &protoMsg.PacketData{
-			MainID:    mainID,
-			SubID:     subID,
-			TransData: data,
+		if conf.Server.CarryMainSubID{
+			data, _ := proto.Marshal(msg)
+			msg = &protoMsg.PacketData{
+				MainID:    mainID,
+				SubID:     subID,
+				TransData: data,
+			}
 		}
-
 
 		//获取用户ID
 		userData := agent.UserData()
 		if nil != userData{
 			userID := userData.(*Player).UserID
-			//不通知该部分玩家
+			//通知该部分玩家
 			for _, uid := range userIDs {
 				if uid == userID {
 					//广播给客户端
-					agent.NotifyMsg(packet)
+					agent.NotifyMsg(msg)
 					log.Debug("通知[指定]玩家：%v", userID)
 				}
 			}

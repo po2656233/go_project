@@ -76,7 +76,7 @@ func handleLogin(args []interface{}) {
 		player.Account = name
 		player.Gold = gold
 		player.Sate = INVALID
-		player.PlatformID = INVALID
+		player.PlatformID = sqlHandle.CheckPlatformInfo(uid)
 		player.RoomNum = INVALID
 		player.GameID = INVALID
 

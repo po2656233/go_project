@@ -4,7 +4,7 @@ import (
 	"github.com/name5566/leaf/gate"
 	"github.com/name5566/leaf/log"
 	"reflect"
-	."server/manger"
+	. "server/manger"
 	. "server/base"
 	"server/game/internal/gameItems/baccarat"
 	"server/game/internal/gameItems/cowcow"
@@ -14,6 +14,7 @@ import (
 	"server/game/internal/gameItems/chineseChess"
 
 	"server/sql/mysql"
+	"server/game/internal/gameItems"
 )
 
 //初始化
@@ -61,117 +62,129 @@ func productGame(kindID, level uint32) interface{} {
 //进入
 func enter(args []interface{}) {
 	//查找玩家
+	_ = args[1]
 	m := args[0].(*protoMsg.ReqEnterGame)
 	agent := args[1].(gate.Agent)
 	if userData := agent.UserData(); userData != nil { //[0
-		//补充用户信息
+		//玩家坐下
 		player := userData.(*Player)
-		player.Sate = PlayerLookOn
+		player.Sate = PlayerSitDown
 		player.GameID = m.GetGameID()
-		var enterArgs []interface{}
 
-		//todo 先确定平台里能获取到指定玩家
-		platformer := GetPlatformManger().Get(player.PlatformID)
-		if gameLimit := mysql.SqlHandle().CheckGameInfo(player.GameID); nil != platformer && gameLimit != nil { //[1-0
-			//补充游戏实例
-			if room, _ := platformer.Roomer.Create(player.RoomNum); room != nil { //[1
-				if _, isOk := room.GetGameHandle(gameLimit.KindID, gameLimit.Level); !isOk { //[2
-					//创建游戏实例
-					if instance := productGame(gameLimit.KindID, gameLimit.Level); instance != nil { //[3
-						item := &GameItem{KindID: gameLimit.KindID, Level: gameLimit.Level}
-						//游戏实例
-						item.Instance = instance.(IGameOperate)
-						//房间添加游戏资源
-						room.AddSource(item)
+		if platform := GetPlatformManger().Get(player.PlatformID); nil != platform {
+			if gameLimit := mysql.SqlHandle().CheckGameInfo(player.GameID); gameLimit != nil { //[1-0
+				//补充游戏实例
+				if room, _ := platform.Roomer.Create(player.RoomNum); room != nil { //[1
+					if gameItem, isOk := room.CheckGame(gameLimit.KindID, gameLimit.Level); !isOk { //[2
+						//创建游戏实例
+						if instance := productGame(gameLimit.KindID, gameLimit.Level); instance != nil { //[3
+							item := &GameItem{KindID: gameLimit.KindID, Level: gameLimit.Level}
+							//游戏实例
+							item.Instance = instance.(IGameOperate)
+							//房间增加游戏
+							room.AddSource(item)
+							//玩家所在游戏
+							player.Game = item
+						}
+					} else {
+						//玩家所在游戏
+						player.Game = gameItem
 					}
+					//玩家进入(游戏场景)
+					var enterArgs []interface{}
+					enterArgs = append(enterArgs, gameLimit, agent)
+					player.Enter(enterArgs)
+					log.Debug("场景参数:%v GameID:%v", enterArgs, player.GameID)
+				} else {
+					gameItems.GlobalSender.SendData(agent, MainLogin, SubEnterGameResult, &protoMsg.ResResult{State: FAILD, Hints: string("error:room Permission denied!")})
+					log.Debug(" 房间:%v 不存在!", player.GameID,player.RoomNum)
 				}
+			} else {
+				gameItems.GlobalSender.SendData(agent, MainLogin, SubEnterGameResult, &protoMsg.ResResult{State: FAILD, Hints: string("error:not Game Handle!")})
+				log.Debug("游戏ID:%v 没有对应的游戏实例", player.GameID)
 			}
-			//游戏种类 游戏级别
-			enterArgs = append(enterArgs, gameLimit)
+		} else {
+			gameItems.GlobalSender.SendData(agent, MainLogin, SubEnterGameResult, &protoMsg.ResResult{State: FAILD, Hints: string("error:not platform info!")})
+			log.Debug("不存在 %v平台 ", player.PlatformID)
 		}
-		log.Debug("场景参数:%v GameID:%v", enterArgs, player.GameID)
-		//玩家进入(游戏场景)
-		if 0 < len(enterArgs) {
-			player.Enter(enterArgs)
-		}
-
 	}
-}
-
-func exit(args []interface{}) {
-	//m := args[0].(*protoMsg.ReqExitGame)
-	////查找玩家
-	//if player := playerManger.Get_1(args[1].(gate.Agent)); player != nil { //[0
-	//	if gameInfo := sqlHandle.CheckGameInfo(m.GameID); gameInfo != nil {
-	//		var hostArgs []interface{}
-	//		hostArgs = append(hostArgs, gameInfo, args[0])
-	//		player.Out(hostArgs)
-	//	}
-	//
-	//}
 }
 
 //游戏
 func playing(args []interface{}) {
-	//agent := args[1].(gate.Agent)
-	//if player := playerManger.Get_1(agent); player != nil { //[0
-	//	if gameInfo := sqlHandle.CheckGameInfo(player.GameID); gameInfo != nil {
-	//		if room, ok := roomManger.Check(player.RoomNum); ok {
-	//			if handle, ok := room.GetGameHandle(gameInfo.KindID, gameInfo.Level); ok {
-	//				//下注
-	//				handle.Playing(args)
-	//			} else {
-	//				log.Debug("game bet:INVALID!")
-	//			}
-	//		} else {
-	//			log.Debug("room:INVALID!")
-	//		}
-	//	}
-	//} else {
-	//	log.Debug("no player!")
-	//	//tempPlayer := &Player{Agent: agent}
-	//	//tempPlayer.Feedback(MainGameFrame, SubGameFrameBetResult, FAILD, string("no player!"))
-	//}
-
-}
-
-//抢庄
-func host(args []interface{}) {
 	//查找玩家
-	//if player := playerManger.Get_1(args[1].(gate.Agent)); player != nil { //[0
-	//	if gameInfo := sqlHandle.CheckGameInfo(player.GameID); gameInfo != nil {
-	//		var hostArgs []interface{}
-	//		hostArgs = append(hostArgs, gameInfo, args[0])
-	//		player.Host(hostArgs)
-	//	}
-	//
-	//}
-}
+	_ = args[1]
+	agent := args[1].(gate.Agent)
+	if userData := agent.UserData(); userData != nil { //[0
+		player := userData.(*Player)
+		//玩家状态:游戏中
+		player.Sate = PlayerPlaying
+		if game := player.Game; nil != game {
+			if gameHandel := game.Instance; nil != gameHandel {
+				gameHandel.Playing(args)
+			}
+		}
+	}
 
-//超级抢庄
-func superHost(args []interface{}) {
-	////查找玩家
-	//if player := playerManger.Get_1(args[1].(gate.Agent)); player != nil { //[0
-	//	if gameInfo := sqlHandle.CheckGameInfo(player.GameID); gameInfo != nil {
-	//		var hostArgs []interface{}
-	//		hostArgs = append(hostArgs, gameInfo, args[0])
-	//		player.SuperHost(hostArgs)
-	//	}
-	//
-	//}
 }
 
 // 玩家准备
 func ready(args []interface{}) {
-	////查找玩家
-	//if player := playerManger.Get_1(args[1].(gate.Agent)); player != nil { //[0
-	//	if gameInfo := sqlHandle.CheckGameInfo(player.GameID); gameInfo != nil {
-	//		var readyArgs []interface{}
-	//		readyArgs = append(readyArgs, gameInfo, args[0])
-	//		player.Ready(readyArgs)
-	//	}
-	//
-	//}
+	_ = args[1]
+	agent := args[1].(gate.Agent)
+	if userData := agent.UserData(); userData != nil { //[0
+		player := userData.(*Player)
+		//玩家状态:游戏中
+		player.Sate = PlayerAgree
+		if game := player.Game; nil != game && nil != game.Instance {
+			var readyArgs []interface{}
+			readyArgs = append(readyArgs, game.KindID, game.Level, player.UserID, agent)
+			player.Ready(readyArgs)
+		}
+	}
+}
+func exit(args []interface{}) {
+	_ = args[1]
+	agent := args[1].(gate.Agent)
+	if userData := agent.UserData(); userData != nil { //[0
+		player := userData.(*Player)
+		//玩家状态:游戏中
+		player.Sate = PlayerStandUp
+		if game := player.Game; nil != game && nil != game.Instance {
+			var outArgs []interface{}
+			outArgs = append(outArgs, game.KindID, game.Level, player.UserID, agent)
+			player.Out(outArgs)
+			player.Game = nil
+		}
+	}
+}
+
+//抢庄
+func host(args []interface{}) {
+	_ = args[1]
+	agent := args[1].(gate.Agent)
+	if userData := agent.UserData(); userData != nil { //[0
+		player := userData.(*Player)
+		if game := player.Game; nil != game && nil != game.Instance {
+			var hostArgs []interface{}
+			hostArgs = append(hostArgs, game.KindID, game.Level, args[0], args[1])
+			player.Host(hostArgs)
+		}
+	}
+}
+
+//超级抢庄
+func superHost(args []interface{}) {
+	_ = args[1]
+	agent := args[1].(gate.Agent)
+	if userData := agent.UserData(); userData != nil { //[0
+		player := userData.(*Player)
+		if game := player.Game; nil != game && nil != game.Instance {
+			var hostArgs []interface{}
+			hostArgs = append(hostArgs, game.KindID, game.Level, args[0], args[1])
+			player.SuperHost(hostArgs)
+		}
+	}
 }
 
 //测试用

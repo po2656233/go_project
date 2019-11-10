@@ -186,16 +186,13 @@ func (self *LandlordGame) Over(args []interface{}) {
 	log.Debug("结算")
 	self.readyCount = 0
 	self.siteInfo = make(map[uint8]uint64)
-	//return
 	//m := args[0].(*protoMsg.GameLandlordPlaying)
-
 }
 
 // 操作
 func (self *LandlordGame) SuperControl(args []interface{}) {
 	//直接扣除金币
 	log.Debug("操作")
-	//return
 	//m := args[0].(*protoMsg.GameLandlordPlaying)
 }
 

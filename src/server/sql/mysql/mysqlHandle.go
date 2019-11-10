@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"server/manger"
 )
 
 type SqlMan struct {
@@ -41,8 +42,9 @@ func SqlHandle() *SqlMan {
 			dbName:   string("qipaiinfo"),
 			db:       nil,
 		}
+		sqlobj.Init()
 	})
-	sqlobj.Init()
+
 	return sqlobj
 }
 
@@ -53,7 +55,36 @@ func (self *SqlMan) Init() {
 		_, err := self.ConnectMySql("root", "0000", "127.0.0.1", "3306", "qipaiinfo")
 		CheckError(err)
 	}
+	//获取平台信息
+	self.initPlatformInfo()
+
+	//获取所有房间信息
+
+	//获取所有玩家信息
 }
+
+//获取平台信息
+func (self *SqlMan) initPlatformInfo() bool {
+	rows, err := self.db.Query("SELECT id,name FROM platform ")
+	defer rows.Close()
+	CheckError(err)
+	var id uint32
+	var name string
+	for rows.Next() {
+
+		if err := rows.Scan(&id, &name); err != nil {
+			log.Fatal(err.Error())
+			return false
+		}
+		manger.GetPlatformManger().Append(&manger.PlatformInfo{
+			ID:   id,
+			Name: name,
+		})
+	}
+	return true
+}
+
+// 创建玩家信息
 
 //关闭mysql
 func (self *SqlMan) CloseMysql() {
@@ -180,7 +211,7 @@ func (self *SqlMan) CheckMoney(userID uint64) float64 {
 
 	CheckError(err)
 
-	 userMoney := float64(0.0)
+	userMoney := float64(0.0)
 	for rows.Next() {
 		if err := rows.Scan(&userMoney); err != nil {
 			log.Fatal(err.Error())
@@ -219,12 +250,9 @@ func (self *SqlMan) CheckUserInfo(userID uint64) (name string, age, sex, vipLeve
 		}
 		break
 	}
-	money = int64(fMoney*100)
+	money = int64(fMoney * 100)
 	return name, age, sex, vipLevel, money
 }
-
-
-
 
 //扣除金币 注:返回类型最好使用error
 func (self *SqlMan) DeductMoney(userID uint64, money int64) (nowMoney int64, isOK bool) {
@@ -237,13 +265,13 @@ func (self *SqlMan) DeductMoney(userID uint64, money int64) (nowMoney int64, isO
 	for rows.Next() {
 		if err := rows.Scan(&preMoney); err != nil {
 			log.Fatal(err.Error())
-			return int64(preMoney*100), isOK
+			return int64(preMoney * 100), isOK
 		}
 		break
 	}
 
-	log.Debug("ID:%v 金额:%v ",userID, int64(preMoney*100))
-	nowMoney =  int64(preMoney*100) - money
+	log.Debug("ID:%v 金额:%v ", userID, int64(preMoney*100))
+	nowMoney = int64(preMoney*100) - money
 	if nowMoney <= 0 {
 		log.Debug("金额成负数了:%v  %v %v", nowMoney/100, money/100, userID)
 		return nowMoney, isOK
@@ -264,22 +292,19 @@ func (self *SqlMan) AddUser(user, password, adress, port, dbName string) error {
 	return err
 }
 
-
 //获取平台信息
-func (self *SqlMan) CheckPlatformInfo(platformID uint64) (name string, age, sex, vipLevel uint32, money int64) {
-	rows, err := self.db.Query("SELECT Name,Age,Sex,Money,VipLevel FROM user WHERE ID in(?)", platformID)
+func (self *SqlMan) CheckPlatformInfo(uid uint64) (platformID uint32) {
+	rows, err := self.db.Query("SELECT PlatformID FROM user WHERE ID in(?)", uid)
 	defer rows.Close()
 	CheckError(err)
 
-	fMoney := 0.0
 	for rows.Next() {
-		if err := rows.Scan(&name, &age, &sex, &fMoney, &vipLevel); err != nil {
+		if err := rows.Scan(&platformID); err != nil {
 			log.Fatal(err.Error())
 		}
 		break
 	}
-	money = int64(fMoney*100)
-	return name, age, sex, vipLevel, money
+	return platformID
 }
 
 
