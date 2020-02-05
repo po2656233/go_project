@@ -1,0 +1,9 @@
+{
+	"logLevel": "debug",
+	"logPath": "",
+	"tcpAddr": "127.0.0.1:9560",
+	"wsAddr": "127.0.0.1:9650",
+	"maxConnNum": 2000000,
+	"profilePath":"../msg/go",
+	"carryMainSubID":true
+}

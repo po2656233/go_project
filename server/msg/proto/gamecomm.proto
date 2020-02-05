@@ -1,0 +1,79 @@
+syntax = "proto3";
+package go;
+
+//玩家信息
+message PlayerInfo{
+    uint64 UserID = 1;          //ID
+    string Name = 2;            //账号
+    int32 Age = 3;              //年龄
+    int32 Sex = 4;              //性别
+    int64 Gold = 5;             //金币 *100
+    int32 VipLevel = 6;         //vip级别
+    string Account = 7;         // 账号(手机号码/邮箱/真名)
+    int32 Sate = 8;	            // 状态 0:旁观 1:坐下 2:同意  3:站起
+    uint32 PlatformID = 9;      // 平台ID 0:无效
+    uint32 RoomNum  = 10;  		// 房间号 0:无效
+    uint32 GameID  = 11;   		// 所在游戏ID 0:无效
+}
+//玩家列表
+message UserList{
+    repeated PlayerInfo AllInfos = 1;//所有玩家信息
+}
+
+//玩家记录（从数据库中获取）ResResult
+message PlayerRecord{
+    PlayerInfo User = 1; //玩家
+    int32 Twice = 2;    //游戏次数
+    int32 Ranking = 3;  //当前排名
+    int32 Bankroll = 4; //投注额度
+    int64 WinLos = 5;   //总输赢 （当局）
+}
+
+message GameReady{
+    uint64 UserID = 1;   //ID
+    bool IsReady = 2; // 玩家准备
+}
+
+//下注
+message GameBet{
+    int32 BetArea = 1;				//下注区域
+    int64 BetScore = 2;				//下注金额
+}
+//下注结果
+message GameBetResult{
+    uint64 UserID = 1;   //ID
+    int32 State = 2;					//状态
+    string Hints = 3;					//提示
+    int32 BetArea = 4;				//下注区域
+    int64 BetScore = 5;				//下注金额
+}
+
+//抢庄
+message GameHost{
+    bool IsWant = 1;//true上庄 false取消上庄
+}
+//超级抢庄
+message GameSuperHost{
+    bool IsWant = 1;//true上庄 false取消
+}
+
+
+//游戏记录
+message GameRecord{
+    bytes Pork = 1;//牌
+    int32 Type = 2;//类型
+    bool isWon = 3;//输赢情况
+}
+//历史记录(保存十二条记录)
+message GameRecordList{
+    repeated GameRecord list = 1;//所有历史信息
+}
+
+
+//反馈结果
+message GameResult{
+    int32 Flag = 1;         //标识 0:成功 1:失败 2:其他
+    bytes Reason = 2;       //原因
+}
+
+//

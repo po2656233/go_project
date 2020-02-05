@@ -1,0 +1,9 @@
+syntax = "proto3";
+package go;
+
+//数据包
+message PacketData{
+    uint32 MainID = 1;			//母指令
+    uint32 SubID = 2;			//子指令
+    bytes TransData = 3;        //传输数据
+}
