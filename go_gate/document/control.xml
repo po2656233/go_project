@@ -1,0 +1,10 @@
+<control>    
+<uniline name="busline_name"  serverID="line_serverID"  ip="node_ip"  port="node_port"  enable="false"/>
+<uniline name="busline_name"  serverID="line_serverID"  ip="node_ip"  port="node_port"  enable="false"/>
+<uniline name="busline_name"  serverID="line_serverID"  ip="node_ip"  port="node_port"  enable="false"/>
+<uniline name="busline_name"  serverID="line_serverID"  ip="node_ip"  port="node_port"  enable="false"/>
+<uniline name="busline_name"  serverID="line_serverID"  ip="node_ip"  port="node_port"  enable="true"/>
+<uniline name="busline_name"  serverID="line_serverID"  ip="node_ip"  port="node_port"  enable="true"/>
+<uniline name="busline_name"  serverID="line_serverID"  ip="node_ip"  port="node_port"  enable="true"/>
+<uniline name="busline_name"  serverID="line_serverID"  ip="node_ip"  port="node_port"  enable="true"/>
+</control>    
