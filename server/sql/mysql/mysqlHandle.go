@@ -4,11 +4,11 @@ import (
 	"database/sql"
 	"github.com/name5566/leaf/log"
 	. "server/base"
+	"server/manger"
 	protoMsg "server/msg/go"
 	"strconv"
 	"strings"
 	"sync"
-	"server/manger"
 )
 
 type SqlMan struct {
@@ -18,15 +18,6 @@ type SqlMan struct {
 	port     string
 	dbName   string
 	db       *sql.DB
-}
-
-type ISqlOP interface {
-	ConnectMySql(user, psw, addr, port, db string) //连接数据库
-	CheckServerList() *protoMsg.GameList           //房间列表
-	CheckLogin(user, password string) bool         //登陆
-	CheckMoney(userID uint64) float32              //金额
-	DeductMoney(userID uint64, money float32) bool //扣除金币
-	CloseMysql()
 }
 
 var once sync.Once
@@ -86,9 +77,53 @@ func (self *SqlMan) initPlatformInfo() bool {
 
 // 创建玩家信息
 
+//数据库连接
+func (self *SqlMan) ConnectMySql(user, password, adress, port, dbName string) (*sql.DB, error) {
+	dataSourceName := user + ":" + password + "@tcp(" + adress + ":" + port + ")/" + dbName + "?charset=utf8"
+	db, err := sql.Open("mysql", dataSourceName)
+	self.db = db
+	return db, err
+}
+
 //关闭mysql
 func (self *SqlMan) CloseMysql() {
 	self.db.Close()
+}
+
+// 玩家昵称
+func (self *SqlMan) CheckName(userID uint64) string {
+	var name string = ""
+	rows, err := self.db.Query("SELECT Name FROM user WHERE ID in(?)", userID)
+	defer rows.Close()
+	CheckError(err)
+
+	for rows.Next() {
+		if err := rows.Scan(&name); err != nil {
+			log.Fatal(err.Error())
+		}
+		break
+	}
+
+	return name
+}
+
+//获取玩家账户金币
+func (self *SqlMan) CheckMoney(userID uint64) float32 {
+
+	//rows,err := db.Query("SELECT 'ID','money-count' FROM userinfo WHERE ID=?",userID)
+	rows, err := self.db.Query("SELECT Money FROM user WHERE ID in(?)", userID)
+	defer rows.Close()
+
+	CheckError(err)
+
+	userMoney := float32(0.0)
+	for rows.Next() {
+		if err := rows.Scan(&userMoney); err != nil {
+			log.Fatal(err.Error())
+		}
+		break
+	}
+	return userMoney
 }
 
 //游戏信息
@@ -202,41 +237,6 @@ func (self *SqlMan) CheckLogin(user, password string) (uid uint64, isSuccessful 
 	return uid, isSuccessful
 }
 
-//获取玩家账户金币
-func (self *SqlMan) CheckMoney(userID uint64) float64 {
-
-	//rows,err := db.Query("SELECT 'ID','money-count' FROM userinfo WHERE ID=?",userID)
-	rows, err := self.db.Query("SELECT Money FROM user WHERE ID in(?)", userID)
-	defer rows.Close()
-
-	CheckError(err)
-
-	userMoney := float64(0.0)
-	for rows.Next() {
-		if err := rows.Scan(&userMoney); err != nil {
-			log.Fatal(err.Error())
-		}
-		break
-	}
-	return userMoney
-}
-
-func (self *SqlMan) CheckName(userID uint64) string {
-	var name string = ""
-	rows, err := self.db.Query("SELECT Name FROM user WHERE ID in(?)", userID)
-	defer rows.Close()
-	CheckError(err)
-
-	for rows.Next() {
-		if err := rows.Scan(&name); err != nil {
-			log.Fatal(err.Error())
-		}
-		break
-	}
-
-	return name
-}
-
 //获取玩家信息
 func (self *SqlMan) CheckUserInfo(userID uint64) (name string, age, sex, vipLevel uint32, money int64) {
 	rows, err := self.db.Query("SELECT Name,Age,Sex,Money,VipLevel FROM user WHERE ID in(?)", userID)
@@ -305,16 +305,6 @@ func (self *SqlMan) CheckPlatformInfo(uid uint64) (platformID uint32) {
 		break
 	}
 	return platformID
-}
-
-
-
-//数据库连接
-func (self *SqlMan) ConnectMySql(user, password, adress, port, dbName string) (*sql.DB, error) {
-	dataSourceName := user + ":" + password + "@tcp(" + adress + ":" + port + ")/" + dbName + "?charset=utf8"
-	db, err := sql.Open("mysql", dataSourceName)
-	self.db = db
-	return db, err
 }
 
 ///////////////////////////////////////////

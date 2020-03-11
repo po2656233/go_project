@@ -3,18 +3,19 @@ package landlords
 //斗地主
 
 import (
+	"github.com/name5566/leaf/gate"
 	"github.com/name5566/leaf/log"
 	"github.com/name5566/leaf/module"
 	. "server/base"
-	. "server/manger"
 	. "server/game/internal/gameItems" // 注意这里不能这样导入 "../../gameItems" 因为本地导入是根据gopath路径设定的
+	. "server/manger"
 	protoMsg "server/msg/go"
 	_ "server/sql/mysql"
 )
 
-var timer *module.Skeleton = nil  //定时器
+var timer *module.Skeleton = nil //定时器
 //var lock *sync.Mutex = &sync.Mutex{} //锁
-var playerList protoMsg.UserList  //玩家列表
+var playerList protoMsg.UserList //玩家列表
 
 //定时器
 const (
@@ -29,10 +30,10 @@ type LandlordGame struct {
 	gameState uint32 //游戏状态
 	timeStamp int64  //时间戳 20秒准备时间,到了20秒后被提出房间
 
-	siteInfo map[uint8]uint64 // 座位上的玩家
-	bankerID    uint64  //庄家ID
-	bankerScore float32 //庄家积分
-	readyCount  uint8   //准备的人数
+	siteInfo    map[uint8]uint64 // 座位上的玩家
+	bankerID    uint64           //庄家ID
+	bankerScore float32          //庄家积分
+	readyCount  uint8            //准备的人数
 }
 
 //创建百家乐实例
@@ -56,7 +57,59 @@ func (self *LandlordGame) Init(level uint32) {
 }
 
 func (self *LandlordGame) Scene(args []interface{}) {
+	level := args[0].(uint32)
+	agent := args[1].(gate.Agent)
+	userData := agent.UserData()
+	if userData == nil {
+		log.Debug("[Error][牛牛场景] [未能查找到相关玩家] ")
+		return
+	}
+	//加入玩家列表
+	player := userData.(*Player)
+	self.AddPlayer(player.UserID)
 
+	//场景信息
+	senceInfo := &protoMsg.GameBaccaratEnter{}
+
+	//玩家信息
+	var playerInfo protoMsg.PlayerInfo
+	playerInfo.UserID = player.UserID
+	playerInfo.Name = player.Name
+	playerInfo.Age = player.Age
+	playerInfo.Gold = int64(GlobalSqlHandle.CheckMoney(player.UserID) * 100) //玩家积分
+	playerInfo.VipLevel = player.Level
+	playerInfo.Sex = player.Sex
+	senceInfo.UserInfo = &playerInfo
+
+	if senceInfo.UserInfo == nil {
+		log.Debug("[Error][斗地主场景] [获取玩家ID:%v 信息失败]  ", player.UserID)
+		return
+	}
+
+	senceInfo.FreeTime = freeTime
+	//senceInfo.AwardAreas // 录单
+	//需优化[定时器中计算时长]
+	senceInfo.TimeStamp = self.timeStamp //////已过时长 应当该为传时间戳
+	switch level {
+	case RoomGeneral:
+		senceInfo.Chips = []int32{1, 5, 25, 50, 100} //筹码
+	case RoomMiddle:
+		senceInfo.Chips = []int32{10, 50, 100, 500, 1000, 5000} //筹码
+	case RoomHigh:
+		senceInfo.Chips = []int32{50, 100, 200, 500, 1000, 10000} //筹码
+	default:
+		senceInfo.Chips = []int32{1, 5, 10, 20, 50, 100} //筹码
+	}
+
+	//数据回包
+	GlobalSender.SendData(agent, MainGameSence, self.gameState, senceInfo)
+
+	// 更新游戏列表
+	var updateArgs []interface{}
+	updateArgs = append(updateArgs, uint32(GameUpdatePlayerList), player.UserID)
+	playerList.AllInfos = append(playerList.AllInfos, &playerInfo)
+	self.UpdateInfo(updateArgs)
+	log.Debug("[斗地主场景]->玩家信息 ID:%v 当前玩家列表:%v ", player.UserID, self.PlayerList)
 }
 
 //更新
@@ -110,13 +163,13 @@ func (self *LandlordGame) Start(args []interface{}) {
 	log.Debug("洗牌之后:%v", cards)
 
 	// 取54-3张牌
-	for site,userID := range self.siteInfo{
+	for site, userID := range self.siteInfo {
 		player := GlobalPlayerManger.Get(userID)
 		if player == nil {
 			log.Debug("[Error][斗地主] [未能查找到相关玩家] ID:%v", userID)
 			continue
 		}
-		if SiteCount <= site{
+		if SiteCount <= site {
 			continue
 		}
 
@@ -133,8 +186,6 @@ func (self *LandlordGame) Start(args []interface{}) {
 
 		//player.WillReceive(MainGameState,SubGameStateStart,msg)
 	}
-
-
 
 	//manger.NotifyOthers(self.PlayerList, MainGameState, SubGameStateStart, msg)
 	//return

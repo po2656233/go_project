@@ -79,10 +79,10 @@ message RoomInfo{
 message GameBaseInfo{
 	 uint32 Type = 1;	 		//游戏类型
 	 uint32 KindID = 2;	 		//游戏标识
-	 uint32 Level = 3;			//房间类别 0:普通房 1:中级房 2:高级房 3:VIP房 4:冠军房
+	 uint32 Level = 3;			//游戏类别 0:普通 1:中级 2:高级 3:积分排位 4:淘汰制排位
 	 string Name = 4;			//游戏名称
-	 uint32 EnterScore = 5;		//房间进场分
-	 uint32 LessScore = 6;		//房间坐下分
+	 uint32 EnterScore = 5;		//进场分
+	 uint32 LessScore = 6;		//坐下分
 }
 //子游戏
 message GameItem{
