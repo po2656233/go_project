@@ -1,17 +1,18 @@
 package manger
 
 import (
-	"sync"
 	"github.com/name5566/leaf/log"
+	"sync"
 )
 
 //----------平台----------------------
 //平台信息
 type PlatformInfo struct {
-	ID       uint32    //平台ID 0表示无效
-	Name      string   //平台名称
-	Roomer 	*RoomManger //房间管理
+	ID     uint32      //平台ID 0表示无效
+	Name   string      //平台名称
+	Roomer *RoomManger //房间管理
 }
+
 //管理房间
 type PlatformManger struct {
 	sync.Map
@@ -31,17 +32,18 @@ func GetPlatformManger() *PlatformManger {
 	})
 	return platformManger
 }
+
 //添加玩家
 func (self *PlatformManger) Append(plat *PlatformInfo) bool {
 	if _, ok := self.Load(plat.ID); !ok {
-		log.Debug("新增平台ID:%v NAME:%v", plat.ID,plat.Name)
-		if nil == plat.Roomer{
+		log.Debug("新增平台ID:%v NAME:%v", plat.ID, plat.Name)
+		if nil == plat.Roomer {
 			plat.Roomer = CreateRoomManger()
 		}
 		self.Store(plat.ID, plat)
 		return true
 	} else {
-		log.Debug("平台ID:%v 已經存在 NAME:%v", plat.ID,plat.Name)
+		log.Debug("平台ID:%v 已經存在 NAME:%v", plat.ID, plat.Name)
 		return false
 	}
 }
@@ -82,4 +84,3 @@ func (self *PlatformManger) Exist(platformID uint32) bool {
 	})
 	return isHas
 }
-
