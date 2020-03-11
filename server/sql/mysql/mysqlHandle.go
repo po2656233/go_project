@@ -160,14 +160,14 @@ func (self *SqlMan) CheckGameList(roomID uint32) (name, key string, games *proto
 		CheckError(err)
 		//log.Debug("GameName=%v GameType=%v KindID:%v\n", gameItem.Name, gameItem.Type, gameItem.KindID)
 		roomGames := strings.Split(strGames, ",")
-		log.Debug("服务列表查询:%v", roomGames)
+		log.Debug("房间名称:%v 服务列表查询:%v\n", name, roomGames)
 		for _, gameID := range roomGames {
 			id, _ := strconv.Atoi(gameID)
 			if gameInfo := self.CheckGameInfo(uint32(id)); gameInfo != nil {
 				var gameItem protoMsg.GameItem
 				gameItem.ID = uint32(id)
 				gameItem.Info = gameInfo
-				//log.Debug("GameName=%v GameType=%v Level:%v KindID:%v EnterScore:%v LessScore：%v\n",gameInfo.Name, gameInfo.Type,gameInfo.Level, gameInfo.KindID, gameInfo.EnterScore, gameInfo.LessScore)
+				log.Debug("GameName=%v GameType=%v Level:%v KindID:%v 入场积分:%v 底分：%v\n", gameInfo.Name, gameInfo.Type, gameInfo.Level, gameInfo.KindID, gameInfo.EnterScore, gameInfo.LessScore)
 				gameList.Items = append(gameList.Items, &gameItem)
 			}
 		}

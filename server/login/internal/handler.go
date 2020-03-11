@@ -1,13 +1,13 @@
 package internal
 
 import (
-	"github.com/name5566/leaf/log"
 	"github.com/golang/protobuf/proto"
 	"github.com/name5566/leaf/gate"
+	"github.com/name5566/leaf/log"
 
 	"reflect"
-	. "server/manger"
 	. "server/base"
+	. "server/manger"
 	protoMsg "server/msg/go"
 	"server/sql/mysql"
 )
@@ -68,7 +68,8 @@ func handleLogin(args []interface{}) {
 		userInfo.Gold = gold
 		msg.UserInfo = userInfo
 		msg.RoomsInfo = sqlHandle.CheckRoomList(uid)
-		log.Debug("房间号列表%v", msg.RoomsInfo)
+
+		//log.Debug("房间号列表%v", msg.RoomsInfo)
 
 		//添加到用户管理
 		player.UserID = uid
@@ -87,7 +88,7 @@ func handleLogin(args []interface{}) {
 		agent.SetUserData(player)
 
 		//发送【房间列表】
-		GetClientManger().SendData(agent,MainLogin,SubMasterInfo, msg)
+		GetClientManger().SendData(agent, MainLogin, SubMasterInfo, msg)
 	} else {
 		//失败信息
 		loginResult := &protoMsg.ResResult{}
@@ -95,7 +96,7 @@ func handleLogin(args []interface{}) {
 		loginResult.Hints = *proto.String("Failed")
 
 		//【返回结果】[MainID|SubID]
-		GetClientManger().SendData(agent,MainLogin,SubLoginResult, loginResult)
+		GetClientManger().SendData(agent, MainLogin, SubLoginResult, loginResult)
 
 		//日志打印
 		log.Error("Login Failed!")
@@ -119,7 +120,7 @@ func handleEnterRoom(args []interface{}) {
 		_, _, msg := sqlHandle.CheckGameList(player.RoomNum)
 
 		//发送数据
-		GetClientManger().SendData(agent,MainLogin,SubGameList, msg)
+		GetClientManger().SendData(agent, MainLogin, SubGameList, msg)
 
 	} else {
 		//失败信息
@@ -128,7 +129,7 @@ func handleEnterRoom(args []interface{}) {
 		enterResult.Hints = *proto.String("Failed")
 
 		//【返回结果】[MainID|SubID]
-		GetClientManger().SendData(agent,MainLogin,SubEnterRoomResult, enterResult)
+		GetClientManger().SendData(agent, MainLogin, SubEnterRoomResult, enterResult)
 
 		//日志打印
 		log.Error("Login Failed!")
