@@ -1,0 +1,264 @@
+syntax = "proto3";
+package go;
+//次序说明(流程):
+//1、个人信息登录--->游戏分类列表
+//2、选择游戏类别--->游戏列表
+//3、选择游戏--->牌桌列表
+//4'、新增牌桌(配置游戏信息)--->牌桌信息  [非必选]
+//4、选择牌桌(或座位)--->游戏场景
+//5.1'、玩家准备                      [游戏为对战类时必选]
+//5.1、游戏开始
+//5.2、游戏中
+//5.3、游戏结算
+//5.4、游戏结束 --->5.1 || --->6(即:达到最大局数,退出游戏)
+//6、退出游戏
+//////////////////////////////enum////////////////////////////////////////////////////
+//桌子状态
+enum TableState {
+  Init = 0;     //初始化
+  Open = 1;     //开启
+  Maintain = 2; //维修
+  Clear = 3;    //清场(当前局结束后,清空所有场景信息)
+  Stop = 4;     //停运(再次启动时，以当前局的场景信息继续运作)
+  Close = 5;    //关闭
+}
+//游戏类型
+enum GameType {
+  General = 0;
+  Fight = 1;          //对战类(两个或两个以上玩家同桌博弈，如三公、诈金花、牛牛)
+  Multiperson = 2;    //百人类型
+  TableCard = 3;      //房卡类型
+  Guess = 4;          //竞猜类型
+  GamesCity = 5;      //电玩城类型
+  DualMeet = 6;       //电竞类型
+  Sport = 7;          //体育类型
+  Smart = 8;          //益智休闲
+  RPG = 9;            //RPG类型
+}
+//游戏场景
+enum GameScene {
+  Free = 0;           //空闲
+  Start = 1;          //开始
+  Call = 2;           //叫分
+  Decide = 3;         //定庄
+  Playing = 4;        //游戏中
+  Opening = 5;        //开奖
+  Over = 6;           //结算
+  Closing = 7;        //关闭
+  SitDirect = 8;         //决定方位
+  RollDice = 9;       //掷骰子
+  WaitOperate = 10;   //等待操作
+}
+/////////////info//////////////////
+//个人信息
+message UserInfo{
+  uint64 UserID = 1;      //ID
+  string Name = 2;        //用户
+  string Account = 3;     //帐号
+  string Password = 4;    //密码
+  uint32 FaceID = 5;      //头像
+  uint32 Gender = 6;      //性别
+  uint32 Age = 7;         //年龄
+  uint32 VIP = 8;         //VIP级别
+  uint32 Level = 9;       //级别
+  int64  Money = 10;      //金钱(余额)
+  string PassPortID = 11;   //证件号
+  string RealName = 12;     //真实名字
+  string PhoneNum = 13;     //手机
+  string Email = 14;        //邮箱
+  string Address = 15;      //住址
+  string Identity = 16;     //识别码(平台生成)
+  uint64 AgentID = 17;        //代理标识(上级代理人)
+  string ReferralCode = 18;   //推荐标识(推荐码,由邀请码生成)
+  string ClientAddr = 19;     //连接地址(当前实际IP)
+  string ServerAddr = 20;     //(跳转至该地址 由登录服务返回的真实服务器地址)
+  string MachineCode = 21;    //机器序列
+}
+//桌子信息
+message TableInfo{
+  uint64 HostID = 1;       //房主ID
+  string Name = 2;         //桌子名称：如李寻欢 李诚等
+  string Password = 3;     //桌子密钥
+  TableState State = 4;    //桌子状态
+  uint32 EnterScore = 5;   //进 场 分
+  uint32 LessScore = 6;    //坐 下 分
+  int64  PlayScore = 7;    //携带积分
+  uint32 Commission = 8;   //税收（百分比数，即为1==1%）
+  uint32 MaxChair = 9;     //最大座位数 (=0时,默认不受限)
+  uint32 Amount = 10;      //总 局 数  (=0时,默认不受限)
+  uint32 MaxOnline = 11;   //在线人数
+}
+//游戏信息
+message GameInfo{
+  GameType Type = 1;      //游戏类型
+  uint64 KindID = 2;      //游戏种类标识
+  uint32 Level = 3;       //游戏类别 0:普通 1:中级 2:高级 3:积分排位 4:淘汰制排位
+  GameScene Scene = 4;    //游戏场景
+  string Name = 5;        //游戏名称：如高级麻将房 四川麻将 广东麻将 跑胡子等等
+}
+//主页信息
+message MasterInfo{
+  UserInfo UserInfo = 1;          //用户信息
+  ClassList Classes = 2;          //分类列表
+  TaskList Tasks = 3;             //任务列表
+}
+/////////////////item/////////////////////////////////
+//任务项
+message TaskItem{
+  uint32 ID = 1;
+  uint32 Twice = 2;     //实现次数
+  string Hints = 3;     //提示语 “恭喜 祝贺”之类
+}
+//分类项
+message ClassItem{
+  uint64 ID = 1;        //标识[必要项]
+  string Name = 2;      //分类名称
+  string Key = 3;       //分类密钥(自定义分类可用)
+}
+//子游戏
+message GameItem{
+  uint64 ID = 1;       //游戏ID
+  GameInfo Info = 2;    //游戏信息
+}
+//桌子
+message TableItem{
+  uint32 Num = 1;        //序号 (界面排序参考项:非必要)
+  uint64 GameID = 2;     //游戏ID
+  TableInfo Info = 3;    //桌子信息
+}
+/////////////list//////////////////////////////////
+//任务列表
+message TaskList{
+  repeated TaskItem Task = 1;
+}
+//分类列表
+message ClassList{
+  repeated ClassItem classify = 1;
+}
+//游戏列表
+message GameList{
+  repeated GameItem Items = 1;
+}
+//桌子列表
+message TableList{
+  repeated TableItem Items = 1;
+}
+/////////////[优秀如你]-->Req:请求 Resp:反馈<--[交互专用]///////////////////////////////////
+/////////////[优秀如你]-->Req:请求 Resp:反馈<--[交互专用]///////////////////////////////////
+/////////////[优秀如你]-->Req:请求 Resp:反馈<--[交互专用]///////////////////////////////////
+//注册
+message RegisterReq{
+  string Name = 1;            //用户
+  string Password = 2;        //密码
+  string SecurityCode = 3;    //验证码
+  string MachineCode = 4;     //机器码
+  string InvitationCode = 5;  //邀请码
+  uint64 PlatformID = 6;      //需要注明平台ID (测试用: id == 1)
+  //选填
+  uint32 Gender = 7;       //性别
+  uint32 Age = 8;          //年龄
+  uint32 FaceID = 9;       //头像
+  string PassPortID = 10;  //证件号
+  string RealName = 11;    //真实名字
+  string PhoneNum = 12;    //手机
+  string Email = 13;       //邮箱
+  string Address = 14;     //住址
+}
+message RegisterResp{
+  UserInfo Info = 1;
+}
+//登录
+message LoginReq{
+  string Account = 1;    //账号
+  string Password = 2;    //密码
+  string SecurityCode = 3;  //验证码
+  string MachineCode = 4;  //机器码
+  uint64 PlatformID = 5; //需要注明平台ID (测试用: id == 1)
+}
+message LoginResp{
+  MasterInfo MainInfo = 1;
+  uint64 InGameID = 2;     //所在游戏ID(=0时,不在任何游戏中)
+  uint64 InTableNum = 3;   //所在桌子ID(=0时,没有进桌)
+}
+//异地
+message AllopatricResp{
+  uint64 UserId = 1;
+}
+//重连
+message ReconnectReq{
+  string Account = 1;       //账号
+  string Password = 2;      //密码
+  string MachineCode = 3;   //机器码
+  uint64 PlatformID = 4;    //需要注明平台ID (测试用: id == 1)
+}
+message ReconnectResp{
+  MasterInfo MainInfo = 1;
+  uint64 InGameID = 2;     //所在游戏ID(=0时,不在任何游戏中)
+  uint64 InTableNum = 3;   //所在桌子ID(=0时,没有进桌)
+}
+//更新余额
+message UpdateMoneyReq{
+}
+message UpdateMoneyResp{
+  uint64 UserID = 1;
+  int64 Money = 2;//当前玩家余额
+}
+//充值
+message RechargeReq {
+  uint64 UserID = 1;
+  uint64 ByUID = 2;
+  int64 Money = 3;     //金钱 (客户端统一 */100)
+  uint32 Method = 4;   //充值方式
+  string Reason = 5;   //备注详情
+}
+message RechargeResp {
+  uint64 UserID = 1;
+  uint64 ByUID = 2;
+  int64  Money = 3;     //金钱 (客户端统一 */100)
+  uint32 Method = 4;    //充值方式
+  bool   IsSuccess = 5; //
+  string Order = 6;     //
+  int64  TimeStamp = 7; //
+  string Reason = 8;    //备注详情
+}
+////////////////////////////////////////////////////
+//选择分类
+message ChooseClassReq{
+  uint32 ID = 1;             //分类编号
+  string TableKey = 2;        //分类密钥
+}
+message ChooseClassResp{
+  uint32 ID = 1;             //分类编号
+  GameList Games = 2;         //游戏列表
+  uint32 PageNum = 3;         //分页码 默认20
+}
+//选择游戏
+message ChooseGameReq{
+  GameInfo Info = 1;          //游戏(kindID level不可缺省)
+  uint32 PageNum = 2;         //请求页数   
+}
+message ChooseGameResp{
+  GameInfo Info = 1;
+  uint32 PageNum = 2;         //分页码 默认 每页20条
+  TableList Tables = 3;       //牌桌列表
+}
+//配置游戏(房卡模式)
+message SettingTableReq {
+  GameInfo GInfo = 1;         //游戏信息
+  TableInfo TInfo = 2;        //桌子信息
+}
+message SettingTableResp {
+  TableItem Item = 1;
+}
+//////////////result////////////////////////////////////
+//结果反馈
+message ResultResp{
+  int32 State = 1;      //状态:0成功 1失败
+  string Hints = 2;      //提示信息
+}
+//结果反馈(弹窗)
+message ResultPopResp{
+  int32 Flag = 1;      //状态:0成功 1失败
+  string Title = 2;      //标题
+  string Hints = 3;      //提示信息
+}

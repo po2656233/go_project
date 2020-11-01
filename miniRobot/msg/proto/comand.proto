@@ -1,0 +1,8 @@
+syntax = "proto3";
+package go;
+//分包协议
+message PacketData{
+    uint32 MsgID = 1;			//消息ID
+    bytes TransData = 2;  //协议数据
+    int32 PageNum = 3;    //分页数
+}

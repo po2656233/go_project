@@ -1,0 +1,130 @@
+syntax = "proto3";
+package go;
+import "gamecomm.proto";
+/////////////////牌值参照////////////////////////////////////////////////////////////////////////////////////////
+//  0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F, //方块 A - K, 小王, 大王
+//  0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18, 0x19, 0x1A, 0x1B, 0x1C, 0x1D, //梅花 A - K
+//  0x21, 0x22, 0x23, 0x24, 0x25, 0x26, 0x27, 0x28, 0x29, 0x2A, 0x2B, 0x2C, 0x2D, //红桃 A - K
+//  0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x3A, 0x3B, 0x3C, 0x3D, //黑桃 A - K
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//【对战类游戏】
+// 玩家信息(刚入场时,只有座位号和id)
+message LandLordsPlayer {
+  PlayerInfo  MyInfo = 1;
+  bool   IsMing = 2;             // 是否明牌
+  bytes  Cards = 3;              // 牌 (仅提供手牌数目的牌值)
+  int64  Multiple = 4;           // 当前倍数
+  int64  CallScore = 5;          // 叫分
+  int64  GainScore = 6;          // 输赢分值
+  int64  TotalScore = 7;         // 总积分(当不为系统房时,该分值可以为负分)
+}
+//入场 (场景)
+message LandLordsSceneResp {
+  int64 TimeStamp = 1;                  // 时间戳
+  string Inning = 2;                    // 牌局号
+  uint64 BankerID = 3;                  // 当前庄家
+  uint64 CurrentID = 4;                 // 当前玩家ID
+  int64  BaseScore = 5;                 // 当前底分()
+  bytes  OutCards = 6;                  // 已经出过的牌值
+  CardInfo TableCards = 7;              // 上一家的出牌(场景恢复)
+  repeated LandLordsPlayer AllPlayers = 8; // 玩家信息
+}
+// 服务端推送
+//(空闲)
+message LandLordsStateFreeResp {
+  TimeInfo Times = 1;
+}
+//(开始)
+message LandLordsStateStartResp {
+  TimeInfo Times = 1;
+  string Inning = 2;               // 牌局号
+}
+//(叫分)
+message LandLordsStateCallResp {
+  TimeInfo Times = 1;// 叫分剩余时间
+  uint64 UserID = 2; // 玩家ID
+}
+//(加倍)
+message LandLordsStateDoubleResp {
+  TimeInfo Times = 1;// 叫分剩余时间
+}
+//(游戏中)
+message LandLordsStatePlayingResp {
+  TimeInfo Times = 1;
+  uint64 TurnID = 2; //轮到谁
+}
+//(开奖)
+message LandLordsStateOpenResp {
+  TimeInfo Times = 1;
+  uint64 WinID = 2; //谁赢了
+}
+//(结束)
+message LandLordsStateOverResp {
+  TimeInfo Times = 1;
+}
+///////////////////////////
+// 发牌
+message LandLordsDealResp {
+  uint64 UserID = 1;    // 玩家ID
+  bytes CardsHand = 2;  // 手牌
+}
+// 广播抢地主后的玩家(抱歉 此处仅用于展示用,插入牌值用LandLordsDealResp)
+message LandLordsBottomCardResp {
+  uint64 BankerID = 1;    // 玩家ID
+  bytes CardsBottom = 2;  // 三张底牌
+  int64 BaseScore = 3;    // 当前叫分
+}
+///////////////////////////////////
+//游戏消息
+//准备
+message LandLordsReadyReq {
+  bool IsReady = 1; // 玩家准备，可以取消准备
+}
+message LandLordsReadyResp {
+  bool IsReady = 1; // 玩家准备，可以取消准备
+  uint64 UserId = 2;
+}
+// 叫分
+message LandLordsCallReq {
+  int64 Score = 1; // 叫分 0:不叫 1: 2: 3:
+}
+message LandLordsCallResp {
+  uint64 UserID = 1; // 玩家ID
+  int64  Score = 2; // 叫分 0:不叫 1: 2: 3:
+}
+// 加倍
+message LandLordsDoubleReq {
+  int64 Multiple = 1; // 额外倍数  1:加倍 2:超级加倍:
+}
+message LandLordsDoubleResp {
+  uint64 UserID = 1; // 玩家ID
+  int64 Multiple = 2; // 额外倍数  1:加倍 2:超级加倍:
+}
+//明牌
+message LandLordsMingReq {
+}
+message LandLordsMingResp {
+  uint64 UserID = 1; // 玩家ID
+}
+// 托管
+message LandLordsTrusteeReq {
+  bool IsTrustee = 1; //是否托管
+}
+message LandLordsTrusteeResp {
+  uint64 UserID = 1; // 玩家ID
+  bool IsTrustee = 2; //是否托管
+}
+// 出牌
+message LandLordsOutCardReq {
+  CardInfo Cards = 1;//
+}
+message LandLordsOutCardResp {
+  uint64 UserID = 1; // 玩家ID
+  CardInfo Cards = 2;// 牌值为空==要不起
+}
+//-----------------------------
+// 结算
+message LandLordsCheckoutResp {
+  uint64 WinnerId = 1;   //赢家ID
+  repeated LandLordsPlayer AllPlayers = 2; // 所有玩家得分
+}

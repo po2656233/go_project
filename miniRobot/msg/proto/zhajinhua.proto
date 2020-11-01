@@ -1,0 +1,131 @@
+syntax = "proto3";
+package go;
+import "gamecomm.proto";
+//玩家信息
+//未准备 	PlayerSitDown = 1;
+//已准备 	PlayerAgree = 2;
+//正在游戏 	PlayerPlaying = 4;
+//弃牌 		PlayerGiveUp = 7;
+//比牌失败 	PlayerCompareLose = 8;
+//跟牌 		PlayerFollow   	= 9;  
+//加注 		PlayerRaise   = 10; 
+message ZhajinhuaPlayer {
+  PlayerInfo  MyInfo = 1;  //其中State
+  bool  IsSee = 2;        // 是否已看牌: true:已看 false:未看
+  int64 RecentScore = 3;  // 最新下注金额
+  int64 TotalScore = 4;   // 总共下注了多少
+  CardInfo Cards = 5;     // 看牌时和游戏结束时亮自己的牌时才有数据
+  repeated uint64 Compares = 6;// 比过牌的用户
+  int64 WinScore = 7;         //输赢金币数
+}
+//入场
+message EnterGameZJHResp {
+  uint64 GameID = 1; //游戏标识
+  uint32 ChairNum = 2;        //椅子编号(不满足req的此项时,将由系统分配,并返回提示)
+  ZhajinhuaPlayer Player = 3;
+}
+//场景
+message ZhajinhuaSceneResp {
+  int64 TimeStamp = 1;                  // 时间戳
+  int64 TotalScore = 2;                 // 当前总下注额
+  int64 MinScore = 3;                   // 当前注额
+  uint64 BankerID = 4;                  // 当前庄家
+  uint64 CurrentID = 5;                 // 当前操作的用户
+  string Inning = 6;                    // 牌局号
+  int32  NoReadyTime = 7;               // 最长不准备
+  int64 LimitScore = 8;                 // 上限金币
+  int32 TurnCount = 9;                  // 轮值数
+  repeated ZhajinhuaPlayer Fighters = 10;// 参战玩家序列
+}
+//当前游戏状态： 等待开局，定庄，发牌，战斗（轮到谁），结算
+//以下状态 由服务端推送
+//(空闲)
+message ZhajinhuaStateFreeResp {
+  TimeInfo Times = 1;
+  string Inning = 2;               // 牌局号
+}
+//(开始)
+message ZhajinhuaStateStartResp {
+  TimeInfo Times = 1;
+}
+//(游戏中)
+message ZhajinhuaStatePlayingResp {
+  TimeInfo Times = 1;
+  uint64 UserID = 2;    //轮到谁
+}
+// (比牌)
+message ZhajinhuaStateCompareResp {
+  TimeInfo Times = 1;
+  ZhajinhuaCompareResp Info = 2;
+}
+//(结束)
+message ZhajinhuaStateOverResp {
+  TimeInfo Times = 1;
+}
+//轮值数
+message ZhajinhuaTurnResp {
+  int32 TurnCount = 1;
+}
+//发牌
+message ZhajinhuaDealResp {
+  uint64 UserID = 1;
+  CardInfo Cards = 2;
+}
+//定庄
+message ZhajinhuaHostResp {
+  uint64 BankerID = 1;
+}
+/////////////////////////////////////////////////////////////////////////
+//准备
+message ZhajinhuaReadyReq {
+  bool IsReady = 1; // 玩家准备，可以取消准备
+}
+message ZhajinhuaReadyResp {
+  uint64 UserId = 1;
+  bool IsReady = 2; // 玩家准备，可以取消准备
+}
+//跟注
+message ZhajinhuaFollowReq {
+}
+message ZhajinhuaFollowResp {
+  uint64 UserId = 1;
+  int64 Score = 2;
+}
+//加注
+message ZhajinhuaRaiseReq {
+  int64 Score = 1;
+}
+message ZhajinhuaRaiseResp {
+  uint64 UserId = 1;
+  int64 Score = 2;
+}
+//看牌
+message ZhajinhuaLookReq {
+}
+message ZhajinhuaLookResp {
+  uint64 UserId = 1;
+  CardInfo Cards = 2;     //[只有该玩家才有牌数据]
+}
+//比牌
+message ZhajinhuaCompareReq {
+  uint64 HitId = 1;          //比牌对象ID
+}
+message ZhajinhuaCompareResp {
+  uint64 AttackerId = 1;              //发起者ID
+  uint64 HitId = 2;                   //比牌对象ID
+  uint64 WinnerId = 3;                //胜利者ID
+  CardInfo AttackerCards = 4;       //发起者手牌
+  CardInfo HitCards = 5;            //比牌对象手牌
+}
+//弃牌
+message ZhajinhuaGiveupReq {
+}
+message ZhajinhuaGiveupResp {
+  uint64 UserId = 1;
+  int64  Gold = 2; //该玩家的剩余金币
+}
+//结算
+message ZhajinhuaCheckoutResp {
+  uint64 WinnerId = 1;                  // 胜利者ID
+  repeated ZhajinhuaPlayer Infos = 2;   // 各玩家输赢情况
+}

@@ -1,0 +1,366 @@
+syntax = "proto3";
+package go;
+import "gamecomm.proto";
+////////////////////牌值定义/////////////////////////////
+//		1 ~ 9 : 一万 ~ 9万
+//		11 ~ 19 : 一条 ~ 9条
+//		21 ~ 29 : 一筒 ~ 9筒
+//		31 ~ 34 : 东、南、西、北风
+//		41 : 发财
+//		42 : 红中
+//		43 : 白板
+//		51 ~ 54 : 春夏秋冬
+//		61 ~ 64 : 四种花色(梅兰竹菊)
+/////////////////////玩家座位//////////////////////////////
+//        骰子方位转换(弃用)
+//    东 : 1,5,9  代表东
+//    南 : 2,6,10 代表南
+//    西 : 3,7,11 代表西
+//    北 : 4,8,12 代表北
+//    通过摸东、南、西、北风决定方位
+/////////////////////风圈解义//////////////////////////////
+// 一场麻将里有4个风圈（第一圈为东风圈、第二圈为南风圈、第三圈为西风圈、第四圈为北风圈）
+// 每个风圈里有4局（第一局为东风局、第二局为南风局、第三局为西风局、第四局为北风局）
+// 国标麻将，轮流坐庄，没有连续坐庄一说。
+/////////////////////门风解义//////////////////////////////
+// 门前发牌的那一家,门风为东，然后依照逆时钟方向计算
+/////////////////////番型解义(请看文件末部)///////////////////
+//刻子
+message MahjongKeZi {
+  repeated int32 Cards = 1;
+  MJOperate Code = 2;
+  uint64 ByUid = 3;           // 由谁提供
+}
+//提示
+message MahjongHint{
+  MJOperate Code = 1;       // 操作码
+  repeated int32 Cards = 2; // 听哪几张牌| 胡牌和自摸皆为一张
+  uint64 ByUid = 3;         // 由谁提供
+}
+//麻将玩家信息
+message MahjongPlayer {
+  PlayerInfo  MyInfo = 1;       //
+  repeated int32 HandCards = 2; //手牌
+  repeated MahjongKeZi KeZiCards = 3; // 吃牌 桌牌:明在桌面上的牌,即碰、吃、杠后的牌
+  repeated int32 TableCards = 4; //玩家的桌面牌值
+  bool   IsTing = 5;            //是否听牌
+  int64  GainScore = 6;         //输赢分值
+  int64  TotalScore = 7;        //总积分(当不为系统房时,该分值可以为负分)
+  Direct MenFeng = 8;           //门风(庄家==东风)
+  Direct SitDirect = 9;         //座位方位
+  repeated MahjongHint OpHints = 10; //玩家可操作(恢复场景)
+}
+//入场
+message EnterGameMJResp {
+  uint64 GameID = 1;            //游戏标识
+  uint32 ChairNum = 2;          //椅子编号(不满足req的此项时,将由系统分配,并返回提示)
+  MahjongPlayer Player = 3;
+}
+//场景
+message MahjongSceneResp {
+  int64  TimeStamp = 1;         // 时间戳
+  int32  RunCount = 2;          // 当前局数
+  int32  RemainCount = 3;       // 剩余张数
+  uint64 BankerID = 4;          // 庄家ID
+  uint64 CurrentID = 5;         // 当前玩家ID
+  string Inning = 6;            // 牌局号
+  int32  HuCard = 7;            // 胡牌,或自摸时的摸起的最后一张
+  Direct QuanFeng = 8;          // 当前局的圈风
+  repeated MahjongPlayer AllPlayers = 9;      //玩家列表(吃碰杠)
+}
+//状态
+// 服务端推送
+//(空闲 - Free)
+message MahjongStateFreeResp {
+  TimeInfo Times = 1;
+  string Inning = 2;               // 牌局号
+}
+//方位 - Direct (调整座位:仅在第一局开始需决定所座方位,或座位替换新玩家)
+message MahjongStateDirectResp {
+  TimeInfo Times = 1;
+  Direct MyDirect = 2;       //东南西北(系统决定)
+}
+//定庄 - Decide 系统定庄
+message MahjongStateDecideResp {
+  TimeInfo Times = 1;
+  uint64 BankerID = 2;            // 首局默认座位东方的为庄家
+  Direct QuanFeng = 3;            // 当前局的圈风
+  Direct MenFeng = 4;             // 玩家的门风
+}
+//开始掷骰子 - RollDice 注:决定牌堆的起始位置
+message MahjongStateRollDiceResp {
+  TimeInfo Times = 1;
+}
+//(开始游戏) - Start
+message MahjongStateStartResp {
+  TimeInfo Times = 1;
+  int32 StartPos = 2;             //抓牌起始位置(即保留不抓取的牌墙)
+}
+//(游戏中) - Playing
+message MahjongStatePlayingResp {
+  TimeInfo Times = 1;
+  uint64 UserID = 2;            // 轮到谁
+  int32 Card = 3;               // 只有UserID的玩家有牌值
+}
+//等待操作(仅对有提示的玩家提供)
+message MahjongStateWaitOperateResp {
+  TimeInfo Times = 1;
+}
+//(开奖) - Opening
+message MahjongStateOpenResp {
+  TimeInfo Times = 1;
+  bool   IsFlow = 2;                        // 是否流局
+  int32  HuCard = 3;                        // 胡牌,或自摸时的摸起的最后一张
+  uint64 WinnerId = 4;                      //胜利者ID（流局时为0）
+  bytes Fans = 5;                           //番型列表 每个元素对应一个番型
+  int32 FanCount = 6;                       //共计番数
+  repeated MahjongPlayer AllPlayers = 7;    //所有玩家得分
+}
+//(结束) - Over
+message MahjongStateOverResp {
+  TimeInfo Times = 1;
+}
+//////////////////////////////////////////////
+//准备
+message MahjongReadyReq {
+  bool IsReady = 1; // 玩家准备，可以取消准备
+}
+message MahjongReadyResp {
+  uint64 UserId = 1;
+  bool IsReady = 2; // 玩家准备，可以取消准备
+}
+//
+//庄家扔骰子
+message MahjongRollReq {
+}
+message MahjongRollResp {
+  uint64 UserID = 1;
+  bytes  Dice = 2;           //骰子决定,起抓牌位置
+}
+// 玩家打出去的牌
+message MahjongOutCardReq{
+  int32 Card = 1; //
+}
+message MahjongOutCardResp{
+  uint64 UserID = 1;        // 玩家ID
+  int32 Card = 2; //
+}
+// 操作
+message MahjongOperateReq{
+  MJOperate Code = 1;       // 操作码 pass表示弃牌
+  repeated int32 Cards = 2; // 吃|碰|杠 时的手牌
+}
+message MahjongOperateResp{
+  uint64 UserID = 1;        // 玩家ID
+  MJOperate Code = 2;       // 操作码
+  repeated int32 Cards = 3; // 吃|碰|杠 时的组合牌
+}
+////////////////////////////////
+//
+//发牌
+message MahjongDealResp {
+  uint64 UserID = 1;              // 玩家ID
+  int32 CurPos = 2;               // 抓牌起始位置
+  repeated int32 HandCards = 3;   // 玩家的手牌(座位上的玩家才有,且只能拿到自己的牌值)
+}
+//
+// 玩家只能收到自己的
+message MahjongHintResp{
+  uint64 UserID = 1;        // 玩家ID
+  repeated MahjongHint Hints = 2; //提示 注意:吃牌时,有多种组合 cards仅提供玩家手牌牌值
+}
+//番种()
+enum Fan_t {
+  FAN_INVALID = 0;       //无效番种
+  //========88番========
+  FAN_DASIXI= 1;            //大四喜
+  FAN_DASANYUAN= 2;         //大三元
+  FAN_LVYISE= 3;            //绿一色
+  FAN_JIULIANBAODENG= 4;    //九莲宝灯
+  FAN_SIGANG= 5;            //四杠
+  FAN_LIANQIDUI= 6;         //连七对
+  FAN_SHISANYAO= 7;         //十三幺
+  //========64番========
+  FAN_QINGYAOJIU= 8;        //清幺九
+  FAN_XIAOSIXI= 9;          //小四喜
+  FAN_XIAOSANYUAN= 10;       //小三元
+  FAN_ZIYISE= 11;            //字一色
+  FAN_SIANKE= 12;            //四暗刻
+  FAN_YISESHUANGLONGHUI= 13; //一色双龙会
+  //========48番========
+  FAN_YISESITONGSHUN= 14;    //一色四同顺
+  FAN_YISESIJIEGAO= 15;      //一色四节高
+  //========32番========
+  FAN_YISESIBUGAO= 16;       //一色四步高
+  FAN_SANGANG= 17;           //三杠
+  FAN_HUNYAOJIU= 18;         //混幺九
+  //========24番========
+  FAN_QIDUI= 19;             //七对
+  FAN_QIXINGBUKAO= 20;       //七星不靠
+  FAN_QUANSHUANGKE= 21;      //全双刻
+  FAN_QINGYISE= 22;          //清一色
+  FAN_YISESANTONGSHUN= 23;   //一色三同顺
+  FAN_YISESANJIEGAO= 24;     //一色三节高
+  FAN_QUANDA= 25;            //全大
+  FAN_QUANZHONG= 26;         //全中
+  FAN_QUANXIAO= 27;          //全小
+  //========16番========
+  FAN_QINGLONG= 28;          //清龙
+  FAN_SANSESHUANGLONGHUI= 29;//三色双龙会
+  FAN_YISESANBUGAO= 30;      //一色三步高
+  FAN_QUANDAIWU= 31;         //全带五
+  FAN_SANTONGKE= 32;         //三同刻
+  FAN_SANANKE= 33;           //三暗刻
+  //========12番========
+  FAN_QUANBUKAO= 34;         //全不靠
+  FAN_ZUHELONG= 35;          //组合龙
+  FAN_DAYUWU= 36;            //大于五
+  FAN_XIAOYUWU= 37;          //小于五
+  FAN_SANFENGKE= 38;         //三风刻
+  //========8番========
+  FAN_HUALONG= 39;           //花龙
+  FAN_TUIBUDAO= 40;          //推不倒
+  FAN_SANSESANTONGSHUN= 41;  //三色三同顺
+  FAN_SANSESANJIEGAO= 42;    //三色三节高
+  FAN_WUFANHU= 43;           //无番和
+  FAN_MIAOSHOUHUICHUN= 44;   //妙手回春
+  FAN_HAIDILAOYUE= 45;       //海底捞月
+  FAN_GANGSHANGKAIHUA= 46;   //杠上开花
+  FAN_QIANGGANGHU= 47;       //抢杠和
+  //========6番========
+  FAN_PENGPENGHU= 48;        //碰碰和
+  FAN_HUNYISE= 49;           //混一色
+  FAN_SANSESANBUGAO= 50;     //三色三步高
+  FAN_WUMENQI= 51;           //五门齐
+  FAN_QUANQIUREN= 52;        //全求人
+  FAN_SHUANGANGANG=53 ;      //双暗杠
+  FAN_SHUANGJIANKE=54 ;      //双箭刻
+  //========4番========
+  FAN_QUANDAIYAO= 55;        //全带幺
+  FAN_BUQIUREN= 56;          //不求人
+  FAN_SHUANGMINGGANG= 57;    //双明杠
+  FAN_HUJUEZHANG= 58;        //和绝张
+  //========2番========
+  FAN_JIANKE= 59;            //箭刻
+  FAN_QUANFENGKE= 60;        //圈风刻
+  FAN_MENFENGKE= 61;         //门风刻
+  FAN_MENQIANQING= 62;       //门前清
+  FAN_PINGHU= 63;            //平和
+  FAN_SIGUIYI= 64;           //四归一
+  FAN_SHUANGTONGKE= 65;      //双同刻
+  FAN_SHUANGANKE= 66;        //双暗刻
+  FAN_ANGANG= 67;            //暗杠
+  FAN_DUANYAO= 68;           //断幺
+  //========1番========
+  FAN_YIBANGAO=69 ;          //一般高
+  FAN_XIXIANGFENG= 70;       //喜相逢
+  FAN_LIANLIU= 71;           //连六
+  FAN_LAOSHAOFU= 72;         //老少副
+  FAN_YAOJIUKE= 73;          //幺九刻
+  FAN_MINGGANG= 74;          //明杠
+  FAN_QUEYIMEN= 75;          //缺一门
+  FAN_WUZI= 76;              //无字
+  FAN_BIANZHANG= 77;         //边张
+  FAN_KANZHANG= 78;          //坎张
+  FAN_DANDIAOJIANG= 79;      //单钓将
+  FAN_ZIMO= 80;              //自摸
+  FAN_HUAPAI= 81;            //花牌
+  //========5番========
+  FAN_MINGANGANG= 82;        //明暗杠
+};
+//
+///////////////////////////////////////////////////////
+//		国标四人麻将番型表
+//    88番
+//    1、大四喜：由4副风刻（杠）组成的和牌。不计圈风刻、门风刻、三风刻、碰碰和。
+//    2、大三元：和牌中，有中发白3副刻子。不计箭刻。
+//    3、绿一色：由23468条及发字中的任何牌组成的顺子、刻子、将的和牌。不计混一色。如无“发”字组成的和牌，可计清一色。
+//    4、九莲宝灯：由一种花色序数牌按1112345678999组成的特定牌型，见同花色任何1张序数牌即成和牌。不计清一色。
+//    5、四杠：4个杠。
+//    6、连七对：由一种花色序数牌组成序数相连的7个对子的和牌。不计清一色、不求人、单钓。
+//    7、十三幺：由3种序数牌的一、九牌，7种字牌及其中一对作将组成的和牌。不计五门齐、不求人、单钓。
+//    64番
+//    8、清幺九：由序数牌一、九刻子组成的和牌。不计碰碰和、同刻、无字。
+//    9、小四喜：和牌时有风牌的3副刻子及将牌。不计三风刻。
+//    10、小三元：和牌时有箭牌的两副刻子和将牌。不计箭刻。
+//    11、字一色：由字牌的刻子（杠）、将组成的和牌。不计碰碰和。
+//    12、四暗刻：4个暗刻（暗杠）。不计门前清、碰碰和。
+//    13、一色双龙会：一种花色的两个老少副，5为将牌。不计平和、七对、清一色。
+//    48番
+//    14、一色四同顺：一种花色4副序数相同的顺子，不计一色三节高、一般高、四归一。
+//    15、一色四节高：一种花色4副依次递增一位数的刻子，不计一色三同顺、碰。
+//    32番
+//    16、一色四步高：一种花色4副依次递增一位数或依次递增二位数的顺子。
+//    17、三杠：3个杠。
+//    18、混幺九：由字牌和序数牌一、九的刻子及将牌组成的和牌。不计碰碰和。
+//    24番
+//    19、七对：由7个对子组成的和牌。不计不求人、单钓。
+//    20、七星不靠：必须有7个单张的东西南北中发白，加上3种花色，数位按147、258、369中的7张序数牌组成没有将牌的和牌。不计五门齐、不求人、单钓。
+//    21、全双刻：由2、4、6、8序数牌的刻子、将牌组成的和牌。不计碰碰和、断幺。
+//    22、清一色：由一种花色的序数牌组成的和牌。不计无字。
+//    23、一色三同顺：和牌时有一种花色3副序数相同的顺子。不计一色三节高。
+//    24、一色三节高：和牌时有一种花色3副依次递增一位数字的刻子。不计一色三同顺。
+//    25、全大：由序数牌789组成的顺子、刻子（杠）、将牌的和牌。不计无字。
+//    26、全中：由序数牌456组成的顺子、刻子（杠）、将牌的和牌。不计断幺。
+//    27、全小：由序数牌123组成的顺子、刻子（杠）、将牌的和牌。不计无字。
+//    16番
+//    28、清龙：和牌时，有一种花1-9相连接的序数牌。
+//    29、三色双龙会：2种花色2个老少副、另一种花色5作将的和牌。不计喜相逢、老少副、无字、平和。
+//    30、一色三步高：和牌时，有一种花色3副依次递增一位或依次递增二位数字的顺子。
+//    31、全带五：每副牌及将牌必须有5的序数牌。不计断幺。
+//    32、三同刻：3个序数相同的刻子（杠）。
+//    33、三暗刻：3个暗刻。
+//    12番
+//    34、全不靠：由单张3种花色147、258、369不能错位的序数牌及东南西北中发白中的任何14张牌组成的和牌。不计五门齐、不求人、单钓。
+//    35、组合龙：3种花色的147、258、369不能错位的序数牌。
+//    36、大于五：由序数牌6-9的顺子、刻子、将牌组成的和牌。不计无字。
+//    37、小于五：由序数牌1-4的顺子、刻子、将牌组成的和牌。不计无字。
+//    38、三风刻：3个风刻。
+//    8番
+//    39、花龙：3种花色的3副顺子连接成1-9的序数牌。
+//    40、推不倒：由牌面图形没有上下区别的牌组成的和牌，包括1234589饼、245689条、白板。不计缺一门。
+//    41、三色三同顺：和牌时，有3种花色3副序数相同的顺子。
+//    42、三色三节高：和牌时，有3种花色3副依次递增一位数的刻子。
+//    43、无番和：和牌后，数不出任何番种分（花牌不计算在内）。
+//    44、妙手回春：自摸牌墙上最后一张牌和牌。不计自摸。
+//    45、海底捞月：和打出的最后一张牌。
+//    46、杠上开花：开杠抓进的牌成和牌（不包括补花）。不计自摸。
+//    47、抢杠和：和别人自抓开明杠的牌。不计和绝张。
+//    6番
+//    48、碰碰和：由4副刻子（或杠）、将牌组成的和牌。
+//    49、混一色：由一种花色序数牌及字牌组成的和牌。
+//    50、三色三步高：3种花色3副依次递增一位序数的顺子。
+//    51、五门齐：和牌时3种序数牌、风、箭牌齐全。
+//    52、全求人：全靠吃牌、碰牌、单钓别人打出的牌和牌。不计单钓。
+//    53、双暗杠：2个暗杠。
+//    54、双箭刻：2副箭刻（或杠）。
+//    4番
+//    55、全带幺：和牌时，每副牌、将牌都有幺牌。
+//    56、不求人：4副牌及将中没有吃牌、碰牌（包括明杠），自摸和牌。
+//    57、双明杠：2个明杠。
+//    58、和绝张：和牌池、桌面已亮明的3张牌所剩的第4张牌（抢杠和不计和绝张）。
+//    2番
+//    59、箭刻：由中、发、白3张相同的牌组成的刻子。
+//    60、圈风刻：与圈风相同的风刻。
+//    61、门风刻：与本门风相同的风刻。
+//    62、门前清：没有吃、碰、明杠，和别人打出的牌。
+//    63、平和：由4副顺子及序数牌作将组成的和牌，边、坎、钓不影响平和。
+//    64、四归一：和牌中，有4张相同的牌归于一家的顺子、刻子、对子、将牌中（不包括杠牌）。
+//    65、双同刻：2副序数相同的刻子。
+//    66、双暗刻：2个暗刻。
+//    67、暗杠：自抓4张相同的牌开杠。
+//    68、断幺：和牌中没有一、九及字牌。
+//    1番
+//    69、一般高：由一种花色2副相同的顺子组成的牌。
+//    70、喜相逢：2种花色2副序数相同的顺子。
+//    71、连六：一种花色6张相连接的序数牌。
+//    72、老少副：一种花色牌的123、789两副顺子。
+//    73、幺九刻：3张相同的一、九序数牌及字牌组成的刻子（或杠）。
+//    74、明杠：自己有暗刻，碰别人打出的一张相同的牌开杠；或自己抓进一张与碰的明刻相同的牌开杠。
+//    75、缺一门：和牌中缺少一种花色序数牌。
+//    76、无字：和牌中没有风、箭牌。
+//    77、边张：单和123的3及789的7或1233和3、7789和7都为边张。手中有12345和3，56789和7不算和边张。
+//    78、坎张：和2张牌之间的牌。4556和5也为坎张，手中有45567和6不算坎张。
+//    79、单钓将：钓单张牌作将成和。
+//    80、自摸：自己抓进牌成和牌。
+//    81、花牌：即春夏秋冬，梅兰竹菊，每花计一分。不计在起和分内，和牌后才能计分。花牌补花成和计自摸分，不计杠上开花。

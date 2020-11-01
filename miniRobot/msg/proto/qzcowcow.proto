@@ -1,0 +1,101 @@
+syntax = "proto3";
+package go;
+import "gamecomm.proto";
+//抢庄牛牛玩家信息
+message QzcowcowPlayer {
+  PlayerInfo  MyInfo = 1;
+  CardInfo Cards = 2;     //
+  int64  CallScore = 3;   //叫分分值
+  int64  BetScore = 4;    //下注分值
+  int64  GainScore = 5;   //输赢分值
+  int64  TotalScore = 6;  //总积分
+}
+//入场
+message EnterGameQZCCResp {
+  uint64 GameID = 1; //游戏标识
+  uint32 ChairNum = 2;        //椅子编号(不满足req的此项时,将由系统分配,并返回提示)
+  QzcowcowPlayer Player = 3;
+}
+//场景
+message QzcowcowSceneResp {
+  int64 TimeStamp = 1;              //时间戳
+  repeated int32 Chips = 2;         //筹码
+  string Inning = 3;                // 牌局号
+  repeated QzcowcowPlayer AllPlayers = 4;  //玩家列表信息
+  uint64 HostID = 5;              //庄家ID
+}
+//状态
+// 服务端推送
+//(空闲 - )
+message QzcowcowStateFreeResp {
+  TimeInfo Times = 1;
+  string Inning = 2;               // 牌局号
+}
+//(开始 - 喊庄)
+message QzcowcowStateCallResp {
+  TimeInfo Times = 1;
+}
+//定庄
+message QzcowcowStateDecideResp {
+  TimeInfo Times = 1;
+  uint64 HostID = 2;
+  int64 Multiple = 3;  //相同倍数 可用作
+}
+//(游戏中 - 下注)
+message QzcowcowStatePlayingResp {
+  TimeInfo Times = 1;
+}
+//(发牌)
+message QzcowcowStateDealResp {
+  TimeInfo Times = 1;
+}
+//(开奖 -- 比牌结果)
+message QzcowcowStateOpenResp {
+  TimeInfo Times = 1;
+  QzcowcowOpenResp OpenInfo = 2;
+}
+//(结束)
+message QzcowcowStateOverResp {
+  TimeInfo Times = 1;
+}
+//////////有些玩家不配有牌////////
+message QzcowcowDealResp {
+  uint64 UserID = 1;
+  CardInfo Cards = 2;     //只有开奖时有真实值
+}
+//////////////////////////////////////
+//准备
+message QzcowcowReadyReq {
+  bool IsReady = 1; // 玩家准备，可以取消准备
+}
+message QzcowcowReadyResp {
+  uint64 UserId = 1;
+  bool IsReady = 2; // 玩家准备，可以取消准备
+}
+//喊庄
+message QzcowcowCallReq {
+  int64 Multiple = 1;        //喊庄倍数
+}
+message QzcowcowCallResp {
+  uint64 UserID = 1;
+  int64 Multiple = 2;        //喊庄倍数
+}
+//下注
+message QzcowcowBetReq {
+  int32 BetArea = 1;        //下注区域
+  int64 BetScore = 2;        //下注金额
+}
+//下注结果：广播
+message QzcowcowBetResp {
+  uint64 UserId = 1;
+  int32 BetArea = 2;        //下注区域
+  int64 BetScore = 3;        //下注金额
+}
+//开牌
+message QzcowcowOpenResp {
+  repeated QzcowcowPlayer AllPlayers = 1;  //玩家列表信息
+}
+//结算
+message QzcowcowOverResp{
+  repeated QzcowcowPlayer AllPlayers = 1;  //玩家列表信息
+}

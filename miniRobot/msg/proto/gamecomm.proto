@@ -1,0 +1,344 @@
+syntax = "proto3";
+package go;
+//该协议文件不提供 req 和 resp 注:如需使用,请在子游戏协议中嵌套相关协议.
+enum PlayerState {
+  PlayerLookOn = 0;         //旁观(可作为刚入场时的初始状态)
+  PlayerSitDown = 1;        //坐下(此状态下，才能参与游戏)
+  PlayerAgree = 2;          //同意(可作为准备状态)
+  PlayerPlaying = 3;        //游戏中
+  PlayerPickUp = 4;         //托管
+  PlayerCall = 5;           //叫分
+  PlayerFollow = 6;         //跟牌
+  PlayerRaise = 7;          //加注
+  PlayerLook = 8;           //看牌
+  PlayerCompare = 9;        //比牌
+  PlayerCompareLose = 10;   //比牌失败
+  PlayerOutCard = 11;       //出牌|摊牌
+  PlayerPass = 12;          //过牌|要不起
+  PlayerChi = 13;           //吃
+  PlayerPong = 14;          //碰
+  PlayerMingGang = 15;      //明杠
+  PlayerAnGang = 16;        //暗杠
+  PlayerTing = 17;          //听
+  PlayerHu = 18;            //胡
+  PlayerZiMo = 19;          //自摸
+  PlayerTrustee = 97;       //托管
+  PlayerGiveUp = 98;        //弃牌
+  PlayerStandUp = 99;       //站起(可作为结束状态)
+}
+// 公告级别
+enum NTFLevel{
+  //系统公告
+  GeneralNTF = 0;//普通公告
+  UrgencyNTF = 1;//紧急公告
+  NTMaintainNTF = 2;//维护公告
+  ServeStopNTF = 3;//停服公告
+  PraiseNTF = 4;    //表扬公告
+  //个人公告
+  STrumpetNTF = 5;  //小喇叭
+  MTrumpetNTF = 6;  // 银喇叭
+  BTrumpetNTF = 7;  // 金喇叭
+}
+// 方位
+enum Direct {
+  Centre = 0;
+  EAST = 1;
+  South = 2;
+  West = 3;
+  North = 4;
+  EASTSouth = 5;
+  WestSouth = 6;
+  EASTNorth = 7;
+  WestNorth = 8;
+}
+// 麻将操作
+enum MJOperate {
+  NULL = 0;       //用于校验
+  Pass = 1;       // 过牌
+  Chi = 2;        // 吃
+  Pong = 3;       // 碰
+  Gang = 4;       // 杠 自己手上三个,杠别家一个。和MingGang效果一样,显示不同
+  MingGang = 5;   // 明杠(同杠)或碰后,抓牌起杠
+  AnGang = 6;     // 暗杠
+  BuHua = 7;      // 补花
+  Ting = 8;       // 听
+  Hu = 9;         // 胡牌
+  ZiMo = 10;      // 自摸
+}
+//玩家信息
+message PlayerInfo {
+  uint64 UserID = 1; //ID
+  string Name = 2; //账号
+  uint32 FaceID = 3; //头像
+  uint32 Age = 4; //年龄
+  uint32 Sex = 5; //性别
+  int64 Gold = 6; //金币 *100
+  int64 Money = 7;//钱
+  uint32 Level = 8; //游戏级别
+  string Account = 9; // 账号(手机号码/邮箱/真名)
+  PlayerState State = 10; // 状态
+  uint64 PlatformID = 11; // 平台ID 0:无效
+  uint64 RoomID = 12; // 房间号 0:无效
+  uint64 GameID = 13; // 所在游戏ID 0:无效
+  uint32 TableID = 14; // 所在桌号ID 0:不提供
+  uint32 ChairID = 15; // 所在椅子ID 0:不提供
+}
+//邮箱信息
+message GoodsInfo {
+  int64 ID = 1;     //商品ID
+  string Name = 2;  //名称
+  int64 Price = 3;  //单价
+  int32  Number = 4;//数量
+}
+//邮箱信息
+message EmailInfo {
+  int64 EmailID = 1; //邮箱ID
+  string AcceptName = 2; //接收者
+  string Sender = 3;//发送者
+  string Cc = 4;//抄送给
+  string Topic = 5;//主题
+  string Content = 6;//内容 300字(最多)
+  repeated GoodsInfo AwardList = 7;//奖励商品列表
+  int64 TimeStamp = 8; //时间戳
+}
+//牌信息
+message CardInfo {
+  bytes Cards = 1;        //牌
+  int32 CardType = 2;     //牌型
+  int32 CardValue = 3;    //牌值
+}
+//时间信息
+message TimeInfo {
+  int64 TimeStamp = 1; //时间戳（起始时间戳）
+  int32 WaitTime = 2;  //仍需等待时长
+  int32 OutTime = 3;   //服务器已过时长
+  int32 TotalTime = 4; //总时长
+}
+//区域信息
+message AreaInfo {
+  int32 ID = 1;           //区域ID
+  int64 MyGold = 2;       //my
+  int64 TotalGold = 3;    //总
+  int64 AcquireGold = 4;  //输赢情况
+}
+//牌局信息
+message InningInfo{
+  string Number = 1;//牌局编号
+  string Name = 2;//游戏名称
+  int32  Level = 3;//游戏等级
+  int64 Payoff = 4;//结算
+  int64 TimeStamp = 5;//时间戳
+}
+//玩家列表(信息)
+message PlayerListInfo {
+  repeated PlayerInfo AllInfos = 1; //所有玩家信息
+}
+//-----------------------------------------------------------------------------------------
+//玩家记录（从数据库中获取）ResResult
+message PlayerRecord {
+  PlayerInfo User = 1;//玩家
+  int32 Twice = 2;    //游戏次数
+  int32 Ranking = 3;  //当前排名
+  int64 Bankroll = 4; //投注额度
+  int64 WinLos = 5;   //总输赢 （当局）
+}
+//游戏记录
+message GameRecord {
+  CardInfo CardInfo = 1;
+  bool IsWon = 2; //输赢情况
+}
+//历史记录(保存十二条记录)
+message GameRecordList {
+  repeated GameRecord list = 1; //所有历史信息
+}
+//-----------------------------------------------------------------------------------------
+/////////////[优秀如你]-->Req:请求 Resp:反馈<--[交互专用]///////////////////////////////////
+/////////////[优秀如你]-->Req:请求 Resp:反馈<--[交互专用]///////////////////////////////////
+/////////////[优秀如你]-->Req:请求 Resp:反馈<--[交互专用]///////////////////////////////////
+//进入游戏
+message EnterGameReq {
+  uint64 GameID = 1;          //游戏 ID
+  string Password = 2;        //房间密钥
+  uint32 ChairNum = 3;        //椅子编号(可选) 注: =0时,将由系统分配.
+}
+//入场协议  百人类
+message EnterGameResp {
+  uint64 GameID = 1;          //游戏标识
+  uint32 ChairNum = 2;        //椅子编号(不满足req的此项时,将由系统分配,并返回提示)
+  PlayerInfo UserInfo = 3;    //玩家信息
+}
+//入场协议 对战类 [EnterXXXGameResp]
+//受游戏本身特性影响,PlayerInfo有本地化需求
+//请查看对应的子游戏协议文件 中的 EnterXXXGameResp
+//若无本地化需求,统一走 EnterGameResp协议
+//退出游戏
+message ExitGameReq {
+  uint64 GameID = 1; //游戏标识
+}
+message ExitGameResp {
+  uint64 GameID = 1; //游戏标识
+  uint64 UserID = 2;
+}
+//换桌
+message ChangeTableReq {
+  uint64 GameID = 1; //游戏标识
+}
+message ChangeTableResp {
+  uint64 GameID = 1; //游戏ID(新的,有别于req的此项)
+  uint32 TableNum = 2; //桌子ID
+  uint64 UserID = 3;  //玩家ID
+}
+/////////////玩家行为(与游戏弱相关的行为)/////////////////////
+// 托管
+message TrusteeReq {
+  bool IsTrustee = 1; //是否托管
+}
+message TrusteeResp {
+  uint64 UserID = 1; // 玩家ID
+  bool IsTrustee = 2; //是否托管
+}
+//扔骰子
+message RollDiceReq {
+  int32 DiceCount = 1; //骰子的个数
+}
+message RollDiceResp {
+  uint64 UserID = 1;
+  int32 DiceCount = 2;  //骰子的个数
+  bytes Dice = 3;       //骰子具体个数,起抓牌位置
+}
+//////////////////////////////////////////////////
+//更新金币
+message UpdateGoldReq{
+}
+message UpdateGoldResp{
+  uint64 UserID = 1;
+  int64 Gold = 2;//当前玩家金币
+}
+//获取游戏记录
+message GetInningsInfoReq{
+  uint64 GameID = 1; //游戏标识 =0时,表示所有参与过的游戏
+}
+message GetInningsInfoResp{
+  uint64 GameID = 1; //游戏标识 =0时,表示所有参与过的游戏
+  repeated InningInfo Innings = 2;//牌局信息
+  int32 PageNum = 3;//页码 默认20条一页
+}
+//请求游戏结束（注:返回牌局记录后,游戏随即销毁）
+message GameOverReq {
+  uint64 GameID = 1; //注:不能为0
+}
+message GameOverResp {
+  uint64 GameID = 1; //注:不能为0
+  repeated InningInfo Innings = 2;//牌局信息
+  int32 PageNum = 3;//页码 默认20条一页;
+}
+//////
+//邮箱信息
+message EmailReq {
+  int32 PageNum = 1;//页码 默认5条一页;
+}
+message EmailResp {
+  uint64 UserID = 1;  //玩家ID
+  repeated EmailInfo Infos = 2;//页码 默认5条一页
+  int32 PageNum = 3;//页码 默认5条一页
+}
+//领取奖励
+message ClaimReq {
+  int64 EmailID = 1;//邮箱ID
+}
+message ClaimResp {
+  uint64 UserID = 1;   //玩家ID
+  int64 EmailID = 2;   //邮箱ID
+}
+//建议
+message SuggestReq {
+  string Content = 1;//内容 200字
+}
+message SuggestResp {
+  uint64 UserID = 1;   //玩家ID
+  EmailInfo Feedback = 2;//反馈
+}
+////////////////////notify/////////////////////////////
+//踢出
+message NotifyBeOut {
+  uint64 UserID = 1;  //玩家ID
+  uint64 GameID = 2; //游戏标识
+  uint32 Code = 3;    //操作码 0:时间到被剔除 1:刷子
+  string Hints = 4;    //被踢出的原因
+}
+//金币变化通知
+message NotifyGoldChange {
+  uint64 UserID = 1;
+  int64 Gold = 2;     //金币 (客户端统一 */100)
+  int64 AlterGold = 3;//增减了多少 (客户端统一 */100)
+  uint32 Code = 4;    //操作原因 0:结算 1:充值 2:平台扣除 3:平台奖励 4:冻结 5:提币
+  string Reason = 5;  //备注详情
+}
+//公告
+message NotifyNoticeReq {
+  uint64 GameID = 1;      //游戏标识 =0大厅
+  string Content = 2;     //内容
+  NTFLevel  Level = 3;    //个人只能发送 喇叭
+}
+message NotifyNoticeResp {
+  uint64 UserID = 1;      //玩家ID =0时为所有玩家
+  uint64 GameID = 2;      //游戏标识 =0大厅
+  NTFLevel  Level = 3;    //公告级别
+  TimeInfo TimeInfo = 4;  //时间
+  string Content = 5;     //内容
+}
+/*
+//-----------------------------------------------------------------------------------------
+//游戏状态
+//(准备)
+message StateReady {
+  TimeInfo Times = 1;
+}
+//(空闲)
+message StateFree {
+  TimeInfo Times = 1;
+}
+//(开始)
+message StateStart {
+  TimeInfo Times = 1;
+}
+//(游戏中)
+message StatePlaying {
+  TimeInfo Times = 1;
+}
+//(结束)
+message StateOver {
+  TimeInfo Times = 1;
+}
+//(叫分)
+message StateCall {
+  TimeInfo Times = 1;//叫分剩余时间
+  uint64 UserID = 2; // 玩家ID
+}
+//-----------------------------------------------------------------------------------------
+//操作
+//抢庄
+message Host {
+  bool IsWant = 1; //true上庄 false取消上庄
+}
+//超级抢庄
+message HostEx {
+  bool IsWant = 1; //true上庄 false取消
+}
+// 叫分
+message Call {
+  uint64 UserID = 1; // 玩家ID
+  uint32 Score = 2; // 叫分 0:不叫 1: 2: 3:
+}
+//下注
+message Bet {
+  int32 AreaId = 1;
+  int64 Money = 2;
+}
+//下注结果：广播
+message BetResult {
+  uint64 UserId = 1;
+  int32 AreaId = 2;
+  int64 Money = 3;
+}
+*/

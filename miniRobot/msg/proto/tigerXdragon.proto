@@ -1,0 +1,85 @@
+syntax = "proto3";
+package go;
+import "gamecomm.proto";
+//场景
+message TigerXdragonSceneResp{
+  int64 TimeStamp = 1;            //时间戳
+  string Inning = 2;              //牌局号
+  repeated int32 Chips = 3;       //筹 码
+  repeated bytes AwardAreas = 4;  //开奖记录(路单)
+  repeated int64 AreaBets = 5;    //各下注区当前总下注额
+  repeated int64 MyBets = 6;      //个人在各下注区的总下注额
+  PlayerListInfo AllPlayers = 7;  //玩家列表
+}
+//状态
+// 服务端推送
+//(准备)
+message TigerXdragonStateStartResp {
+  TimeInfo Times = 1;
+  string Inning = 2;               // 牌局号
+}
+//(下注)
+message TigerXdragonStatePlayingResp {
+  TimeInfo Times = 1;
+}
+//(开奖)
+message TigerXdragonStateOpenResp {
+  TimeInfo Times = 1;
+  TigerXdragonOpenResp OpenInfo = 2;
+}
+//(结束)
+message TigerXdragonStateOverResp {
+  TimeInfo Times = 1;
+}
+//游戏消息
+//下注
+message TigerXdragonBetReq{
+  int32 BetArea = 1;        //下注区域
+  int64 BetScore = 2;        //下注金额
+}
+message TigerXdragonBetResp{
+  uint64 UserID = 1;
+  int32 BetArea = 2;        //下注区域
+  int64 BetScore = 3;        //下注金额
+}
+//结束
+message TigerXdragonOpenResp{
+  bytes Cards = 1;       //开奖数据
+  bytes AwardArea = 2;  //中奖区域 1~13
+}
+//结算
+message TigerXdragonCheckoutResp{
+  int64 MyAcquire = 1;        //获得金币(结算)
+  repeated int64 Acquires = 2;//各个区域输赢情况
+}
+/////////////预留协议///////////////////////////
+//抢庄
+message TigerXdragonHostReq {
+  bool IsWant = 1;//true上庄 false取消上庄
+}
+message TigerXdragonHostResp {
+  uint64 UserID = 1;
+  bool IsWant = 2;//true上庄 false取消上庄
+}
+//超级抢庄
+message TigerXdragonSuperHostReq {
+  bool IsWant = 1;//true上庄 false取消
+}
+message TigerXdragonSuperHostResp {
+  uint64 UserID = 1;
+  bool IsWant = 2;//true上庄 false取消
+}
+// 从零开始，后面累加1 共13区域
+//    Area_Win             //庄赢 (除庄输和庄赢两个区域外,对玩家下注情况进行统计)
+//    Area_Lose            //庄输
+//    Area_Dragon          //龙
+//    Area_Tiger           //虎
+//    Area_Drawn           //和局
+//    Area_DDiamond        //龙方块
+//    Area_DClub           //龙梅花
+//    Area_DHeart          //龙红桃
+//    Area_DSpade          //龙黑桃
+//    Area_TDiamond        //虎方块
+//    Area_TClub           //虎梅花
+//    Area_THeart          //虎红桃
+//    Area_TSpade          //虎黑桃
