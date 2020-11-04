@@ -1,30 +1,142 @@
 package internal
 
 import (
-	"github.com/name5566/leaf/log"
-	protoMsg "miniRobot/msg/go"
-	"reflect"
+    "github.com/name5566/leaf/gate"
+    "github.com/name5566/leaf/log"
+    protoMsg "miniRobot/msg/go"
+    "reflect"
+    "sync"
+    "sync/atomic"
 )
 
+type gameManCount struct {
+    sync.Map
+    //rooms map[uint32]*RoomInfo
+}
+
+var indexGames int32 = -1
+var countMan uint32 = 0
+
+var ptrCount *gameManCount = &gameManCount{}
 
 func init() {
-	// 向当前模块（login 模块）注册 Login 消息的消息处理函数 handleTest
-	//handleMsg(&jsonMsg.UserLogin{}, handleLoginJson)
-	handleMsg(&protoMsg.LoginResp{}, handleLogin)               //反馈--->主页信息
+
+    // 向当前模块（login 模块）注册 Login 消息的消息处理函数 handleTest
+    //handleMsg(&jsonMsg.UserLogin{}, handleLoginJson)
+    handleMsg(&protoMsg.RegisterResp{}, handleRegister)       //反馈--->主页信息
+    handleMsg(&protoMsg.LoginResp{}, handleLogin)             //反馈--->主页信息
+    handleMsg(&protoMsg.ChooseClassResp{}, handleChooseClass) //反馈--->主页信息
+    handleMsg(&protoMsg.ChooseGameResp{}, handleChooseGame)   //反馈--->主页信息
+    handleMsg(&protoMsg.ResultResp{}, handleResultResp)       //反馈--->主页信息
+    handleMsg(&protoMsg.ResultPopResp{}, handleResultPopResp) //反馈--->主页信息
+
 }
 
 //注册模块间的通信
 func handleMsg(m interface{}, h interface{}) {
-	skeleton.RegisterChanRPC(reflect.TypeOf(m), h)
+    skeleton.RegisterChanRPC(reflect.TypeOf(m), h)
 }
 
 //-----------------消息处理-----------------
-func handleLogin(args []interface{})  {
-	m := args[0].(*protoMsg.LoginResp)
-	log.Debug("msg:%v",m)
+func handleRegister(args []interface{}) {
+    m := args[0].(*protoMsg.RegisterResp)
+    log.Debug("注册成功:%v", m)
 }
 
+func handleLogin(args []interface{}) {
+    m := args[0].(*protoMsg.LoginResp)
+    a := args[1].(gate.Agent)
+    //log.Debug("登录成功:%v", m)
+    a.SetUserData(m.MainInfo.UserInfo)
 
+    //获取游戏分类列表
+    msg := &protoMsg.ChooseClassReq{}
+    for _, cls := range m.MainInfo.Classes.Classify {
+        msg.ID = uint32(cls.ID)
+        msg.TableKey = cls.Key
+        a.WriteMsg(msg)
+        return
+    }
+
+}
+
+//获取房间列表
+func handleChooseClass(args []interface{}) {
+    m := args[0].(*protoMsg.ChooseClassResp)
+    a := args[1].(gate.Agent)
+
+    // person := a.UserData().(*protoMsg.UserInfo)
+    //选择游戏
+    index := atomic.AddInt32(&indexGames, 1)
+    if index < int32(len(m.Games.Items)) {
+        msg := &protoMsg.ChooseGameReq{
+            Info:    m.Games.Items[index].Info,
+            PageNum: 0,
+        }
+        //  log.Debug("玩家'%v(ID:%v)' 请求游戏详情:ID:%v %v", person.Account, person.UserID, m.Games.Items[index].ID, msg.Info)
+        a.WriteMsg(msg)
+    } else {
+        ok := atomic.CompareAndSwapInt32(&indexGames, indexGames, -1)
+        log.Debug("---------------------%v---------------------", ok)
+    }
+
+}
+
+//选择游戏
+func handleChooseGame(args []interface{}) {
+    m := args[0].(*protoMsg.ChooseGameResp)
+    a := args[1].(gate.Agent)
+    // person := a.UserData().(*protoMsg.UserInfo)
+    for _, item := range m.Tables.Items {
+        val, ok := ptrCount.Load(item.GameID)
+        if !ok{
+            ptrCount.Store(item.GameID,uint32(0))
+            val,_ = ptrCount.Load(item.GameID)
+        }
+
+        if val.(uint32)+1 < item.Info.MaxChair || (0 == item.Info.MaxChair && val.(uint32)+1 < 6) {
+            //不能坐满，留个座位给真实玩家
+            msg := &protoMsg.EnterGameReq{
+                GameID:   item.GameID,
+                Password: item.Info.Password,
+            }
+            a.WriteMsg(msg)
+            ptrCount.Store(item.GameID, uint32(val.(uint32)+1))
+            log.Debug("桌子名称:%v 游戏ID:%v 当前人数:%v  最大可容纳:%v", item.Info.Name, item.GameID, val.(uint32)+1, item.Info.MaxChair)
+            return
+        }
+        ////选择游戏
+        //index :=  atomic.AddInt32(&indexGames,1)
+        //if index < int32(len(m.Games.Items)) {
+        //    msg := &protoMsg.ChooseGameReq{
+        //        Info:    m.Info,
+        //        PageNum: 0,
+        //    }
+        //    //  log.Debug("玩家'%v(ID:%v)' 请求游戏详情:ID:%v %v", person.Account, person.UserID, m.Games.Items[index].ID, msg.Info)
+        //    a.WriteMsg(msg)
+        //} else {
+        //    ok := atomic.CompareAndSwapInt32(&indexGames, indexGames, -1)
+        //    log.Debug("---------------------%v---------------------", ok)
+        //}
+        // return
+
+    }
+
+}
+
+//
+func handleResultResp(args []interface{}) {
+    // m := args[0].(*protoMsg.ResultResp)
+    //a := args[1].(gate.Agent)
+    // log.Debug("提示:%v", m)
+}
+
+//选择游戏
+func handleResultPopResp(args []interface{}) {
+    m := args[0].(*protoMsg.ResultPopResp)
+    //a := args[1].(gate.Agent)
+    log.Debug("弹窗提示:%v", m)
+}
 
 /////////////////json-->测试用/////////////////////////////
 // 消息处理

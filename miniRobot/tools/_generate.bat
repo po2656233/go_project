@@ -1,6 +1,10 @@
 @echo OFF
 chcp  65001
 @echo "-----------fix package name(本地化)------------------"
+set copy__path=E:\go_prj\go_server\msg\proto\
+set target_path=E:\go_prj\go_project\miniRobot\msg\proto\
+xcopy %copy__path%*.proto %target_path% /s /h /y /U
+
 py  .\amend.py
 timeout 1
 md ..\msg\go
