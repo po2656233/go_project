@@ -89,12 +89,12 @@ func handleChooseGame(args []interface{}) {
     // person := a.UserData().(*protoMsg.UserInfo)
     for _, item := range m.Tables.Items {
         val, ok := ptrCount.Load(item.GameID)
-        if !ok{
-            ptrCount.Store(item.GameID,uint32(0))
-            val,_ = ptrCount.Load(item.GameID)
+        if !ok {
+            ptrCount.Store(item.GameID, uint32(0))
+            val, _ = ptrCount.Load(item.GameID)
         }
-
-        if val.(uint32)+1 < item.Info.MaxChair || (0 == item.Info.MaxChair && val.(uint32)+1 < 6) {
+        realCount := item.Info.MaxOnline + val.(uint32) + 1
+        if realCount < item.Info.MaxChair || (0 == item.Info.MaxChair && val.(uint32)+1 < 6) {
             //不能坐满，留个座位给真实玩家
             msg := &protoMsg.EnterGameReq{
                 GameID:   item.GameID,
@@ -102,23 +102,9 @@ func handleChooseGame(args []interface{}) {
             }
             a.WriteMsg(msg)
             ptrCount.Store(item.GameID, uint32(val.(uint32)+1))
-            log.Debug("桌子名称:%v 游戏ID:%v 当前人数:%v  最大可容纳:%v", item.Info.Name, item.GameID, val.(uint32)+1, item.Info.MaxChair)
+            log.Debug("桌子名称:%v 游戏ID:%v 当前人数:%v 机器人:%v 最大可容纳:%v", item.Info.Name, item.GameID, realCount, val.(uint32)+1, item.Info.MaxChair)
             return
         }
-        ////选择游戏
-        //index :=  atomic.AddInt32(&indexGames,1)
-        //if index < int32(len(m.Games.Items)) {
-        //    msg := &protoMsg.ChooseGameReq{
-        //        Info:    m.Info,
-        //        PageNum: 0,
-        //    }
-        //    //  log.Debug("玩家'%v(ID:%v)' 请求游戏详情:ID:%v %v", person.Account, person.UserID, m.Games.Items[index].ID, msg.Info)
-        //    a.WriteMsg(msg)
-        //} else {
-        //    ok := atomic.CompareAndSwapInt32(&indexGames, indexGames, -1)
-        //    log.Debug("---------------------%v---------------------", ok)
-        //}
-        // return
 
     }
 

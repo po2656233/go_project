@@ -60,11 +60,8 @@ func handlerMsg(m interface{}, h interface{}) {
 //百人类
 func handleEnterGame(args []interface{}) {
     m := args[0].(*protoMsg.EnterGameResp)
-    a := args[1].(gate.Agent)
-    person := a.UserData().(*protoMsg.UserInfo)
-    if m.UserInfo.UserID == person.UserID {
-        log.Debug("进入游戏:%v", m)
-    }
+    //a := args[1].(gate.Agent)
+    log.Debug("进入游戏:%v", m.UserInfo.UserID)
 
 }
 
@@ -171,7 +168,7 @@ func handleQzcowcowStateFreeResp(args []interface{}) {
     a := args[1].(gate.Agent)
     //	person := a.UserData().(*protoMsg.UserInfo)
     second, _ := rand.Int(rand.Reader, big.NewInt(int64(m.Times.TotalTime)))
-    time.AfterFunc(time.Duration(second.Int64())*time.Second, func() {
+    time.AfterFunc(time.Duration(second.Int64()+1)*time.Second, func() {
         msg := &protoMsg.QzcowcowReadyReq{
             IsReady: true,
         }
@@ -184,7 +181,7 @@ func handleTbcowcowStateFreeResp(args []interface{}) {
     a := args[1].(gate.Agent)
     //	person := a.UserData().(*protoMsg.UserInfo)
     second, _ := rand.Int(rand.Reader, big.NewInt(int64(m.Times.TotalTime)))
-    time.AfterFunc(time.Duration(second.Int64())*time.Second, func() {
+    time.AfterFunc(time.Duration(second.Int64()+1)*time.Second, func() {
         msg := &protoMsg.TbcowcowReadyReq{
             IsReady: true,
         }
@@ -196,7 +193,7 @@ func handleMahjongStateFreeResp(args []interface{}) {
     m := args[0].(*protoMsg.MahjongStateFreeResp)
     a := args[1].(gate.Agent)
     second, _ := rand.Int(rand.Reader, big.NewInt(int64(m.Times.TotalTime)))
-    time.AfterFunc(time.Duration(second.Int64())*time.Second, func() {
+    time.AfterFunc(time.Duration(second.Int64()+1)*time.Second, func() {
         msg := &protoMsg.MahjongReadyReq{
             IsReady: true,
         }
@@ -208,7 +205,7 @@ func handleMahjongERStateFreeResp(args []interface{}) {
     m := args[0].(*protoMsg.MahjongERStateFreeResp)
     a := args[1].(gate.Agent)
     second, _ := rand.Int(rand.Reader, big.NewInt(int64(m.Times.TotalTime)))
-    time.AfterFunc(time.Duration(second.Int64())*time.Second, func() {
+    time.AfterFunc(time.Duration(second.Int64()+1)*time.Second, func() {
         msg := &protoMsg.MahjongERReadyReq{
             IsReady: true,
         }
@@ -220,7 +217,7 @@ func handleZhajinhuaStateFreeResp(args []interface{}) {
     m := args[0].(*protoMsg.ZhajinhuaStateFreeResp)
     a := args[1].(gate.Agent)
     second, _ := rand.Int(rand.Reader, big.NewInt(int64(m.Times.TotalTime)))
-    time.AfterFunc(time.Duration(second.Int64())*time.Second, func() {
+    time.AfterFunc(time.Duration(second.Int64()+1)*time.Second, func() {
         msg := &protoMsg.ZhajinhuaReadyReq{
             IsReady: true,
         }
@@ -231,7 +228,7 @@ func handleSangongStateFreeResp(args []interface{}) {
     m := args[0].(*protoMsg.SangongStateFreeResp)
     a := args[1].(gate.Agent)
     second, _ := rand.Int(rand.Reader, big.NewInt(int64(m.Times.TotalTime)))
-    time.AfterFunc(time.Duration(second.Int64())*time.Second, func() {
+    time.AfterFunc(time.Duration(second.Int64()+1)*time.Second, func() {
         msg := &protoMsg.SangongReadyReq{
             IsReady: true,
         }
@@ -243,7 +240,7 @@ func handleLandLordsStateFreeResp(args []interface{}) {
     m := args[0].(*protoMsg.LandLordsStateFreeResp)
     a := args[1].(gate.Agent)
     second, _ := rand.Int(rand.Reader, big.NewInt(int64(m.Times.TotalTime)))
-    time.AfterFunc(time.Duration(second.Int64())*time.Second, func() {
+    time.AfterFunc(time.Duration(second.Int64()+1)*time.Second, func() {
         msg := &protoMsg.LandLordsReadyReq{
             IsReady: true,
         }
