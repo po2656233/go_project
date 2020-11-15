@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"strings"
 	"log"
+	"sync"
 )
 
 
@@ -59,11 +60,38 @@ func GoID() int {
 	return id
 }
 
+
+//统计游戏里的玩家数量
+var MangerPerson struct {
+	sync.Map
+	//rooms map[uint32]*RoomInfo
+}
+
+
 //堆栈信息输出
 func DumpStacks() {
 	buf := make([]byte, 16384)
 	buf = buf[:runtime.Stack(buf, true)]
 	fmt.Printf("=== BEGIN goroutine stack dump ===\n%s\n=== END goroutine stack dump ===", buf)
+}
+
+//删除值
+func DeleteValue(slice interface{}, value interface{}) interface{} {
+	//判断是否是切片类型
+	v := reflect.ValueOf(slice)
+	if v.Kind() != reflect.Slice {
+		return nil
+	}
+	for i := 0; i < v.Len(); i++ {
+		if reflect.ValueOf(value).IsValid() {
+			if v.Index(i).Kind() == reflect.ValueOf(value).Kind() {
+				if reflect.DeepEqual(v.Index(i).Interface(), value) {
+					return reflect.AppendSlice(v.Slice(0, i), v.Slice(i+1, v.Len())).Interface()
+				}
+			}
+		}
+	}
+	return slice
 }
 
 // id 生成器

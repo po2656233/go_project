@@ -3,21 +3,13 @@ package internal
 import (
     "github.com/name5566/leaf/gate"
     "github.com/name5566/leaf/log"
+    . "miniRobot/base"
     protoMsg "miniRobot/msg/go"
     "reflect"
-    "sync"
     "sync/atomic"
 )
 
-type gameManCount struct {
-    sync.Map
-    //rooms map[uint32]*RoomInfo
-}
 
-var indexGames int32 = -1
-var countMan uint32 = 0
-
-var ptrCount *gameManCount = &gameManCount{}
 
 func init() {
 
@@ -67,7 +59,7 @@ func handleChooseClass(args []interface{}) {
 
     // person := a.UserData().(*protoMsg.UserInfo)
     //选择游戏
-    index := atomic.AddInt32(&indexGames, 1)
+    index := atomic.AddInt32(&IndexGames, 1)
     if index < int32(len(m.Games.Items)) {
         msg := &protoMsg.ChooseGameReq{
             Info:    m.Games.Items[index].Info,
@@ -76,7 +68,7 @@ func handleChooseClass(args []interface{}) {
         //  log.Debug("玩家'%v(ID:%v)' 请求游戏详情:ID:%v %v", person.Account, person.UserID, m.Games.Items[index].ID, msg.Info)
         a.WriteMsg(msg)
     } else {
-        ok := atomic.CompareAndSwapInt32(&indexGames, indexGames, -1)
+        ok := atomic.CompareAndSwapInt32(&IndexGames, IndexGames, -1)
         log.Debug("---------------------%v---------------------", ok)
     }
 
@@ -88,20 +80,20 @@ func handleChooseGame(args []interface{}) {
     a := args[1].(gate.Agent)
     // person := a.UserData().(*protoMsg.UserInfo)
     for _, item := range m.Tables.Items {
-        val, ok := ptrCount.Load(item.GameID)
+        val, ok := MangerPerson.Load(item.GameID)
         if !ok {
-            ptrCount.Store(item.GameID, uint32(0))
-            val, _ = ptrCount.Load(item.GameID)
+            MangerPerson.Store(item.GameID, uint32(0))
+            val, _ = MangerPerson.Load(item.GameID)
         }
         realCount := item.Info.MaxOnline + val.(uint32) + 1
-        if realCount < item.Info.MaxChair || (0 == item.Info.MaxChair && val.(uint32)+1 < 6) {
+        if realCount < item.Info.MaxChair || (0 == item.Info.MaxChair && val.(uint32)+1 < 30) {
             //不能坐满，留个座位给真实玩家
             msg := &protoMsg.EnterGameReq{
                 GameID:   item.GameID,
                 Password: item.Info.Password,
             }
             a.WriteMsg(msg)
-            ptrCount.Store(item.GameID, uint32(val.(uint32)+1))
+            MangerPerson.Store(item.GameID, uint32(val.(uint32)+1))
             log.Debug("桌子名称:%v 游戏ID:%v 当前人数:%v 机器人:%v 最大可容纳:%v", item.Info.Name, item.GameID, realCount, val.(uint32)+1, item.Info.MaxChair)
             return
         }

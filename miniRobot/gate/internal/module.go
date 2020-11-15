@@ -52,28 +52,14 @@ type Gate struct {
     TCPAddr      string
     LenMsgLen    int
     LittleEndian bool
+
+    //客户端
+    listWS   []*network.WSClient
 }
 
 func (gate *Gate) Run(closeSig chan bool) {
-    //var wsServer *network.WSClient
-    //if gate.WSAddr != "" {
-    //	wsServer = new(network.WSClient)
-    //	wsServer.Addr = gate.WSAddr
-    //	//wsServer.MaxConnNum = gate.MaxConnNum
-    //	wsServer.PendingWriteNum = gate.PendingWriteNum
-    //	wsServer.MaxMsgLen = gate.MaxMsgLen
-    //	//wsServer.HTTPTimeout = gate.HTTPTimeout
-    //	//wsServer.CertFile = gate.CertFile
-    //	//wsServer.KeyFile = gate.KeyFile
-    //	wsServer.NewAgent = func(conn *network.WSConn) network.Agent {
-    //		a := &agent{conn: conn, gate: gate}
-    //		if gate.AgentChanRPC != nil {
-    //			gate.AgentChanRPC.Go("NewAgent", a)
-    //		}
-    //		return a
-    //	}
-    //}
-    listWS := make( []*network.WSClient,0)
+    gate.listWS = make( []*network.WSClient,0)
+    log.Debug("---开始")
     for i := 0; i < base.ALLCount; i++ {
 
         var client *network.WSClient
@@ -82,7 +68,7 @@ func (gate *Gate) Run(closeSig chan bool) {
             client.Addr = gate.WSAddr
             client.ConnNum = 1
             client.HandshakeTimeout = 10 * time.Second
-            client.ConnectInterval = 3 * time.Second
+            client.ConnectInterval = 10* time.Second
             client.PendingWriteNum = conf.PendingWriteNum
             //client.LenMsgLen = 4
             client.AutoReconnect = true
@@ -96,30 +82,20 @@ func (gate *Gate) Run(closeSig chan bool) {
             }
         }
 
-        //if wsServer != nil {
-        //	wsServer.Start()
-        //}
         if client != nil {
             client.Start()
+            gate.listWS = append(gate.listWS,client)
         }
-        listWS = append(listWS,client)
-
-        //if wsServer != nil {
-        //	wsServer.Close()
-        //}
 
     }
-    //<-closeSig
-    //for _,client:=range listWS{
-    //    if client != nil {
-    //        client.Close()
-    //    }
-    //}
-
 
 }
 
-func (gate *Gate) OnDestroy() {}
+func (gate *Gate) OnDestroy() {
+    //for _, client := range gate.listWS {
+    //    client.Close()
+    //}
+}
 
 type agent struct {
     conn     network.Conn
