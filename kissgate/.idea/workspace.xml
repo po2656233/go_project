@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="BranchesTreeState">
+    <expand>
+      <path>
+        <item name="ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="LOCAL_ROOT" type="e8cecc67:BranchNodeDescriptor" />
+      </path>
+      <path>
+        <item name="ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="REMOTE_ROOT" type="e8cecc67:BranchNodeDescriptor" />
+      </path>
+      <path>
+        <item name="ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="REMOTE_ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:origin" type="e8cecc67:BranchNodeDescriptor" />
+      </path>
+    </expand>
+    <select />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="025e04cb-cb41-41b1-9209-2ce1366f0a87" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/../go_gate/.idea/.gitignore" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../go_gate/.idea/go_gate.iml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../go_gate/.idea/misc.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../go_gate/.idea/modules.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../go_gate/.idea/vcs.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../miniRobot/.idea/miniRobot.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../go_gate/config.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../go_gate/config.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../go_gate/manger/httpapi.go" beforeDir="false" afterPath="$PROJECT_DIR$/../go_gate/manger/httpapi.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../go_gate/manger/proxy/line.go" beforeDir="false" afterPath="$PROJECT_DIR$/../go_gate/manger/proxy/line.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../go_gate/manger/proxy/proxy.go" beforeDir="false" afterPath="$PROJECT_DIR$/../go_gate/manger/proxy/proxy.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../go_gate/manger/proxy/proxytcp.go" beforeDir="false" afterPath="$PROJECT_DIR$/../go_gate/manger/proxy/proxytcp.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../go_gate/manger/proxy/proxyws.go" beforeDir="false" afterPath="$PROJECT_DIR$/../go_gate/manger/proxy/proxyws.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../go_gate/manger/proxymgr.go" beforeDir="false" afterPath="$PROJECT_DIR$/../go_gate/manger/proxymgr.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../miniRobot/login/internal/handler.go" beforeDir="false" afterPath="$PROJECT_DIR$/../miniRobot/login/internal/handler.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../miniRobot/msg/msg.go" beforeDir="false" afterPath="$PROJECT_DIR$/../miniRobot/msg/msg.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../miniRobot/msg/proto/login.proto" beforeDir="false" afterPath="$PROJECT_DIR$/../miniRobot/msg/proto/login.proto" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../miniRobot/tools/_generate.bat" beforeDir="false" afterPath="$PROJECT_DIR$/../miniRobot/tools/_generate.bat" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Go File" />
+      </list>
+    </option>
+  </component>
+  <component name="GOROOT" path="D:\Go" />
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/.." />
+  </component>
+  <component name="JsFlowSettings">
+    <service-enabled>true</service-enabled>
+    <exe-path />
+    <other-services-enabled>true</other-services-enabled>
+    <auto-save>true</auto-save>
+  </component>
+  <component name="ProjectId" id="1kL9wQ5uALKDvzej0ZKfedtLQPv" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">
+    <property name="ASKED_SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
+    <property name="DefaultGoTemplateProperty" value="Go File" />
+    <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
+    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
+    <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
+    <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="configurable.Global.GOPATH.is.expanded" value="true" />
+    <property name="configurable.Module.GOPATH.is.expanded" value="false" />
+    <property name="configurable.Project.GOPATH.is.expanded" value="true" />
+    <property name="go.import.settings.migrated" value="true" />
+    <property name="go.sdk.automatically.set" value="true" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="settings.editor.selected.configurable" value="go.vgo" />
+  </component>
+  <component name="RunManager">
+    <configuration name="go build main.go" type="GoApplicationRunConfiguration" factoryName="Go Application" nameIsGenerated="true">
+      <module name="kissgate" />
+      <working_directory value="$PROJECT_DIR$" />
+      <go_parameters value="-i" />
+      <kind value="FILE" />
+      <filePath value="$PROJECT_DIR$/main.go" />
+      <method v="2" />
+    </configuration>
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="2" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+    <option name="oldMeFiltersMigrated" value="true" />
+  </component>
+  <component name="VgoProject">
+    <integration-enabled>true</integration-enabled>
+    <environment>
+      <map>
+        <entry key="GOPROXY" value="https://goproxy.io,direct" />
+      </map>
+    </environment>
+  </component>
+  <component name="WindowStateProjectService">
+    <state x="414" y="175" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1605469729197">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state x="414" y="175" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1605469729197" />
+    <state x="656" y="144" key="#go_build_main.go" timestamp="1605469713509">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state x="656" y="144" key="#go_build_main.go/0.0.1920.1040@0.0.1920.1040" timestamp="1605469713509" />
+    <state width="745" height="466" key="DebuggerActiveHint" timestamp="1605631911937">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state width="745" height="466" key="DebuggerActiveHint/0.0.1920.1040@0.0.1920.1040" timestamp="1605631911937" />
+    <state x="847" y="379" key="EnvironmentVariablesDialog" timestamp="1605469342789">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state x="847" y="379" key="EnvironmentVariablesDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1605469342789" />
+    <state x="740" y="275" key="FileChooserDialogImpl" timestamp="1605469725763">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state x="740" y="275" key="FileChooserDialogImpl/0.0.1920.1040@0.0.1920.1040" timestamp="1605469725763" />
+    <state width="1877" height="269" key="GridCell.Tab.0.bottom" timestamp="1605634544211">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state width="1877" height="269" key="GridCell.Tab.0.bottom/0.0.1920.1040@0.0.1920.1040" timestamp="1605634544211" />
+    <state width="1877" height="269" key="GridCell.Tab.0.center" timestamp="1605634544210">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state width="1877" height="269" key="GridCell.Tab.0.center/0.0.1920.1040@0.0.1920.1040" timestamp="1605634544210" />
+    <state width="1877" height="269" key="GridCell.Tab.0.left" timestamp="1605634544210">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state width="1877" height="269" key="GridCell.Tab.0.left/0.0.1920.1040@0.0.1920.1040" timestamp="1605634544210" />
+    <state width="1877" height="269" key="GridCell.Tab.0.right" timestamp="1605634544211">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state width="1877" height="269" key="GridCell.Tab.0.right/0.0.1920.1040@0.0.1920.1040" timestamp="1605634544211" />
+    <state width="1877" height="205" key="GridCell.Tab.1.bottom" timestamp="1605634544208">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state width="1877" height="205" key="GridCell.Tab.1.bottom/0.0.1920.1040@0.0.1920.1040" timestamp="1605634544208" />
+    <state width="1877" height="205" key="GridCell.Tab.1.center" timestamp="1605634544208">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state width="1877" height="205" key="GridCell.Tab.1.center/0.0.1920.1040@0.0.1920.1040" timestamp="1605634544208" />
+    <state width="1877" height="205" key="GridCell.Tab.1.left" timestamp="1605634544208">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state width="1877" height="205" key="GridCell.Tab.1.left/0.0.1920.1040@0.0.1920.1040" timestamp="1605634544208" />
+    <state width="1877" height="205" key="GridCell.Tab.1.right" timestamp="1605634544208">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state width="1877" height="205" key="GridCell.Tab.1.right/0.0.1920.1040@0.0.1920.1040" timestamp="1605634544208" />
+    <state x="461" y="164" key="SettingsEditor" timestamp="1605469344658">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state x="461" y="164" key="SettingsEditor/0.0.1920.1040@0.0.1920.1040" timestamp="1605469344658" />
+    <state x="662" y="254" width="699" height="532" key="find.popup" timestamp="1605610175411">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state x="662" y="254" width="699" height="532" key="find.popup/0.0.1920.1040@0.0.1920.1040" timestamp="1605610175411" />
+    <state x="682" y="431" key="vcs.readOnlyHandler.ReadOnlyStatusDialog" timestamp="1605594414737">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state x="682" y="431" key="vcs.readOnlyHandler.ReadOnlyStatusDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1605594414737" />
+  </component>
+</project>

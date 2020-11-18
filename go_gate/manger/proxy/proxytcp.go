@@ -1,7 +1,6 @@
 package proxy
 
 import (
-	"encoding/binary"
 	"github.com/nothollyhigh/kiss/log"
 	"github.com/nothollyhigh/kiss/util"
 	"net"
@@ -135,18 +134,18 @@ func (ptcp *ProxyTcp) OnNew(clientConn *net.TCPConn) {
 			if serverConn == nil {
 				// 校验第一个数据包是否有效
 				nReadLen := len(buf)
-				if nReadLen < HEAD_LEN || nReadLen - HEAD_LEN != int(binary.BigEndian.Uint32(buf[:4])) - MSGID_LEN - ERRCODE_LEN{
-					clientConn.Close()
-					ConnMgr.UpdateFailedNum(1)
-					//线路延迟
-					if line != nil{
-						line.UpdateDelay(UnreachableTime)
-						//统计连接失败数
-						line.UpdateFailedNum(1)
-						log.Info("Session(%s -> %s) protocol Failed",clientAddr,  line.Remote)
-					}
-					return
-				}
+				//if nReadLen < HEAD_LEN || nReadLen - HEAD_LEN != int(binary.BigEndian.Uint32(buf[:4])) - MSGID_LEN - ERRCODE_LEN{
+				//	clientConn.Close()
+				//	ConnMgr.UpdateFailedNum(1)
+				//	//线路延迟
+				//	if line != nil{
+				//		line.UpdateDelay(UnreachableTime)
+				//		//统计连接失败数
+				//		line.UpdateFailedNum(1)
+				//		log.Info("Session(%s -> %s) protocol Failed",clientAddr,  line.Remote)
+				//	}
+				//	return
+				//}
 
 				// 获取serverID
 				line = ptcp.AssignLine(string(buf[HEAD_LEN:nReadLen - HEAD_LEN]))
@@ -191,9 +190,13 @@ func (ptcp *ProxyTcp) OnNew(clientConn *net.TCPConn) {
 				ptcp.InitConn(serverConn)
 
 				// TCP 真实IP数据透传
-				if HEAD_LEN <= nread && MsgUserIP == int(binary.BigEndian.Uint32(buf[4:4+MSGID_LEN])){
-					serverConn.Write(buf)
-				}else if err = line.HandleRedirect(serverConn, line.Remote); err != nil {
+				//if HEAD_LEN <= nread && MsgUserIP == int(binary.BigEndian.Uint32(buf[4:4+MSGID_LEN])){
+				//	serverConn.Write(buf)
+				//}else if err = line.HandleRedirect(serverConn, line.Remote); err != nil {
+				//	log.Info("Session(%s -> %s) HandleRedirect Failed: %s", clientAddr, line.Remote, err.Error())
+				//	return
+				//}
+				if err = line.HandleRedirect(serverConn, line.Remote); err != nil {
 					log.Info("Session(%s -> %s) HandleRedirect Failed: %s", clientAddr, line.Remote, err.Error())
 					return
 				}

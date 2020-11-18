@@ -73,7 +73,7 @@ func (mgr *ProxyManger)AddProxy(busline config.XMLBusLine){
 	case PT_TCP:
 		proxy = NewTcpProxy(name, busline.Addr)
 	case PT_WEBSOCKET:
-		paths := []string{}
+		paths := make([]string,0)
 		for _, route := range busline.Routes {
 			paths = append(paths, route.Path)
 		}
@@ -81,7 +81,7 @@ func (mgr *ProxyManger)AddProxy(busline config.XMLBusLine){
 	}
 
 
-	//线路
+	//集成线路
 	for _, line := range busline.Lines {
 		if "" == name{
 			name = line.ServerID
@@ -132,8 +132,8 @@ func (mgr *ProxyManger) InitProxy() {
 	DEFAULT_TCP_CHECKLINE_INTERVAL = time.Second * time.Duration(options.Heartbeat.Interval)
 	DEFAULT_TCP_CHECKLINE_TIMEOUT = time.Second * time.Duration(options.Heartbeat.Timeout)
 
-	for _, busline := range proxy.BusLines{
-		mgr.AddProxy(busline)
+	for _, busLine := range proxy.BusLines{
+		mgr.AddProxy(busLine)
 	}
 }
 

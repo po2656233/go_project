@@ -13,9 +13,7 @@ import (
 var (
 	PT_TCP       = "tcp"
 	PT_WEBSOCKET = "websocket"
-	HEAD_LEN	 = 12
-	MSGID_LEN	 = 4
-	ERRCODE_LEN	 = 4
+	HEAD_LEN	 = 2
 
 	/* 默认配置项 */
 	DEFAULT_TCP_NODELAY            = true              /* tcp nodelay */

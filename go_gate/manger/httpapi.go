@@ -90,7 +90,7 @@ func (h *httpHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 		//log.Info("HTTP API:Read data line ok:\n%v", string(readData))
 		//节点信息比对
-		var busline config.XMLBusLine
+		var busLine config.XMLBusLine
 		var line config.XMLLine
 		var pLine *Line
 		var proxy IProxy
@@ -101,17 +101,17 @@ func (h *httpHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		DEFAULT_TCP_CHECKLINE_INTERVAL = time.Second * time.Duration(options.Heartbeat.Interval)
 		DEFAULT_TCP_CHECKLINE_TIMEOUT = time.Second * time.Duration(options.Heartbeat.Timeout)
 
-		for _, busline = range confProxy.BusLines { //[0
-			if proxy, _ = ProxyMgr.GetProxy(busline.Name); nil != proxy { //[1 获取到的值不能为空，否则新增处理
+		for _, busLine = range confProxy.BusLines { //[0
+			if proxy, _ = ProxyMgr.GetProxy(busLine.Name); nil != proxy { //[1 获取到的值不能为空，否则新增处理
 				// 查找线路
-				for _, line = range busline.Lines { //[2
+				for _, line = range busLine.Lines { //[2
 					for _, node = range line.Nodes {//[3
 						node.Addr = fmt.Sprintf("%s:%s", node.Ip, node.Port)
 						if pLine = proxy.GetLine(line.ServerID, node.Addr); pLine != nil {
 							continue
 						}
 						// 新增线路
-						switch busline.Type { //[4
+						switch busLine.Type { //[4
 						case PT_TCP:
 							proxy.(*ProxyTcp).AddLine(line.ServerID, node.Addr, DEFAULT_TCP_CHECKLINE_TIMEOUT, DEFAULT_TCP_CHECKLINE_INTERVAL, node.Maxload, config.GlobalXmlConfig.Options.Redirect)
 						case PT_WEBSOCKET:
@@ -123,9 +123,9 @@ func (h *httpHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 				} //2]
 
 				//保留有效线路
-				proxy.ReserveLines(busline.Lines)
+				proxy.ReserveLines(busLine.Lines)
 
-				switch busline.Type { //[2'
+				switch busLine.Type { //[2'
 				case PT_TCP:
 					proxy.(*ProxyTcp).StartCheckLines()
 				case PT_WEBSOCKET:
@@ -133,7 +133,7 @@ func (h *httpHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 				}//2']
 			} else { //1] [1'
 				// 新增 busline
-				ProxyMgr.AddProxy(busline)
+				ProxyMgr.AddProxy(busLine)
 			} //1']
 		} //0]
 	}

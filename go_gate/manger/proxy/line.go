@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/golang/protobuf/proto"
+	"github.com/gorilla/websocket"
 	"github.com/nothollyhigh/kiss/log"
 	tnet "github.com/nothollyhigh/kiss/net"
 	"github.com/nothollyhigh/kiss/util"
@@ -191,6 +192,29 @@ func (line *Line) HandleRedirect(conn *net.TCPConn, addr string) error {
 
 	return nil
 }
+func (line *Line) HandleRedirectC(conn *websocket.Conn, addr string) error {
+	if line.Redirect {
+		// 消息头
+		head := &Head{MsgId:MsgUserIP,}
+		// 消息体
+		addrstr := strings.Split(addr, ":")[0]
+		msg := &gate.MsgSetUserAddrReq{Addr:addrstr}
+
+		log.Info("RemoteAddr: %v realIP: %v", conn.RemoteAddr(),  addrstr)
+		if buffer,err:= makeBuf(head, msg); err == nil{
+			if err = conn.SetWriteDeadline(time.Now().Add(time.Second * 5)); err != nil {
+				return err
+			}
+			// 向conn传输buf
+			err = conn.WriteMessage(websocket.BinaryMessage, buffer)
+			return err
+		}else{
+			return err
+		}
+	}
+
+	return nil
+}
 
 /* 更新为客户端与服务器建立连接的失败总次数，以及近期每分钟内的失败次数记录 */
 func (line *Line) UpdateFailedNum(delta int64) {
@@ -243,10 +267,8 @@ func makeBuf(head *Head, msg proto.Message) ([]byte, error) {
 	}
 
 	btHead := make([]byte,HEAD_LEN)
-	head.Length = int32(MSGID_LEN) + int32(ERRCODE_LEN) + int32(len(body))
-	binary.BigEndian.PutUint32(btHead[:4], uint32(head.Length))
-	binary.BigEndian.PutUint32(btHead[4:8], uint32(head.MsgId))
-	binary.BigEndian.PutUint32(btHead[8:12], uint32(head.ErrorCode))
+	head.Length =  int32(len(body))
+	binary.BigEndian.PutUint16(btHead[:HEAD_LEN], uint16(head.Length))
 
 	var buffer bytes.Buffer
 	buffer.Write(btHead)
