@@ -4,11 +4,11 @@
 package msg
 
 import (
+    "sync"
     "github.com/golang/protobuf/proto"
     "github.com/name5566/leaf/network/json"
     "github.com/name5566/leaf/network/protobuf"
     protoMsg "miniRobot/msg/go"
-    "sync"
 )
 
 // 使用默认的 JSON 消息处理器（默认还提供了 protobuf 消息处理器）
@@ -56,6 +56,8 @@ func init() {
     RegisterMessage(&protoMsg.SettingTableResp{})
     RegisterMessage(&protoMsg.ResultResp{})
     RegisterMessage(&protoMsg.ResultPopResp{})
+    RegisterMessage(&protoMsg.PingReq{})
+    RegisterMessage(&protoMsg.PongResp{})
 
     //comand文件生成的代码
     RegisterMessage(&protoMsg.PacketData{})
@@ -282,6 +284,8 @@ func init() {
     RegisterMessage(&protoMsg.TbcowcowReadyResp{})
     RegisterMessage(&protoMsg.TbcowcowBetReq{})
     RegisterMessage(&protoMsg.TbcowcowBetResp{})
+    RegisterMessage(&protoMsg.TbcowcowShowCardReq{})
+    RegisterMessage(&protoMsg.TbcowcowShowCardResp{})
     RegisterMessage(&protoMsg.TbcowcowOpenResp{})
     RegisterMessage(&protoMsg.TbcowcowOverResp{})
 
@@ -355,3 +359,4 @@ func init() {
     RegisterMessage(&protoMsg.MahjongERDealResp{})
     RegisterMessage(&protoMsg.MahjongERHintResp{})
 }
+

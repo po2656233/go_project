@@ -262,3 +262,9 @@ message ResultPopResp{
   string Title = 2;      //标题
   string Hints = 3;      //提示信息
 }
+//////////////heart//////////////////////////////////////////
+//心跳包 默认20秒 网关等待读取数据时长为35秒
+message PingReq{
+}
+message PongResp{
+}

@@ -22,6 +22,9 @@ func init() {
     handleMsg(&protoMsg.ResultResp{}, handleResultResp)       //反馈--->主页信息
     handleMsg(&protoMsg.ResultPopResp{}, handleResultPopResp) //反馈--->主页信息
 
+
+    handleMsg(&protoMsg.PongResp{}, handlePongResp)             //反馈--->主页信息
+
 }
 
 //注册模块间的通信
@@ -29,17 +32,36 @@ func handleMsg(m interface{}, h interface{}) {
     skeleton.RegisterChanRPC(reflect.TypeOf(m), h)
 }
 
+/////////////
+
+func handlePongResp(args []interface{}) {
+    _ = args[0].(*protoMsg.PongResp)
+    //time.AfterFunc(time.Duration(20)*time.Second, func() {
+    //   if a,ok := args[1].(gate.Agent);ok{
+    //       a.WriteMsg(&protoMsg.PingReq{})
+    //   }
+    //})
+}
+
+
 //-----------------消息处理-----------------
 func handleRegister(args []interface{}) {
     m := args[0].(*protoMsg.RegisterResp)
     log.Debug("注册成功:%v", m)
 }
 
+
 func handleLogin(args []interface{}) {
     m := args[0].(*protoMsg.LoginResp)
     a := args[1].(gate.Agent)
     //log.Debug("登录成功:%v", m)
     a.SetUserData(m.MainInfo.UserInfo)
+
+    //time.AfterFunc(time.Duration(20)*time.Second, func() {
+    //    if a,ok := args[1].(gate.Agent);ok{
+    //        a.WriteMsg(&protoMsg.PingReq{})
+    //    }
+    //})
 
     //获取游戏分类列表
     msg := &protoMsg.ChooseClassReq{}

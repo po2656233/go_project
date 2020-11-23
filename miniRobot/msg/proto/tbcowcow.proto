@@ -73,6 +73,13 @@ message TbcowcowBetResp {
   int32 BetArea = 2;        //下注区域
   int64 BetScore = 3;        //下注金额
 }
+//摊牌  // CardInfo Cards = 1;
+message TbcowcowShowCardReq {
+}
+message TbcowcowShowCardResp {
+  uint64 UserId = 1;
+  CardInfo Cards = 2;     
+}
 //开牌
 message TbcowcowOpenResp {
   uint64 WinnerId = 1;   //赢家ID

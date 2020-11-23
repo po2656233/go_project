@@ -4,6 +4,7 @@ chcp  65001
 set copy__path=E:\go_prj\go_server\msg\proto\
 set target_path=E:\go_prj\go_project\miniRobot\msg\proto\
 xcopy %copy__path%*.proto %target_path% /s /h /y /U
+xcopy %copy__path%..\msg.go %target_path%..\msg.go /s /h /y /U
 
 py  .\amend.py
 timeout 1

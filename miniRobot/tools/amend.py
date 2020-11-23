@@ -58,6 +58,22 @@ def main():
                 else:
                     f.write(line+'\n')
         f.close()
-
+    
+    fd  =  open ( "../msg/msg.go", 'r+' ,encoding='utf-8')
+    buffd = fd.read()
+    patd = re.compile (w1 + '(.*?)' + w2,re.S)
+    resultd  =  pat.findall(buffd)
+    newNUMSd = re.sub(pat, deal, buffd)
+    
+    #包名本地化
+    fd.seek(0)
+    fd.truncate()
+    all_the_linesd = newNUMSd.split('\n')
+    for line in all_the_linesd:
+        line = line.replace("server/msg/go","miniRobot/msg/go")
+        fd.write(line+'\n')    
+    fd.close()
+    
+    
 if __name__ == '__main__':
     main()
