@@ -88,6 +88,8 @@ func init() {
     RegisterMessage(&protoMsg.UpdateGoldResp{})
     RegisterMessage(&protoMsg.GetInningsInfoReq{})
     RegisterMessage(&protoMsg.GetInningsInfoResp{})
+    RegisterMessage(&protoMsg.GetRecordReq{})
+    RegisterMessage(&protoMsg.GetRecordResp{})
     RegisterMessage(&protoMsg.GameOverReq{})
     RegisterMessage(&protoMsg.GameOverResp{})
     RegisterMessage(&protoMsg.EmailReq{})

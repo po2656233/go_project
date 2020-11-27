@@ -123,10 +123,10 @@ message AreaInfo {
 }
 //牌局信息
 message InningInfo{
-  string Number = 1;//牌局编号
-  string Name = 2;//游戏名称
-  int32  Level = 3;//游戏等级
-  int64 Payoff = 4;//结算
+  uint64 GameID = 1; //游戏ID
+  string Number = 2;  //牌局编号
+  string Name = 3;  //游戏名称
+  int64 Payoff = 4; //结算
   int64 TimeStamp = 5;//时间戳
 }
 //玩家列表(信息)
@@ -206,7 +206,7 @@ message RollDiceResp {
   int32 DiceCount = 2;  //骰子的个数
   bytes Dice = 3;       //骰子具体个数,起抓牌位置
 }
-//////////////////////////////////////////////////
+///////////////////金币变化///////////////////////////////
 //更新金币
 message UpdateGoldReq{
 }
@@ -214,7 +214,8 @@ message UpdateGoldResp{
   uint64 UserID = 1;
   int64 Gold = 2;//当前玩家金币
 }
-//获取游戏记录
+///////////////////游戏记录///////////////////////////////
+//获取牌局记录
 message GetInningsInfoReq{
   uint64 GameID = 1; //游戏标识 =0时,表示所有参与过的游戏
 }
@@ -222,6 +223,21 @@ message GetInningsInfoResp{
   uint64 GameID = 1; //游戏标识 =0时,表示所有参与过的游戏
   repeated InningInfo Innings = 2;//牌局信息
   int32 PageNum = 3;//页码 默认20条一页
+}
+//获取游戏记录(根据kindID)
+message GetRecordReq{
+  uint64 KindID = 1; //游戏标识 =0时,表示所有参与过的游戏
+  uint32 Level = 2;       //游戏类别 0:普通 1:中级 2:高级 3:积分排位 4:淘汰制排位 -1:表示不分级别统计
+  int64 StartTimeStamp = 3; //起始时间戳 = 0默认所有
+  int64 EndTimeStamp = 4;   //结束时间戳 = 0
+}
+message GetRecordResp{
+  uint64 KindID = 1; //游戏标识 =0时,表示所有参与过的游戏
+  uint32 Level = 2;      // -1:表示不分级别统计
+  int64 StartTimeStamp = 3;
+  int64 EndTimeStamp = 4;
+  repeated InningInfo Innings = 5;//牌局信息
+  int32 PageNum = 6;//页码 默认20条一页
 }
 //请求游戏结束（注:返回牌局记录后,游戏随即销毁）
 message GameOverReq {
@@ -232,7 +248,7 @@ message GameOverResp {
   repeated InningInfo Innings = 2;//牌局信息
   int32 PageNum = 3;//页码 默认20条一页;
 }
-//////
+//////////////////////////////////////////////////////
 //邮箱信息
 message EmailReq {
   int32 PageNum = 1;//页码 默认5条一页;
