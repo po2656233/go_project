@@ -80,6 +80,8 @@ func init() {
     RegisterMessage(&protoMsg.ExitGameResp{})
     RegisterMessage(&protoMsg.ChangeTableReq{})
     RegisterMessage(&protoMsg.ChangeTableResp{})
+    RegisterMessage(&protoMsg.GetBackPasswordReq{})
+    RegisterMessage(&protoMsg.GetBackPasswordResp{})
     RegisterMessage(&protoMsg.TrusteeReq{})
     RegisterMessage(&protoMsg.TrusteeResp{})
     RegisterMessage(&protoMsg.RollDiceReq{})

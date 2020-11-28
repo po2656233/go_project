@@ -188,6 +188,14 @@ message ChangeTableResp {
   uint32 TableNum = 2; //桌子ID
   uint64 UserID = 3;  //玩家ID
 }
+//找回游戏密码 [创建者|群主]权限
+message GetBackPasswordReq {
+  uint64 GameID = 1; //游戏标识
+}
+message GetBackPasswordResp {
+  uint64 GameID = 1; //游戏标识
+  string Password = 2;//
+}
 /////////////玩家行为(与游戏弱相关的行为)/////////////////////
 // 托管
 message TrusteeReq {
