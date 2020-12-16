@@ -83,13 +83,13 @@ message QzcowcowCallResp {
 //下注
 message QzcowcowBetReq {
   int32 BetArea = 1;        //下注区域
-  int64 BetScore = 2;        //下注金额
+  int64 BetScore = 2;         //倍数
 }
 //下注结果：广播
 message QzcowcowBetResp {
   uint64 UserId = 1;
   int32 BetArea = 2;        //下注区域
-  int64 BetScore = 3;        //下注金额
+  int64 BetScore = 3;        //倍数
 }
 //开牌
 message QzcowcowOpenResp {

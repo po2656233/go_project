@@ -109,6 +109,7 @@ func rpcCloseAgent(args []interface{}) {
             return true
         })
     }
+    a.Close()
 
     _ = a
 }

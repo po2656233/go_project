@@ -83,24 +83,6 @@ message PlayerInfo {
   uint32 TableID = 14; // 所在桌号ID 0:不提供
   uint32 ChairID = 15; // 所在椅子ID 0:不提供
 }
-//邮箱信息
-message GoodsInfo {
-  int64 ID = 1;     //商品ID
-  string Name = 2;  //名称
-  int64 Price = 3;  //单价
-  int32  Number = 4;//数量
-}
-//邮箱信息
-message EmailInfo {
-  int64 EmailID = 1; //邮箱ID
-  string AcceptName = 2; //接收者
-  string Sender = 3;//发送者
-  string Cc = 4;//抄送给
-  string Topic = 5;//主题
-  string Content = 6;//内容 300字(最多)
-  repeated GoodsInfo AwardList = 7;//奖励商品列表
-  int64 TimeStamp = 8; //时间戳
-}
 //牌信息
 message CardInfo {
   bytes Cards = 1;        //牌
@@ -255,32 +237,6 @@ message GameOverResp {
   uint64 GameID = 1; //注:不能为0
   repeated InningInfo Innings = 2;//牌局信息
   int32 PageNum = 3;//页码 默认20条一页;
-}
-//////////////////////////////////////////////////////
-//邮箱信息
-message EmailReq {
-  int32 PageNum = 1;//页码 默认5条一页;
-}
-message EmailResp {
-  uint64 UserID = 1;  //玩家ID
-  repeated EmailInfo Infos = 2;//页码 默认5条一页
-  int32 PageNum = 3;//页码 默认5条一页
-}
-//领取奖励
-message ClaimReq {
-  int64 EmailID = 1;//邮箱ID
-}
-message ClaimResp {
-  uint64 UserID = 1;   //玩家ID
-  int64 EmailID = 2;   //邮箱ID
-}
-//建议
-message SuggestReq {
-  string Content = 1;//内容 200字
-}
-message SuggestResp {
-  uint64 UserID = 1;   //玩家ID
-  EmailInfo Feedback = 2;//反馈
 }
 ////////////////////notify/////////////////////////////
 //踢出

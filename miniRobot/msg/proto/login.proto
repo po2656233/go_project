@@ -74,6 +74,45 @@ message UserInfo{
   string ServerAddr = 20;     //(跳转至该地址 由登录服务返回的真实服务器地址)
   string MachineCode = 21;    //机器序列
 }
+// 武器信息
+message WeaponInfo{
+  uint64 ID = 1;    //标识
+  string Name = 2;  //名称
+  int32 Type = 3;   //种类
+  int32 Level = 4;  //级别
+  int64 Damage = 5; //伤害值
+  int64 Prob = 6;   //掉落几率
+  int32 Count = 7;  //总数
+}
+// 商品信息
+message GoodsInfo{
+  uint64 ID = 1;    //标识
+  string Name = 2;  //名称
+  int32 Type = 3;   //种类
+  int64 Price = 4;  //价格
+  int64 Store = 5;  //库存
+  int64 Sold = 6;   //已售 (玩家单次购得的数量)
+  int32 Amount = 7; //总数 (玩家已购得的总数量)
+}
+// 背包信息(单个)
+message KnapsackInfo{
+  uint64 ID = 1;    //标识
+  string Name = 2;  //名称
+  repeated WeaponInfo MyWeaponry = 3;//单页最多二十
+  repeated GoodsInfo MyGoods = 4;//商品[房卡]
+  uint32 Number = 5;    //编码 (页码)
+}
+//邮箱信息
+message EmailInfo {
+  int64 EmailID = 1; //邮箱ID
+  string AcceptName = 2; //接收者
+  string Sender = 3;//发送者
+  string Cc = 4;//抄送给
+  string Topic = 5;//主题
+  string Content = 6;//内容 300字(最多)
+  repeated GoodsInfo AwardList = 7;//奖励商品列表
+  int64 TimeStamp = 8; //时间戳
+}
 //桌子信息
 message TableInfo{
   uint64 HostID = 1;       //房主ID
@@ -196,6 +235,7 @@ message ReconnectResp{
   uint64 InGameID = 2;     //所在游戏ID(=0时,不在任何游戏中)
   uint64 InTableNum = 3;   //所在桌子ID(=0时,没有进桌)
 }
+//////////////////////金币///////////////////////////////////////////
 //更新余额
 message UpdateMoneyReq{
 }
@@ -221,7 +261,53 @@ message RechargeResp {
   int64  TimeStamp = 7; //
   string Reason = 8;    //备注详情
 }
-////////////////////////////////////////////////////
+/////////////////物品/////////////////////////
+//购买商品
+message BuyGoodsReq {
+  uint64 ID = 1;        //标识
+  int64 Payment = 2;    //付款 (客户端统一 */100)
+  int64 Count = 3;      // 玩家单次购得的数量)
+}
+message BuyGoodsResp {
+  uint64 UserID = 1;
+  GoodsInfo Info = 2;
+}
+//查看背包
+message CheckKnapsackReq {
+  uint64 ID = 1;    //背包标识
+  uint32 Number = 2;    //编码 (页码) 0时表示获取全部
+}
+message CheckKnapsackResp {
+  uint64 UserID = 1;
+  KnapsackInfo Info = 2;
+}
+//////////////////邮箱建议////////////////////////////////////
+//邮箱信息
+message EmailReq {
+  int32 PageNum = 1;//页码 默认5条一页;
+}
+message EmailResp {
+  uint64 UserID = 1;  //玩家ID
+  repeated EmailInfo Infos = 2;//页码 默认5条一页
+  int32 PageNum = 3;//页码 默认5条一页
+}
+//领取奖励
+message ClaimReq {
+  int64 EmailID = 1;//邮箱ID
+}
+message ClaimResp {
+  uint64 UserID = 1;   //玩家ID
+  int64 EmailID = 2;   //邮箱ID
+}
+//建议
+message SuggestReq {
+  string Content = 1;//内容 200字
+}
+message SuggestResp {
+  uint64 UserID = 1;   //玩家ID
+  EmailInfo Feedback = 2;//反馈
+}
+/////////////////选择操作///////////////////////////////////
 //选择分类
 message ChooseClassReq{
   uint32 ID = 1;             //分类编号

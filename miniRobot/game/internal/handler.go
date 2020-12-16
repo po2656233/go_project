@@ -26,6 +26,7 @@ func init() {
     handlerMsg(&protoMsg.EnterGameMJERResp{}, handleEnterGameMJER)       //反馈--->主页信息
     handlerMsg(&protoMsg.EnterGameSGResp{}, handleEnterGameSG)           //反馈--->主页信息
     handlerMsg(&protoMsg.LandLordsSceneResp{}, handleEnterGameLandLords) //反馈--->主页信息
+    handlerMsg(&protoMsg.TuitongziSceneResp{}, handleEnterGameTuitongzi) //反馈--->主页信息
 
     //准备
     handlerMsg(&protoMsg.QzcowcowStateFreeResp{}, handleQzcowcowStateFreeResp)   //反馈--->主页信息
@@ -44,7 +45,7 @@ func init() {
     handlerMsg(&protoMsg.BaccaratStatePlayingResp{}, handleBaccaratStatePlayingResp)         //反馈--->主页信息
     handlerMsg(&protoMsg.BrcowcowStatePlayingResp{}, handleBrcowcowStatePlayingResp)         //反馈--->主页信息
     handlerMsg(&protoMsg.BrtoubaoStatePlayingResp{}, handleBrtoubaoStatePlayingResp)         //反馈--->主页信息
-    handlerMsg(&protoMsg.TuitongziStatePlayingResp{}, handleTuitongziStatePlayingResp)       //反馈--->主页信息
+    handlerMsg(&protoMsg.BrTuitongziStatePlayingResp{}, handleBrTuitongziStatePlayingResp)   //反馈--->主页信息
     handlerMsg(&protoMsg.TigerXdragonStatePlayingResp{}, handleTigerXdragonStatePlayingResp) //反馈--->主页信息
 
     ///对战出牌
@@ -52,6 +53,7 @@ func init() {
     handlerMsg(&protoMsg.MahjongStatePlayingResp{}, handleMahjongStatePlayingResp)     //反馈--->主页信息
     handlerMsg(&protoMsg.MahjongERStatePlayingResp{}, handleMahjongERStatePlayingResp) //反馈--->主页信息
     handlerMsg(&protoMsg.LandLordsStatePlayingResp{}, handleLandLordsStatePlayingResp) //反馈--->主页信息
+    handlerMsg(&protoMsg.TuitongziStatePlayingResp{}, handleTuitongziStatePlayingResp) //反馈--->主页信息
 
     //操作提示
     handlerMsg(&protoMsg.MahjongHintResp{}, handleMahjongHintResp)     //反馈--->主页信息
@@ -173,6 +175,18 @@ func handleEnterGameLandLords(args []interface{}) {
     //person := a.UserData().(*protoMsg.UserInfo)
     log.Debug("进入游戏:%v", m)
     msg := &protoMsg.LandLordsReadyReq{
+        IsReady: true,
+    }
+    a.WriteMsg(msg)
+
+}
+
+func handleEnterGameTuitongzi(args []interface{}) {
+    m := args[0].(*protoMsg.TuitongziSceneResp)
+    a := args[1].(gate.Agent)
+    //person := a.UserData().(*protoMsg.UserInfo)
+    log.Debug("进入游戏:%v", m)
+    msg := &protoMsg.TuitongziReadyReq{
         IsReady: true,
     }
     a.WriteMsg(msg)
@@ -325,7 +339,7 @@ func handleMahjongStatePlayingResp(args []interface{}) {
     m := args[0].(*protoMsg.MahjongStatePlayingResp)
     a := args[1].(gate.Agent)
     person := a.UserData().(*protoMsg.UserInfo)
-    if person.UserID == m.UserID {
+    if person.UserID == m.UserID && 0 < m.Card {
         msg := &protoMsg.MahjongOutCardReq{
             Card: m.Card,
         }
@@ -343,7 +357,7 @@ func handleMahjongStatePlayingResp(args []interface{}) {
             if 0 < size {
                 msg.Card = mjcards[m.UserID][size-1]
                 //删除牌值
-                mjcards[m.UserID] = DeleteValue(mjcards[m.UserID],msg.Card).([]int32)
+                mjcards[m.UserID] = DeleteValue(mjcards[m.UserID], msg.Card).([]int32)
             }
             a.WriteMsg(msg)
         })
@@ -354,7 +368,7 @@ func handleMahjongERStatePlayingResp(args []interface{}) {
     m := args[0].(*protoMsg.MahjongERStatePlayingResp)
     a := args[1].(gate.Agent)
     person := a.UserData().(*protoMsg.UserInfo)
-    if person.UserID == m.UserID {
+    if person.UserID == m.UserID && 0 < m.Card {
         msg := &protoMsg.MahjongEROutCardReq{
             Card: m.Card,
         }
@@ -372,7 +386,7 @@ func handleMahjongERStatePlayingResp(args []interface{}) {
             if 0 < size {
                 msg.Card = mjercards[m.UserID][size-1]
                 //删除牌值
-                mjercards[m.UserID] = DeleteValue(mjercards[m.UserID],msg.Card).([]int32)
+                mjercards[m.UserID] = DeleteValue(mjercards[m.UserID], msg.Card).([]int32)
             }
             a.WriteMsg(msg)
         })
@@ -383,7 +397,11 @@ func handleLandLordsStatePlayingResp(args []interface{}) {
     m := args[0].(*protoMsg.LandLordsStatePlayingResp)
     a := args[1].(gate.Agent)
     person := a.UserData().(*protoMsg.UserInfo)
+    log.Debug("斗地主机器人")
     if person.UserID == m.TurnID {
+        msg := &protoMsg.LandLordsTrusteeReq{IsTrustee: true}
+        a.WriteMsg(msg)
+        log.Debug("机器人：%v托管", person.UserID)
         //second, _ := rand.Int(rand.Reader, big.NewInt(int64(m.Times.TotalTime/2)))
         //time.AfterFunc(time.Duration(second.Int64())*time.Second, func() {
         //    msg := &protoMsg.LandLordsOutCardReq{
@@ -392,6 +410,23 @@ func handleLandLordsStatePlayingResp(args []interface{}) {
         //    a.WriteMsg(msg)
         //})
     }
+}
+
+func handleTuitongziStatePlayingResp(args []interface{}) {
+    m := args[0].(*protoMsg.TuitongziStatePlayingResp)
+    a := args[1].(gate.Agent)
+    person := a.UserData().(*protoMsg.UserInfo)
+    log.Debug("推筒子机器人:%v", person.UserID)
+    msg := &protoMsg.LandLordsTrusteeReq{IsTrustee: true}
+    a.WriteMsg(msg)
+    second, _ := rand.Int(rand.Reader, big.NewInt(int64(m.Times.TotalTime/2)))
+    time.AfterFunc(time.Duration(second.Int64())*time.Second, func() {
+        twice, _ := rand.Int(rand.Reader, big.NewInt(int64(5)))
+        msg := &protoMsg.TuitongziBetReq{
+            BetScore: twice.Int64(),
+        }
+        a.WriteMsg(msg)
+    })
 }
 
 //////////////////操作///////////////////////////////////////////
@@ -403,7 +438,7 @@ func handleMahjongHintResp(args []interface{}) {
         //删除pass
         for _, v := range m.Hints {
             if v.Code == protoMsg.MJOperate_Pass {
-                m.Hints = DeleteValue(m.Hints,v).([]*protoMsg.MahjongHint)
+                m.Hints = DeleteValue(m.Hints, v).([]*protoMsg.MahjongHint)
                 break
             }
         }
@@ -424,28 +459,31 @@ func handleMahjongHintResp(args []interface{}) {
 
         //删除牌值
         if _, ok := mjcards[m.UserID]; ok {
-            for _, card := range m.Hints[index].Cards{
-                mjcards[m.UserID] = DeleteValue( mjcards[m.UserID],card).([]int32)
+            for _, card := range m.Hints[index].Cards {
+                mjcards[m.UserID] = DeleteValue(mjcards[m.UserID], card).([]int32)
             }
             //
             sort.Slice(mjcards[m.UserID], func(i, j int) bool {
                 return mjcards[m.UserID][i] < mjcards[m.UserID][j]
             })
             if m.Hints[index].Code == protoMsg.MJOperate_Chi || m.Hints[index].Code == protoMsg.MJOperate_Pong {
-                sizeX := len(mjcards[m.UserID])
-                if 0 < sizeX {
-                    time.AfterFunc(time.Duration(2)*time.Second, func() {
+                time.AfterFunc(time.Duration(2)*time.Second, func() {
+                    sizeX := len(mjcards[m.UserID])
+                    if 0 < sizeX {
                         a.WriteMsg(&protoMsg.MahjongOutCardReq{
                             Card: mjcards[m.UserID][sizeX-1],
                         })
-                        mjcards[m.UserID] = DeleteValue(mjcards[m.UserID],mjcards[m.UserID][sizeX-1]).([]int32)
-                    })
-                }
+                        mjcards[m.UserID] = DeleteValue(mjcards[m.UserID], mjcards[m.UserID][sizeX-1]).([]int32)
+                    }
+
+                })
             }
 
         }
+
     }
 }
+
 func handleMahjongERHintResp(args []interface{}) {
     m := args[0].(*protoMsg.MahjongERHintResp)
     a := args[1].(gate.Agent)
@@ -454,7 +492,7 @@ func handleMahjongERHintResp(args []interface{}) {
         //删除pass
         for _, v := range m.Hints {
             if v.Code == protoMsg.MJOperate_Pass {
-                m.Hints = DeleteValue(m.Hints,v).([]*protoMsg.MahjongERHint)
+                m.Hints = DeleteValue(m.Hints, v).([]*protoMsg.MahjongERHint)
                 break
             }
         }
@@ -474,8 +512,8 @@ func handleMahjongERHintResp(args []interface{}) {
         a.WriteMsg(msg)
         //删除牌值
         if _, ok := mjercards[m.UserID]; ok {
-            for _, card := range m.Hints[index].Cards{
-                mjercards[m.UserID] = DeleteValue(mjercards[m.UserID],card).([]int32)
+            for _, card := range m.Hints[index].Cards {
+                mjercards[m.UserID] = DeleteValue(mjercards[m.UserID], card).([]int32)
             }
             //
             sort.Slice(mjercards[m.UserID], func(i, j int) bool {
@@ -488,7 +526,7 @@ func handleMahjongERHintResp(args []interface{}) {
                         a.WriteMsg(&protoMsg.MahjongEROutCardReq{
                             Card: mjercards[m.UserID][size-1],
                         })
-                        mjercards[m.UserID] = DeleteValue(mjercards[m.UserID],mjercards[m.UserID][size-1]).([]int32)
+                        mjercards[m.UserID] = DeleteValue(mjercards[m.UserID], mjercards[m.UserID][size-1]).([]int32)
                     })
                 }
             }
@@ -552,8 +590,8 @@ func handleBrtoubaoStatePlayingResp(args []interface{}) {
     })
 }
 
-func handleTuitongziStatePlayingResp(args []interface{}) {
-    m := args[0].(*protoMsg.TuitongziStatePlayingResp)
+func handleBrTuitongziStatePlayingResp(args []interface{}) {
+    m := args[0].(*protoMsg.BrTuitongziStatePlayingResp)
     a := args[1].(gate.Agent)
     // person := a.UserData().(*protoMsg.UserInfo)
     secondR, _ := rand.Int(rand.Reader, big.NewInt(int64(m.Times.TotalTime)))
@@ -562,7 +600,7 @@ func handleTuitongziStatePlayingResp(args []interface{}) {
     scoreR, _ := rand.Int(rand.Reader, big.NewInt(100))
     score := scoreR.Int64() * 100
     time.AfterFunc(time.Duration(secondR.Int64())*time.Second, func() {
-        msg := &protoMsg.TuitongziBetReq{
+        msg := &protoMsg.BrTuitongziBetReq{
             BetArea:  area,
             BetScore: score,
         }

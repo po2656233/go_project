@@ -59,13 +59,13 @@ def main():
                     f.write(line+'\n')
         f.close()
     
+    #msg包名本地化
     fd  =  open ( "../msg/msg.go", 'r+' ,encoding='utf-8')
     buffd = fd.read()
     patd = re.compile (w1 + '(.*?)' + w2,re.S)
     resultd  =  pat.findall(buffd)
     newNUMSd = re.sub(pat, deal, buffd)
     
-    #包名本地化
     fd.seek(0)
     fd.truncate()
     all_the_linesd = newNUMSd.split('\n')
@@ -73,6 +73,24 @@ def main():
         line = line.replace("server/msg/go","miniRobot/msg/go")
         fd.write(line+'\n')    
     fd.close()
+    
+
+    #路由名称本地化
+    fd  =  open ( "../gate/router.go", 'r+' ,encoding='utf-8')
+    buffd = fd.read()
+    patd = re.compile (w1 + '(.*?)' + w2,re.S)
+    resultd  =  pat.findall(buffd)
+    newNUMSd = re.sub(pat, deal, buffd)
+    
+    fd.seek(0)
+    fd.truncate()
+    all_the_linesd = newNUMSd.split('\n')
+    for line in all_the_linesd:
+        line = line.replace("server/","miniRobot/")
+        fd.write(line+'\n')    
+    fd.close()
+    
+    
     
     
 if __name__ == '__main__':

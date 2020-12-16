@@ -66,7 +66,8 @@ message MahjongSceneResp {
   string Inning = 6;            // 牌局号
   int32  HuCard = 7;            // 胡牌,或自摸时的摸起的最后一张
   Direct QuanFeng = 8;          // 当前局的圈风
-  repeated MahjongPlayer AllPlayers = 9;      //玩家列表(吃碰杠)
+  int32 StartPos = 9;           // 抓牌起始位置(即保留不抓取的牌墙)
+  repeated MahjongPlayer AllPlayers = 10;      //玩家列表(吃碰杠)
 }
 //状态
 // 服务端推送

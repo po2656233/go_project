@@ -55,14 +55,14 @@ message SangongStatePlayingResp {
 message SangongStateDealResp {
   TimeInfo Times = 1;
 }
-//(开奖 -- 比牌结果)
+//(摊牌)
 message SangongStateOpenResp {
   TimeInfo Times = 1;
-  SangongOpenResp OpenInfo = 2;
 }
 //(结束)
 message SangongStateOverResp {
   TimeInfo Times = 1;
+  SangongOverResp OpenInfo = 2;
 }
 //////////有些玩家不配有牌////////
 message SangongDealResp {
@@ -88,11 +88,11 @@ message SangongCallResp {
 }
 //下注
 message SangongBetReq {
-  int64 BetScore = 1;        //下注金额
+  int64 BetScore = 1;         //倍数
 }
 message SangongBetResp {
   uint64 UserId = 1;
-  int64 BetScore = 2;        //下注金额
+  int64 BetScore = 2;         //倍数
 }
 //摊牌
 message SangongOutCardReq {
@@ -100,10 +100,6 @@ message SangongOutCardReq {
 message SangongOutCardResp {
   uint64 UserId = 1;
   CardInfo Cards = 2;     //
-}
-//开牌
-message SangongOpenResp {
-  repeated SangongPlayer AllPlayers = 1;  //玩家列表信息
 }
 //结算
 message SangongOverResp{

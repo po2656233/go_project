@@ -100,7 +100,7 @@ func handleChooseClass(args []interface{}) {
 func handleChooseGame(args []interface{}) {
     m := args[0].(*protoMsg.ChooseGameResp)
     a := args[1].(gate.Agent)
-    // person := a.UserData().(*protoMsg.UserInfo)
+    person := a.UserData().(*protoMsg.UserInfo)
     for _, item := range m.Tables.Items {
         val, ok := MangerPerson.Load(item.GameID)
         if !ok {
@@ -108,7 +108,7 @@ func handleChooseGame(args []interface{}) {
             val, _ = MangerPerson.Load(item.GameID)
         }
         realCount := item.Info.MaxOnline + val.(uint32) + 1
-        if realCount < item.Info.MaxChair || (0 == item.Info.MaxChair && val.(uint32)+1 < 30) {
+        if int64(item.Info.EnterScore) <  person.Money &&( realCount < item.Info.MaxChair || (0 == item.Info.MaxChair && val.(uint32)+1 < 30) ){
             //不能坐满，留个座位给真实玩家
             msg := &protoMsg.EnterGameReq{
                 GameID:   item.GameID,
