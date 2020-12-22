@@ -7,21 +7,19 @@ import (
     "github.com/name5566/leaf/log"
     "io"
     . "miniRobot/base"
-    "miniRobot/login"
     protoMsg "miniRobot/msg/go"
     "os"
+    "sync/atomic"
     "time"
 )
-
-var haveNames bool
+var isRegister = false
 var allNames []string
-var count = 0
+var count = int32(0)
 var agentReg gate.Agent
 
 //广播消息
 //这里是对所有玩家进行通知，通知单个游戏的所有玩家，请在单个游戏里实现
 func init() {
-    haveNames = false
     CreateRobot(ALLCount)
     skeleton.RegisterChanRPC("NewAgent", rpcNewAgent)
     skeleton.RegisterChanRPC("CloseAgent", rpcCloseAgent)
@@ -30,6 +28,16 @@ func init() {
         //a := args[0].(gate.Agent)
         //_ = a
         //a.WriteMsg(args[1])
+        m := args[0].(*protoMsg.UserInfo)
+        //a := args[1].(gate.Agent)
+
+        for k,v:=range  allNames{
+            if v == m.Account{
+                allNames = append(allNames[:k], allNames[k+1:]...)
+                break
+            }
+        }
+
     }) // 广播消息 调用参考:game.ChanRPC.Go("Broadcast",agent,args)
 
 }
@@ -39,23 +47,23 @@ func init() {
 
 func register() {
     size := len(allNames)
-    if size < count {
-        count = 0
+    curCount:=atomic.LoadInt32(&count)
+    if size <= int(curCount) {
+        atomic.CompareAndSwapInt32(&count, count, 0)
         logins()
         return
     }
-    if count == 0 {
-        count = 1
-    }
 
-    if 0 < count && count < size {
+
+    if 0 <= curCount &&  int(curCount) < size  {
         msg := &protoMsg.RegisterReq{
-            Name:       allNames[count-1],
+            Name:       allNames[curCount],
             Password:   "rob",
             PlatformID: 1,
         }
         agentReg.WriteMsg(msg)
-        count++
+        log.Debug("正在注册")
+        atomic.AddInt32(&count,1)
         time.AfterFunc(10*time.Millisecond, register)
     }
 
@@ -63,17 +71,18 @@ func register() {
 
 func logins() {
     size := len(allNames)
-    if size < count+1 {
+    curCount:=atomic.LoadInt32(&count)
+    if size <= int(curCount) {
         return
     }
-    if 0 <= count && count < size {
+    if 0 <= curCount && int(curCount) < size {
         msg := &protoMsg.LoginReq{
-            Account:    allNames[count],
+            Account:    allNames[curCount],
             Password:   "rob",
             PlatformID: 1,
         }
         agentReg.WriteMsg(msg)
-        count++
+        atomic.AddInt32(&count,1)
     }
 
     //time.AfterFunc(100*time.Millisecond, logins)
@@ -85,7 +94,7 @@ func rpcNewAgent(args []interface{}) {
     //fmt.Println("-成功創建-")
     agentReg = agent
     //注册或登录
-    if !haveNames {
+    if !isRegister {
         register()
     } else {
         logins()
@@ -95,15 +104,16 @@ func rpcNewAgent(args []interface{}) {
 
 func rpcCloseAgent(args []interface{}) {
     a := args[0].(gate.Agent)
-    if 0 < count {
-        count--
-        if count < 0 {
-            count = 0
+    curCount:=atomic.LoadInt32(&count)
+    if 0 < curCount {
+        curCount = atomic.AddInt32(&count,-1)
+        if curCount < 0 {
+            curCount = 0
         }
     }
-    if count == 0{
+  //  log.Debug("当前count:%v",curCount)
+    if curCount == 0{
         log.Debug("重置了")
-        login.Module.SetIndex(-1)
         MangerPerson.Range(func(k, v interface{}) bool {
             MangerPerson.Delete(k)
             return true
@@ -142,13 +152,14 @@ func checkFileIsExist(filename string) bool {
 }
 
 //创建
-func CreateRobot(count int) []string {
+func CreateRobot(num int) []string {
     var f *os.File
     var err1 error
     allNames = make([]string, 0)
     name := ""
     filename := "./robotList.txt"
     if checkFileIsExist(filename) { //如果文件存在
+        isRegister = true
         f, err1 = os.OpenFile(filename, os.O_RDONLY, 0644) //打开文件
         fmt.Println("文件存在")
         //存在的话，就不再生成
@@ -158,7 +169,6 @@ func CreateRobot(count int) []string {
             allNames = append(allNames, name)
         }
         f.Close()
-        haveNames = true
         return allNames
     } else {
         f, err1 = os.Create(filename) //创建文件
@@ -168,7 +178,7 @@ func CreateRobot(count int) []string {
 
     //获取名字列表
     somethings := ""
-    for i := 0; i < count; i++ {
+    for i := 0; i < num; i++ {
         name = GetFullName()
         allNames = append(allNames, name)
         somethings += name + "\n"
@@ -177,7 +187,6 @@ func CreateRobot(count int) []string {
     _, err1 = io.WriteString(f, somethings) //写入文件(字符串)
     check(err1)
     f.Close()
-    haveNames = false
     return allNames
 }
 

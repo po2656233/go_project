@@ -48,6 +48,8 @@ enum GameScene {
   SitDirect = 8;         //决定方位
   RollDice = 9;       //掷骰子
   WaitOperate = 10;   //等待操作
+  ChangeThree = 11;   //换三张
+  DingQue = 12;       //定缺门
 }
 /////////////info//////////////////
 //个人信息
@@ -88,11 +90,12 @@ message WeaponInfo{
 message GoodsInfo{
   uint64 ID = 1;    //标识
   string Name = 2;  //名称
-  int32 Type = 3;   //种类
-  int64 Price = 4;  //价格
-  int64 Store = 5;  //库存
-  int64 Sold = 6;   //已售 (玩家单次购得的数量)
-  int32 Amount = 7; //总数 (玩家已购得的总数量)
+  uint64 Kind = 3;   //种类
+  uint32 Level = 4;  //级别
+  int64 Price = 5;  //价格
+  int64 Store = 6;  //库存
+  int64 Sold = 7;   //已售 (玩家单次购得的数量)
+  int32 Amount = 8; //总数 (玩家已购得的总数量)
 }
 // 背包信息(单个)
 message KnapsackInfo{
@@ -262,6 +265,21 @@ message RechargeResp {
   string Reason = 8;    //备注详情
 }
 /////////////////物品/////////////////////////
+//获取商品信息
+message GetGoodsReq {
+  uint64 ID = 1;        //标识 =0时 无效
+}
+message GetGoodsResp {
+  uint64 UserID = 1;
+  GoodsInfo Info = 2;
+}
+//获取所有商品信息
+message GetAllGoodsReq {
+}
+message GetAllGoodsResp {
+  uint64 UserID = 1;
+  repeated GoodsInfo Info = 2;
+}
 //购买商品
 message BuyGoodsReq {
   uint64 ID = 1;        //标识

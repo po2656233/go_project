@@ -3,7 +3,7 @@ package base
 //MainID 200+ || SubID 100+
 const (
 	WaitTime        = 5
-	ALLCount      	= 500
+	ALLCount      	= 800
 	//注册
 	//登录
 	MainLogin          = 201 //-> 登录

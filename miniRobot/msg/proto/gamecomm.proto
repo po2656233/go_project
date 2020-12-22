@@ -161,6 +161,14 @@ message ExitGameResp {
   uint64 GameID = 1; //游戏标识
   uint64 UserID = 2;
 }
+//解散游戏
+message DisbandedGameReq {
+  uint64 GameID = 1; //游戏标识
+}
+message DisbandedGameResp {
+  uint64 GameID = 1; //游戏标识
+  uint64 UserID = 2;
+}
 //换桌
 message ChangeTableReq {
   uint64 GameID = 1; //游戏标识
