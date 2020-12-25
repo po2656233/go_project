@@ -58,6 +58,7 @@ func register() {
     if 0 <= curCount &&  int(curCount) < size  {
         msg := &protoMsg.RegisterReq{
             Name:       allNames[curCount],
+            Gender: 0x0F,
             Password:   "rob",
             PlatformID: 1,
         }
@@ -119,7 +120,7 @@ func rpcCloseAgent(args []interface{}) {
             return true
         })
     }
-    a.Close()
+    //a.Close()
 
     _ = a
 }

@@ -27,6 +27,7 @@ func init() {
     handlerMsg(&protoMsg.EnterGameQZCCResp{}, handleEnterGameQZCC)       //反馈--->主页信息
     handlerMsg(&protoMsg.EnterGameTBCCResp{}, handleEnterGameTBCC)       //反馈--->主页信息
     handlerMsg(&protoMsg.EnterGameZJHResp{}, handleEnterGameZJH)         //反馈--->主页信息
+    handlerMsg(&protoMsg.EnterGameZJHJiSuResp{}, handleGameZJHJiSu)         //反馈--->主页信息
     handlerMsg(&protoMsg.EnterGameMJResp{}, handleEnterGameMJ)           //反馈--->主页信息
     handlerMsg(&protoMsg.EnterGameMJERResp{}, handleEnterGameMJER)       //反馈--->主页信息
     handlerMsg(&protoMsg.EnterGameMJCSResp{}, handleEnterGameMJCSResp)       //反馈--->主页信息
@@ -34,7 +35,6 @@ func init() {
     handlerMsg(&protoMsg.EnterGameMJSCResp{}, handleEnterGameMJSCResp)       //反馈--->主页信息
     handlerMsg(&protoMsg.EnterGameMJXZDDResp{}, handleEnterGameMJXZDDResp)       //反馈--->主页信息
     handlerMsg(&protoMsg.EnterGameMJXLCHResp{}, handleEnterGameMJXLCHResp)       //反馈--->主页信息
-    
     handlerMsg(&protoMsg.EnterGameSGResp{}, handleEnterGameSG)           //反馈--->主页信息
     handlerMsg(&protoMsg.LandLordsSceneResp{}, handleEnterGameLandLords) //反馈--->主页信息
     handlerMsg(&protoMsg.TuitongziSceneResp{}, handleEnterGameTuitongzi) //反馈--->主页信息
@@ -49,6 +49,8 @@ func init() {
     handlerMsg(&protoMsg.MahjongXLCHStateFreeResp{}, handleMahjongXLCHStateFreeResp) //反馈--->主页信息
     handlerMsg(&protoMsg.MahjongXZDDStateFreeResp{}, handleMahjongXZDDStateFreeResp) //反馈--->主页信息
     handlerMsg(&protoMsg.ZhajinhuaStateFreeResp{}, handleZhajinhuaStateFreeResp) //反馈--->主页信息
+    handlerMsg(&protoMsg.ZhajinhuaJiSuStateFreeResp{}, handleZhajinhuaJiSuStateFreeResp) //反馈--->主页信息
+
     handlerMsg(&protoMsg.SangongStateFreeResp{}, handleSangongStateFreeResp)     //反馈--->主页信息
     handlerMsg(&protoMsg.LandLordsStateFreeResp{}, handleLandLordsStateFreeResp) //反馈--->主页信息
 
@@ -151,6 +153,21 @@ func handleEnterGameZJH(args []interface{}) {
     }
 
 }
+//
+func handleGameZJHJiSu(args []interface{}) {
+    m := args[0].(*protoMsg.EnterGameZJHJiSuResp)
+    a := args[1].(gate.Agent)
+    person := a.UserData().(*protoMsg.UserInfo)
+    if m.Player.MyInfo.UserID == person.UserID {
+        log.Debug("进入游戏:%v  机器人ID:%v",m.GameID, person.UserID)
+        msg := &protoMsg.ZhajinhuaJiSuReadyReq{
+            IsReady: true,
+        }
+        a.WriteMsg(msg)
+    }
+
+}
+
 func handleEnterGameMJ(args []interface{}) {
     m := args[0].(*protoMsg.EnterGameMJResp)
     a := args[1].(gate.Agent)
@@ -425,6 +442,18 @@ func handleZhajinhuaStateFreeResp(args []interface{}) {
         a.WriteMsg(msg)
     })
 }
+func handleZhajinhuaJiSuStateFreeResp(args []interface{}) {
+    m := args[0].(*protoMsg.ZhajinhuaJiSuStateFreeResp)
+    a := args[1].(gate.Agent)
+    second, _ := rand.Int(rand.Reader, big.NewInt(int64(m.Times.TotalTime)))
+    time.AfterFunc(time.Duration(second.Int64())*time.Second, func() {
+        msg := &protoMsg.ZhajinhuaJiSuReadyReq{
+            IsReady: true,
+        }
+        a.WriteMsg(msg)
+    })
+}
+
 func handleSangongStateFreeResp(args []interface{}) {
     m := args[0].(*protoMsg.SangongStateFreeResp)
     a := args[1].(gate.Agent)

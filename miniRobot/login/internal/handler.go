@@ -111,7 +111,7 @@ func handleChooseClass(args []interface{}) {
     if 0 < size && 0<= atomic.LoadInt32(&IndexGames) && atomic.LoadInt32(&IndexGames) < int32(size){
         msg := &protoMsg.ChooseGameReq{
             Info:    allgames[int(atomic.LoadInt32(&IndexGames))].Info,
-            PageNum: 0,
+            PageNum: 1,
         }
        // log.Debug("共有游戏%v个",len(allgames))
        // log.Debug("玩家'%v(ID:%v)' GameSize:%v 请求游戏详情:ID:%v  %v", person.Account, person.UserID,len(allgames),allgames[atomic.LoadInt32(&IndexGames)].ID, msg.Info)
@@ -189,10 +189,6 @@ func handleResultPopResp(args []interface{}) {
     if m.Hints == "您的账号已经在异地登录了!"{
         game.ChanRPC.Go("Broadcast",a, person)
     }
-
-
-    a.Close()
-    a.Destroy()
 
 }
 

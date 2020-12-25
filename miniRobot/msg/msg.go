@@ -74,6 +74,7 @@ func init() {
     RegisterMessage(&protoMsg.SettingTableResp{})
     RegisterMessage(&protoMsg.ResultResp{})
     RegisterMessage(&protoMsg.ResultPopResp{})
+    RegisterMessage(&protoMsg.ToShoppingResp{})
     RegisterMessage(&protoMsg.PingReq{})
     RegisterMessage(&protoMsg.PongResp{})
 
@@ -277,7 +278,7 @@ func init() {
     RegisterMessage(&protoMsg.SangongBetResp{})
     RegisterMessage(&protoMsg.SangongOutCardReq{})
     RegisterMessage(&protoMsg.SangongOutCardResp{})
-    RegisterMessage(&protoMsg.SangongOverResp{})
+    RegisterMessage(&protoMsg.SangongOpenResp{})
 
     //zhajinhua文件生成的代码
     RegisterMessage(&protoMsg.ZhajinhuaPlayer{})

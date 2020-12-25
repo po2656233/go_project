@@ -63,6 +63,7 @@ func init() {
     msg.ProcessorProto.SetRouter(&protoMsg.SettingTableResp{}, login.ChanRPC)
     msg.ProcessorProto.SetRouter(&protoMsg.ResultResp{}, login.ChanRPC)
     msg.ProcessorProto.SetRouter(&protoMsg.ResultPopResp{}, login.ChanRPC)
+    msg.ProcessorProto.SetRouter(&protoMsg.ToShoppingResp{}, login.ChanRPC)
     msg.ProcessorProto.SetRouter(&protoMsg.PingReq{}, login.ChanRPC)
     msg.ProcessorProto.SetRouter(&protoMsg.PongResp{}, login.ChanRPC)
 
@@ -266,7 +267,7 @@ func init() {
     msg.ProcessorProto.SetRouter(&protoMsg.SangongBetResp{}, game.ChanRPC)
     msg.ProcessorProto.SetRouter(&protoMsg.SangongOutCardReq{}, game.ChanRPC)
     msg.ProcessorProto.SetRouter(&protoMsg.SangongOutCardResp{}, game.ChanRPC)
-    msg.ProcessorProto.SetRouter(&protoMsg.SangongOverResp{}, game.ChanRPC)
+    msg.ProcessorProto.SetRouter(&protoMsg.SangongOpenResp{}, game.ChanRPC)
 
     //zhajinhua文件生成的代码
     msg.ProcessorProto.SetRouter(&protoMsg.ZhajinhuaPlayer{}, game.ChanRPC)

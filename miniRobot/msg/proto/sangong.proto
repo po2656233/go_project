@@ -58,11 +58,11 @@ message SangongStateDealResp {
 //(摊牌)
 message SangongStateOpenResp {
   TimeInfo Times = 1;
+  SangongOpenResp OpenInfo = 2;
 }
 //(结束)
 message SangongStateOverResp {
   TimeInfo Times = 1;
-  SangongOverResp OpenInfo = 2;
 }
 //////////有些玩家不配有牌////////
 message SangongDealResp {
@@ -102,6 +102,6 @@ message SangongOutCardResp {
   CardInfo Cards = 2;     //
 }
 //结算
-message SangongOverResp{
+message SangongOpenResp{
   repeated SangongPlayer AllPlayers = 1;  //玩家列表信息
 }
