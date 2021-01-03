@@ -45,11 +45,13 @@ enum GameScene {
   Opening = 5;        //开奖
   Over = 6;           //结算
   Closing = 7;        //关闭
-  SitDirect = 8;         //决定方位
+  SitDirect = 8;      //决定方位
   RollDice = 9;       //掷骰子
   WaitOperate = 10;   //等待操作
   ChangeThree = 11;   //换三张
   DingQue = 12;       //定缺门
+  CheckTing = 13;     //查听
+  CheckHuaZhu = 14;   //查花猪
 }
 /////////////info//////////////////
 //个人信息

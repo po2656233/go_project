@@ -267,6 +267,7 @@ message NotifyNoticeReq {
   uint64 GameID = 1;      //游戏标识 =0大厅
   string Content = 2;     //内容
   NTFLevel  Level = 3;    //个人只能发送 喇叭
+  int32 Timeout = 4;      //总时长 0<= 默认一分钟
 }
 message NotifyNoticeResp {
   uint64 UserID = 1;      //玩家ID =0时为所有玩家

@@ -23,43 +23,46 @@ var mjXLCHcards map[uint64][]int32
 //初始化
 func init() {
     //游戏处理
-    handlerMsg(&protoMsg.EnterGameResp{}, handleEnterGame)               //反馈--->主页信息
-    handlerMsg(&protoMsg.EnterGameQZCCResp{}, handleEnterGameQZCC)       //反馈--->主页信息
-    handlerMsg(&protoMsg.EnterGameTBCCResp{}, handleEnterGameTBCC)       //反馈--->主页信息
-    handlerMsg(&protoMsg.EnterGameZJHResp{}, handleEnterGameZJH)         //反馈--->主页信息
-    handlerMsg(&protoMsg.EnterGameZJHJiSuResp{}, handleGameZJHJiSu)         //反馈--->主页信息
-    handlerMsg(&protoMsg.EnterGameMJResp{}, handleEnterGameMJ)           //反馈--->主页信息
-    handlerMsg(&protoMsg.EnterGameMJERResp{}, handleEnterGameMJER)       //反馈--->主页信息
-    handlerMsg(&protoMsg.EnterGameMJCSResp{}, handleEnterGameMJCSResp)       //反馈--->主页信息
-    handlerMsg(&protoMsg.EnterGameMJGDResp{}, handleEnterGameMJGDResp)       //反馈--->主页信息
-    handlerMsg(&protoMsg.EnterGameMJSCResp{}, handleEnterGameMJSCResp)       //反馈--->主页信息
-    handlerMsg(&protoMsg.EnterGameMJXZDDResp{}, handleEnterGameMJXZDDResp)       //反馈--->主页信息
-    handlerMsg(&protoMsg.EnterGameMJXLCHResp{}, handleEnterGameMJXLCHResp)       //反馈--->主页信息
-    handlerMsg(&protoMsg.EnterGameSGResp{}, handleEnterGameSG)           //反馈--->主页信息
-    handlerMsg(&protoMsg.LandLordsSceneResp{}, handleEnterGameLandLords) //反馈--->主页信息
-    handlerMsg(&protoMsg.TuitongziSceneResp{}, handleEnterGameTuitongzi) //反馈--->主页信息
+    handlerMsg(&protoMsg.EnterGameResp{}, handleEnterGame)                 //反馈--->主页信息
+    handlerMsg(&protoMsg.EnterGameQZCCResp{}, handleEnterGameQZCC)         //反馈--->主页信息
+    handlerMsg(&protoMsg.EnterGameTBCCResp{}, handleEnterGameTBCC)         //反馈--->主页信息
+    handlerMsg(&protoMsg.EnterGameZJHResp{}, handleEnterGameZJH)           //反馈--->主页信息
+    handlerMsg(&protoMsg.EnterGameZJHJiSuResp{}, handleGameZJHJiSu)        //反馈--->主页信息
+    handlerMsg(&protoMsg.EnterGameMJResp{}, handleEnterGameMJ)             //反馈--->主页信息
+    handlerMsg(&protoMsg.EnterGameMJERResp{}, handleEnterGameMJER)         //反馈--->主页信息
+    handlerMsg(&protoMsg.EnterGameMJCSResp{}, handleEnterGameMJCSResp)     //反馈--->主页信息
+    handlerMsg(&protoMsg.EnterGameMJGDResp{}, handleEnterGameMJGDResp)     //反馈--->主页信息
+    handlerMsg(&protoMsg.EnterGameMJSCResp{}, handleEnterGameMJSCResp)     //反馈--->主页信息
+    handlerMsg(&protoMsg.EnterGameMJXZDDResp{}, handleEnterGameMJXZDDResp) //反馈--->主页信息
+    handlerMsg(&protoMsg.EnterGameMJXLCHResp{}, handleEnterGameMJXLCHResp) //反馈--->主页信息
+    handlerMsg(&protoMsg.EnterGameSGResp{}, handleEnterGameSG)             //反馈--->主页信息
+    handlerMsg(&protoMsg.LandLordsSceneResp{}, handleEnterGameLandLords)   //反馈--->主页信息
+    handlerMsg(&protoMsg.PaoDeKuaiSceneResp{}, handleEnterGamePaoDeKuai)   //反馈--->主页信息
+    handlerMsg(&protoMsg.TuitongziSceneResp{}, handleEnterGameTuitongzi)   //反馈--->主页信息
 
     //准备
-    handlerMsg(&protoMsg.QzcowcowStateFreeResp{}, handleQzcowcowStateFreeResp)   //反馈--->主页信息
-    handlerMsg(&protoMsg.TbcowcowStateFreeResp{}, handleTbcowcowStateFreeResp)   //反馈--->主页信息
-    handlerMsg(&protoMsg.MahjongStateFreeResp{}, handleMahjongStateFreeResp)     //反馈--->主页信息
-    handlerMsg(&protoMsg.MahjongERStateFreeResp{}, handleMahjongERStateFreeResp) //反馈--->主页信息
-    handlerMsg(&protoMsg.MahjongGDStateFreeResp{}, handleMahjongGDStateFreeResp) //反馈--->主页信息
-    handlerMsg(&protoMsg.MahjongSCStateFreeResp{}, handleMahjongSCStateFreeResp) //反馈--->主页信息
-    handlerMsg(&protoMsg.MahjongXLCHStateFreeResp{}, handleMahjongXLCHStateFreeResp) //反馈--->主页信息
-    handlerMsg(&protoMsg.MahjongXZDDStateFreeResp{}, handleMahjongXZDDStateFreeResp) //反馈--->主页信息
-    handlerMsg(&protoMsg.ZhajinhuaStateFreeResp{}, handleZhajinhuaStateFreeResp) //反馈--->主页信息
+    handlerMsg(&protoMsg.QzcowcowStateFreeResp{}, handleQzcowcowStateFreeResp)           //反馈--->主页信息
+    handlerMsg(&protoMsg.TbcowcowStateFreeResp{}, handleTbcowcowStateFreeResp)           //反馈--->主页信息
+    handlerMsg(&protoMsg.MahjongStateFreeResp{}, handleMahjongStateFreeResp)             //反馈--->主页信息
+    handlerMsg(&protoMsg.MahjongERStateFreeResp{}, handleMahjongERStateFreeResp)         //反馈--->主页信息
+    handlerMsg(&protoMsg.MahjongCSStateFreeResp{}, handleMahjongCSStateFreeResp)         //反馈--->主页信息
+    handlerMsg(&protoMsg.MahjongGDStateFreeResp{}, handleMahjongGDStateFreeResp)         //反馈--->主页信息
+    handlerMsg(&protoMsg.MahjongSCStateFreeResp{}, handleMahjongSCStateFreeResp)         //反馈--->主页信息
+    handlerMsg(&protoMsg.MahjongXLCHStateFreeResp{}, handleMahjongXLCHStateFreeResp)     //反馈--->主页信息
+    handlerMsg(&protoMsg.MahjongXZDDStateFreeResp{}, handleMahjongXZDDStateFreeResp)     //反馈--->主页信息
+    handlerMsg(&protoMsg.ZhajinhuaStateFreeResp{}, handleZhajinhuaStateFreeResp)         //反馈--->主页信息
     handlerMsg(&protoMsg.ZhajinhuaJiSuStateFreeResp{}, handleZhajinhuaJiSuStateFreeResp) //反馈--->主页信息
 
     handlerMsg(&protoMsg.SangongStateFreeResp{}, handleSangongStateFreeResp)     //反馈--->主页信息
     handlerMsg(&protoMsg.LandLordsStateFreeResp{}, handleLandLordsStateFreeResp) //反馈--->主页信息
+    handlerMsg(&protoMsg.PaoDeKuaiStateFreeResp{}, handlePaoDeKuaiStateFreeResp) //反馈--->主页信息
 
     //发牌
-    handlerMsg(&protoMsg.MahjongDealResp{}, handleMahjongDealResp)     //反馈--->主页信息
-    handlerMsg(&protoMsg.MahjongERDealResp{}, handleMahjongERDealResp) //反馈--->主页信息
-    handlerMsg(&protoMsg.MahjongCSDealResp{}, handleMahjongCSDealResp) //反馈--->主页信息
-    handlerMsg(&protoMsg.MahjongGDDealResp{}, handleMahjongGDDealResp) //反馈--->主页信息
-    handlerMsg(&protoMsg.MahjongSCDealResp{}, handleMahjongSCDealResp) //反馈--->主页信息
+    handlerMsg(&protoMsg.MahjongDealResp{}, handleMahjongDealResp)         //反馈--->主页信息
+    handlerMsg(&protoMsg.MahjongERDealResp{}, handleMahjongERDealResp)     //反馈--->主页信息
+    handlerMsg(&protoMsg.MahjongCSDealResp{}, handleMahjongCSDealResp)     //反馈--->主页信息
+    handlerMsg(&protoMsg.MahjongGDDealResp{}, handleMahjongGDDealResp)     //反馈--->主页信息
+    handlerMsg(&protoMsg.MahjongSCDealResp{}, handleMahjongSCDealResp)     //反馈--->主页信息
     handlerMsg(&protoMsg.MahjongXZDDDealResp{}, handleMahjongXZDDDealResp) //反馈--->主页信息
     handlerMsg(&protoMsg.MahjongXLCHDealResp{}, handleMahjongXLCHDealResp) //反馈--->主页信息
     //百人下注
@@ -70,27 +73,32 @@ func init() {
     handlerMsg(&protoMsg.TigerXdragonStatePlayingResp{}, handleTigerXdragonStatePlayingResp) //反馈--->主页信息
 
     ///对战出牌
-    handlerMsg(&protoMsg.ZhajinhuaStatePlayingResp{}, handleZhajinhuaStatePlayingResp) //反馈--->主页信息
-    handlerMsg(&protoMsg.MahjongStatePlayingResp{}, handleMahjongStatePlayingResp)     //反馈--->主页信息
-    handlerMsg(&protoMsg.MahjongERStatePlayingResp{}, handleMahjongERStatePlayingResp) //反馈--->主页信息
-    handlerMsg(&protoMsg.MahjongCSStatePlayingResp{}, handleMahjongCSStatePlayingResp) //反馈--->主页信息
-    handlerMsg(&protoMsg.MahjongGDStatePlayingResp{}, handleMahjongGDStatePlayingResp) //反馈--->主页信息
-    handlerMsg(&protoMsg.MahjongSCStatePlayingResp{}, handleMahjongSCStatePlayingResp) //反馈--->主页信息
+    handlerMsg(&protoMsg.ZhajinhuaStatePlayingResp{}, handleZhajinhuaStatePlayingResp)     //反馈--->主页信息
+    handlerMsg(&protoMsg.MahjongStatePlayingResp{}, handleMahjongStatePlayingResp)         //反馈--->主页信息
+    handlerMsg(&protoMsg.MahjongERStatePlayingResp{}, handleMahjongERStatePlayingResp)     //反馈--->主页信息
+    handlerMsg(&protoMsg.MahjongCSStatePlayingResp{}, handleMahjongCSStatePlayingResp)     //反馈--->主页信息
+    handlerMsg(&protoMsg.MahjongGDStatePlayingResp{}, handleMahjongGDStatePlayingResp)     //反馈--->主页信息
+    handlerMsg(&protoMsg.MahjongSCStatePlayingResp{}, handleMahjongSCStatePlayingResp)     //反馈--->主页信息
     handlerMsg(&protoMsg.MahjongXZDDStatePlayingResp{}, handleMahjongXZDDStatePlayingResp) //反馈--->主页信息
     handlerMsg(&protoMsg.MahjongXLCHStatePlayingResp{}, handleMahjongXLCHStatePlayingResp) //反馈--->主页信息
 
     handlerMsg(&protoMsg.LandLordsStatePlayingResp{}, handleLandLordsStatePlayingResp) //反馈--->主页信息
+    handlerMsg(&protoMsg.PaoDeKuaiStatePlayingResp{}, handlePaoDeKuaiStatePlayingResp) //反馈--->主页信息
     handlerMsg(&protoMsg.TuitongziStatePlayingResp{}, handleTuitongziStatePlayingResp) //反馈--->主页信息
 
     //操作提示
-    handlerMsg(&protoMsg.MahjongHintResp{}, handleMahjongHintResp)     //反馈--->主页信息
-    handlerMsg(&protoMsg.MahjongERHintResp{}, handleMahjongERHintResp) //反馈--->主页信息
-    handlerMsg(&protoMsg.MahjongCSHintResp{}, handleMahjongCSHintResp) //反馈--->主页信息
-    handlerMsg(&protoMsg.MahjongGDHintResp{}, handleMahjongGDHintResp) //反馈--->主页信息
-    handlerMsg(&protoMsg.MahjongSCHintResp{}, handleMahjongSCHintResp) //反馈--->主页信息
+    handlerMsg(&protoMsg.MahjongHintResp{}, handleMahjongHintResp)         //反馈--->主页信息
+    handlerMsg(&protoMsg.MahjongERHintResp{}, handleMahjongERHintResp)     //反馈--->主页信息
+    handlerMsg(&protoMsg.MahjongCSHintResp{}, handleMahjongCSHintResp)     //反馈--->主页信息
+    handlerMsg(&protoMsg.MahjongGDHintResp{}, handleMahjongGDHintResp)     //反馈--->主页信息
+    handlerMsg(&protoMsg.MahjongSCHintResp{}, handleMahjongSCHintResp)     //反馈--->主页信息
     handlerMsg(&protoMsg.MahjongXZDDHintResp{}, handleMahjongXZDDHintResp) //反馈--->主页信息
     handlerMsg(&protoMsg.MahjongXLCHHintResp{}, handleMahjongXLCHHintResp) //反馈--->主页信息
-   
+
+    //麻将换牌
+    handlerMsg(&protoMsg.MahjongXZDDStateDingQueResp{}, handleMahjongXZDDStateDingQueResp) //反馈--->主页信息
+    handlerMsg(&protoMsg.MahjongXLCHStateDingQueResp{}, handleMahjongXLCHStateDingQueResp) //反馈--->主页信息
+
 }
 
 //注册传输消息
@@ -104,8 +112,8 @@ func handleEnterGame(args []interface{}) {
     m := args[0].(*protoMsg.EnterGameResp)
     a := args[1].(gate.Agent)
     person := a.UserData().(*protoMsg.UserInfo)
-    if person.UserID == m.UserInfo.UserID{
-        log.Debug("进入游戏:%v  机器人ID:%v",m.GameID, person.UserID)
+    if person.UserID == m.UserInfo.UserID {
+        log.Debug("进入游戏:%v  机器人ID:%v", m.GameID, person.UserID)
     }
 }
 
@@ -115,7 +123,7 @@ func handleEnterGameQZCC(args []interface{}) {
     a := args[1].(gate.Agent)
     person := a.UserData().(*protoMsg.UserInfo)
     if m.Player.MyInfo.UserID == person.UserID {
-        log.Debug("进入游戏:%v  机器人ID:%v",m.GameID, person.UserID)
+        log.Debug("进入游戏:%v  机器人ID:%v", m.GameID, person.UserID)
         msg := &protoMsg.QzcowcowReadyReq{
             IsReady: true,
         }
@@ -130,7 +138,7 @@ func handleEnterGameTBCC(args []interface{}) {
     a := args[1].(gate.Agent)
     person := a.UserData().(*protoMsg.UserInfo)
     if m.Player.MyInfo.UserID == person.UserID {
-        log.Debug("进入游戏:%v  机器人ID:%v",m.GameID, person.UserID)
+        log.Debug("进入游戏:%v  机器人ID:%v", m.GameID, person.UserID)
         msg := &protoMsg.TbcowcowReadyReq{
             IsReady: true,
         }
@@ -145,7 +153,7 @@ func handleEnterGameZJH(args []interface{}) {
     a := args[1].(gate.Agent)
     person := a.UserData().(*protoMsg.UserInfo)
     if m.Player.MyInfo.UserID == person.UserID {
-           log.Debug("进入游戏:%v  机器人ID:%v",m.GameID, person.UserID)
+        log.Debug("进入游戏:%v  机器人ID:%v", m.GameID, person.UserID)
         msg := &protoMsg.ZhajinhuaReadyReq{
             IsReady: true,
         }
@@ -153,13 +161,14 @@ func handleEnterGameZJH(args []interface{}) {
     }
 
 }
+
 //
 func handleGameZJHJiSu(args []interface{}) {
     m := args[0].(*protoMsg.EnterGameZJHJiSuResp)
     a := args[1].(gate.Agent)
     person := a.UserData().(*protoMsg.UserInfo)
     if m.Player.MyInfo.UserID == person.UserID {
-        log.Debug("进入游戏:%v  机器人ID:%v",m.GameID, person.UserID)
+        log.Debug("进入游戏:%v  机器人ID:%v", m.GameID, person.UserID)
         msg := &protoMsg.ZhajinhuaJiSuReadyReq{
             IsReady: true,
         }
@@ -177,7 +186,7 @@ func handleEnterGameMJ(args []interface{}) {
 
     person := a.UserData().(*protoMsg.UserInfo)
     if m.Player.MyInfo.UserID == person.UserID {
-           log.Debug("进入游戏:%v  机器人ID:%v",m.GameID, person.UserID)
+        log.Debug("进入游戏:%v  机器人ID:%v", m.GameID, person.UserID)
         msg := &protoMsg.MahjongReadyReq{
             IsReady: true,
         }
@@ -195,7 +204,7 @@ func handleEnterGameMJER(args []interface{}) {
     }
     person := a.UserData().(*protoMsg.UserInfo)
     if m.Player.MyInfo.UserID == person.UserID {
-           log.Debug("进入游戏:%v  机器人ID:%v",m.GameID, person.UserID)
+        log.Debug("进入游戏:%v  机器人ID:%v", m.GameID, person.UserID)
         msg := &protoMsg.MahjongERReadyReq{
             IsReady: true,
         }
@@ -213,7 +222,7 @@ func handleEnterGameMJCSResp(args []interface{}) {
     }
     person := a.UserData().(*protoMsg.UserInfo)
     if m.Player.MyInfo.UserID == person.UserID {
-           log.Debug("进入游戏:%v  机器人ID:%v",m.GameID, person.UserID)
+        log.Debug("进入游戏:%v  机器人ID:%v", m.GameID, person.UserID)
         msg := &protoMsg.MahjongCSReadyReq{
             IsReady: true,
         }
@@ -231,7 +240,7 @@ func handleEnterGameMJGDResp(args []interface{}) {
     }
     person := a.UserData().(*protoMsg.UserInfo)
     if m.Player.MyInfo.UserID == person.UserID {
-           log.Debug("进入游戏:%v  机器人ID:%v",m.GameID, person.UserID)
+        log.Debug("进入游戏:%v  机器人ID:%v", m.GameID, person.UserID)
         msg := &protoMsg.MahjongGDReadyReq{
             IsReady: true,
         }
@@ -249,7 +258,7 @@ func handleEnterGameMJSCResp(args []interface{}) {
     }
     person := a.UserData().(*protoMsg.UserInfo)
     if m.Player.MyInfo.UserID == person.UserID {
-           log.Debug("进入游戏:%v  机器人ID:%v",m.GameID, person.UserID)
+        log.Debug("进入游戏:%v  机器人ID:%v", m.GameID, person.UserID)
         msg := &protoMsg.MahjongSCReadyReq{
             IsReady: true,
         }
@@ -266,7 +275,7 @@ func handleEnterGameMJXZDDResp(args []interface{}) {
     }
     person := a.UserData().(*protoMsg.UserInfo)
     if m.Player.MyInfo.UserID == person.UserID {
-           log.Debug("进入游戏:%v  机器人ID:%v",m.GameID, person.UserID)
+        log.Debug("进入游戏:%v  机器人ID:%v", m.GameID, person.UserID)
         msg := &protoMsg.MahjongXZDDReadyReq{
             IsReady: true,
         }
@@ -283,7 +292,7 @@ func handleEnterGameMJXLCHResp(args []interface{}) {
     }
     person := a.UserData().(*protoMsg.UserInfo)
     if m.Player.MyInfo.UserID == person.UserID {
-           log.Debug("进入游戏:%v  机器人ID:%v",m.GameID, person.UserID)
+        log.Debug("进入游戏:%v  机器人ID:%v", m.GameID, person.UserID)
         msg := &protoMsg.MahjongXLCHReadyReq{
             IsReady: true,
         }
@@ -297,7 +306,7 @@ func handleEnterGameSG(args []interface{}) {
     a := args[1].(gate.Agent)
     person := a.UserData().(*protoMsg.UserInfo)
     if m.Player.MyInfo.UserID == person.UserID {
-           log.Debug("进入游戏:%v  机器人ID:%v",m.GameID, person.UserID)
+        log.Debug("进入游戏:%v  机器人ID:%v", m.GameID, person.UserID)
         msg := &protoMsg.SangongReadyReq{
             IsReady: true,
         }
@@ -309,7 +318,7 @@ func handleEnterGameSG(args []interface{}) {
 func handleEnterGameLandLords(args []interface{}) {
     //m := args[0].(*protoMsg.LandLordsSceneResp)
     a := args[1].(gate.Agent)
-   // person := a.UserData().(*protoMsg.UserInfo)
+    // person := a.UserData().(*protoMsg.UserInfo)
     //log.Debug("进入游戏:%v  机器人ID:%v",m.GameID, person.UserID)
     msg := &protoMsg.LandLordsReadyReq{
         IsReady: true,
@@ -318,11 +327,23 @@ func handleEnterGameLandLords(args []interface{}) {
 
 }
 
+func handleEnterGamePaoDeKuai(args []interface{}) {
+    //m := args[0].(*protoMsg.LandLordsSceneResp)
+    a := args[1].(gate.Agent)
+    // person := a.UserData().(*protoMsg.UserInfo)
+    //log.Debug("进入游戏:%v  机器人ID:%v",m.GameID, person.UserID)
+    msg := &protoMsg.PaoDeKuaiReadyReq{
+        IsReady: true,
+    }
+    a.WriteMsg(msg)
+
+}
+
 func handleEnterGameTuitongzi(args []interface{}) {
-  //  m := args[0].(*protoMsg.TuitongziSceneResp)
+    //  m := args[0].(*protoMsg.TuitongziSceneResp)
     a := args[1].(gate.Agent)
     //person := a.UserData().(*protoMsg.UserInfo)
-       //log.Debug("进入游戏:%v  机器人ID:%v",m.GameID, person.UserID)
+    //log.Debug("进入游戏:%v  机器人ID:%v",m.GameID, person.UserID)
     msg := &protoMsg.TuitongziReadyReq{
         IsReady: true,
     }
@@ -367,6 +388,7 @@ func handleMahjongStateFreeResp(args []interface{}) {
         msg := &protoMsg.MahjongReadyReq{
             IsReady: true,
         }
+        mjcards = make(map[uint64][]int32, 0)
         a.WriteMsg(msg)
     })
 
@@ -379,10 +401,25 @@ func handleMahjongERStateFreeResp(args []interface{}) {
         msg := &protoMsg.MahjongERReadyReq{
             IsReady: true,
         }
+        mjercards = make(map[uint64][]int32, 0)
         a.WriteMsg(msg)
     })
 
 }
+func handleMahjongCSStateFreeResp(args []interface{}) {
+    m := args[0].(*protoMsg.MahjongCSStateFreeResp)
+    a := args[1].(gate.Agent)
+    second, _ := rand.Int(rand.Reader, big.NewInt(int64(m.Times.TotalTime)))
+    time.AfterFunc(time.Duration(second.Int64())*time.Second, func() {
+        msg := &protoMsg.MahjongCSReadyReq{
+            IsReady: true,
+        }
+        mjCScards = make(map[uint64][]int32, 0)
+        a.WriteMsg(msg)
+    })
+
+}
+
 func handleMahjongGDStateFreeResp(args []interface{}) {
     m := args[0].(*protoMsg.MahjongGDStateFreeResp)
     a := args[1].(gate.Agent)
@@ -391,6 +428,7 @@ func handleMahjongGDStateFreeResp(args []interface{}) {
         msg := &protoMsg.MahjongGDReadyReq{
             IsReady: true,
         }
+        mjGDcards = make(map[uint64][]int32, 0)
         a.WriteMsg(msg)
     })
 
@@ -403,6 +441,7 @@ func handleMahjongSCStateFreeResp(args []interface{}) {
         msg := &protoMsg.MahjongSCReadyReq{
             IsReady: true,
         }
+        mjSCcards = make(map[uint64][]int32, 0)
         a.WriteMsg(msg)
     })
 
@@ -415,6 +454,7 @@ func handleMahjongXZDDStateFreeResp(args []interface{}) {
         msg := &protoMsg.MahjongXZDDReadyReq{
             IsReady: true,
         }
+        mjXZDDcards = make(map[uint64][]int32, 0)
         a.WriteMsg(msg)
     })
 
@@ -427,6 +467,7 @@ func handleMahjongXLCHStateFreeResp(args []interface{}) {
         msg := &protoMsg.MahjongXLCHReadyReq{
             IsReady: true,
         }
+        mjXLCHcards = make(map[uint64][]int32, 0)
         a.WriteMsg(msg)
     })
 
@@ -472,6 +513,17 @@ func handleLandLordsStateFreeResp(args []interface{}) {
     second, _ := rand.Int(rand.Reader, big.NewInt(int64(m.Times.TotalTime)))
     time.AfterFunc(time.Duration(second.Int64())*time.Second, func() {
         msg := &protoMsg.LandLordsReadyReq{
+            IsReady: true,
+        }
+        a.WriteMsg(msg)
+    })
+}
+func handlePaoDeKuaiStateFreeResp(args []interface{}) {
+    m := args[0].(*protoMsg.PaoDeKuaiStateFreeResp)
+    a := args[1].(gate.Agent)
+    second, _ := rand.Int(rand.Reader, big.NewInt(int64(m.Times.TotalTime)))
+    time.AfterFunc(time.Duration(second.Int64())*time.Second, func() {
+        msg := &protoMsg.PaoDeKuaiReadyReq{
             IsReady: true,
         }
         a.WriteMsg(msg)
@@ -538,6 +590,10 @@ func handleMahjongXZDDDealResp(args []interface{}) {
         if _, ok := mjXZDDcards[m.UserID]; ok {
             mjXZDDcards[m.UserID] = append(mjXZDDcards[m.UserID], m.HandCards...)
         }
+        msg :=&protoMsg.TrusteeReq{
+            IsTrustee: true,
+        }
+        a.WriteMsg(msg)
     }
 }
 
@@ -551,6 +607,7 @@ func handleMahjongXLCHDealResp(args []interface{}) {
         }
     }
 }
+
 //////////////////////////对战类/////////////////////////////////////////////
 func handleZhajinhuaStatePlayingResp(args []interface{}) {
     m := args[0].(*protoMsg.ZhajinhuaStatePlayingResp)
@@ -784,9 +841,6 @@ func handleMahjongXLCHStatePlayingResp(args []interface{}) {
     }
 }
 
-
-
-
 func handleLandLordsStatePlayingResp(args []interface{}) {
     m := args[0].(*protoMsg.LandLordsStatePlayingResp)
     a := args[1].(gate.Agent)
@@ -794,6 +848,25 @@ func handleLandLordsStatePlayingResp(args []interface{}) {
     log.Debug("斗地主机器人")
     if person.UserID == m.TurnID {
         msg := &protoMsg.LandLordsTrusteeReq{IsTrustee: true}
+        a.WriteMsg(msg)
+        log.Debug("机器人：%v托管", person.UserID)
+        //second, _ := rand.Int(rand.Reader, big.NewInt(int64(m.Times.TotalTime/2)))
+        //time.AfterFunc(time.Duration(second.Int64())*time.Second, func() {
+        //    msg := &protoMsg.LandLordsOutCardReq{
+        //        Card: m.Card,
+        //    }
+        //    a.WriteMsg(msg)
+        //})
+    }
+}
+
+func handlePaoDeKuaiStatePlayingResp(args []interface{}) {
+    m := args[0].(*protoMsg.PaoDeKuaiStatePlayingResp)
+    a := args[1].(gate.Agent)
+    person := a.UserData().(*protoMsg.UserInfo)
+    log.Debug("斗地主机器人")
+    if person.UserID == m.TurnID {
+        msg := &protoMsg.PaoDeKuaiTrusteeReq{IsTrustee: true}
         a.WriteMsg(msg)
         log.Debug("机器人：%v托管", person.UserID)
         //second, _ := rand.Int(rand.Reader, big.NewInt(int64(m.Times.TotalTime/2)))
@@ -1112,6 +1185,10 @@ func handleMahjongXZDDHintResp(args []interface{}) {
             Cards: m.Hints[index].Cards,
         }
         a.WriteMsg(msg)
+        msgx :=&protoMsg.TrusteeReq{
+            IsTrustee: true,
+        }
+        a.WriteMsg(msgx)
         //删除牌值
         if _, ok := mjXZDDcards[m.UserID]; ok {
             for _, card := range m.Hints[index].Cards {
@@ -1189,6 +1266,64 @@ func handleMahjongXLCHHintResp(args []interface{}) {
 
     }
 }
+
+//麻将换三张
+func handleMahjongXZDDStateDingQueResp(args []interface{}){
+    m := args[0].(*protoMsg.MahjongXZDDStateDingQueResp)
+    a := args[1].(gate.Agent)
+    person := a.UserData().(*protoMsg.UserInfo)
+    if cards,ok:=mjXZDDcards[person.UserID];ok{
+        sam:=INVALID
+        temCards:=make([]int32,len(cards))
+        copy(temCards, cards)
+        for _,card :=range m.MyCards{
+            for k,card1 :=range temCards{
+               if  card == card1{
+                   sam++
+                   temCards = append(temCards[:k],temCards[k+1:]...)
+               }
+            }
+        }
+        if sam == len(m.GetMyCards()){
+            //替换牌值
+            for _,card :=range m.OtherCards{
+                temCards = append(temCards,card)
+            }
+            mjXZDDcards[person.UserID] =  temCards
+        }
+
+    }
+
+}
+func handleMahjongXLCHStateDingQueResp(args []interface{}){
+    m := args[0].(*protoMsg.MahjongXLCHStateDingQueResp)
+    a := args[1].(gate.Agent)
+    person := a.UserData().(*protoMsg.UserInfo)
+    if cards,ok:=mjXLCHcards[person.UserID];ok{
+        sam:=INVALID
+        temCards:=make([]int32,len(cards))
+        copy(temCards, cards)
+        for _,card :=range m.MyCards{
+            for k,card1 :=range temCards{
+                if  card == card1{
+                    sam++
+                    temCards = append(temCards[:k],temCards[k+1:]...)
+                }
+            }
+        }
+        if sam == len(m.GetMyCards()){
+            //替换牌值
+            for _,card :=range m.OtherCards{
+                temCards = append(temCards,card)
+            }
+            mjXLCHcards[person.UserID] =  temCards
+        }
+
+    }
+}
+
+
+
 
 /////////////////////////百人类////////////////////////////////
 func handleBaccaratStatePlayingResp(args []interface{}) {

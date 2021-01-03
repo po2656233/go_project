@@ -9,13 +9,19 @@ import (
     . "miniRobot/base"
     protoMsg "miniRobot/msg/go"
     "os"
+    "sync"
     "sync/atomic"
     "time"
 )
 var isRegister = false
-var allNames []string
+type nodeType struct {
+    *sync.Mutex
+    allNames []string
+}
+
 var count = int32(0)
 var agentReg gate.Agent
+var node = nodeType{allNames: make([]string,0), Mutex: &sync.Mutex{}}
 
 //广播消息
 //这里是对所有玩家进行通知，通知单个游戏的所有玩家，请在单个游戏里实现
@@ -23,22 +29,24 @@ func init() {
     CreateRobot(ALLCount)
     skeleton.RegisterChanRPC("NewAgent", rpcNewAgent)
     skeleton.RegisterChanRPC("CloseAgent", rpcCloseAgent)
-    AsyncChan.Register("Broadcast", func(args []interface{}) {
-        fmt.Println("-------------->Broadcast------->Register")
-        //a := args[0].(gate.Agent)
-        //_ = a
-        //a.WriteMsg(args[1])
-        m := args[0].(*protoMsg.UserInfo)
-        //a := args[1].(gate.Agent)
-
-        for k,v:=range  allNames{
-            if v == m.Account{
-                allNames = append(allNames[:k], allNames[k+1:]...)
-                break
-            }
-        }
-
-    }) // 广播消息 调用参考:game.ChanRPC.Go("Broadcast",agent,args)
+    AsyncChan.Register("Broadcast", rpcBroadcast)
+    //AsyncChan.Register("Broadcast", func(args []interface{}) {
+    //    fmt.Println("-------------->Broadcast------->Register")
+    //    //a := args[0].(gate.Agent)
+    //    //_ = a
+    //    //a.WriteMsg(args[1])
+    //    m := args[0].(*protoMsg.UserInfo)
+    //    //a := args[1].(gate.Agent)
+    //    node.Lock()
+    //    defer node.Unlock()
+    //    for k,v:=range  node.allNames{
+    //        if v == m.Account{
+    //            node.allNames = append(node.allNames[:k], node.allNames[k+1:]...)
+    //            break
+    //        }
+    //    }
+    //
+    //}) // 广播消息 调用参考:game.ChanRPC.Go("Broadcast",agent,args)
 
 }
 
@@ -46,7 +54,9 @@ func init() {
 //并登录
 
 func register() {
-    size := len(allNames)
+    node.Lock()
+    defer node.Unlock()
+    size := len(node.allNames)
     curCount:=atomic.LoadInt32(&count)
     if size <= int(curCount) {
         atomic.CompareAndSwapInt32(&count, count, 0)
@@ -56,29 +66,34 @@ func register() {
 
 
     if 0 <= curCount &&  int(curCount) < size  {
+        node.Lock()
         msg := &protoMsg.RegisterReq{
-            Name:       allNames[curCount],
+            Name:       node.allNames[curCount],
             Gender: 0x0F,
             Password:   "rob",
             PlatformID: 1,
         }
         agentReg.WriteMsg(msg)
+        node.Unlock()
         log.Debug("正在注册")
         atomic.AddInt32(&count,1)
+
         time.AfterFunc(10*time.Millisecond, register)
     }
 
 }
 
 func logins() {
-    size := len(allNames)
+    node.Lock()
+    defer node.Unlock()
+    size := len(node.allNames)
     curCount:=atomic.LoadInt32(&count)
     if size <= int(curCount) {
         return
     }
     if 0 <= curCount && int(curCount) < size {
         msg := &protoMsg.LoginReq{
-            Account:    allNames[curCount],
+            Account:    node.allNames[curCount],
             Password:   "rob",
             PlatformID: 1,
         }
@@ -129,7 +144,21 @@ func rpcBroadcast(args []interface{}) interface{} {
     //断线通知
     a := args[0].(gate.Agent)
     _ = a
-    a.WriteMsg(args[1])
+    //a.WriteMsg(args[1])
+       fmt.Println("-------------->Broadcast------->Register")
+       //a := args[0].(gate.Agent)
+       //_ = a
+       //a.WriteMsg(args[1])
+       m := args[0].(*protoMsg.UserInfo)
+       //a := args[1].(gate.Agent)
+       node.Lock()
+       defer node.Unlock()
+       for k,v:=range  node.allNames{
+           if v == m.Account{
+               node.allNames = append(node.allNames[:k], node.allNames[k+1:]...)
+               break
+           }
+       }
     return error(nil)
 }
 
@@ -156,7 +185,9 @@ func checkFileIsExist(filename string) bool {
 func CreateRobot(num int) []string {
     var f *os.File
     var err1 error
-    allNames = make([]string, 0)
+    node.Lock()
+    defer node.Unlock()
+    //node.allNames = make([]string, 0)
     name := ""
     filename := "./robotList.txt"
     if checkFileIsExist(filename) { //如果文件存在
@@ -167,10 +198,10 @@ func CreateRobot(num int) []string {
         scanner := bufio.NewScanner(f)
         for scanner.Scan() {
             name = scanner.Text()
-            allNames = append(allNames, name)
+            node.allNames = append(node.allNames, name)
         }
         f.Close()
-        return allNames
+        return node.allNames
     } else {
         f, err1 = os.Create(filename) //创建文件
         fmt.Println("文件不存在")
@@ -181,14 +212,14 @@ func CreateRobot(num int) []string {
     somethings := ""
     for i := 0; i < num; i++ {
         name = GetFullName()
-        allNames = append(allNames, name)
+        node.allNames = append(node.allNames, name)
         somethings += name + "\n"
     }
 
     _, err1 = io.WriteString(f, somethings) //写入文件(字符串)
     check(err1)
     f.Close()
-    return allNames
+    return node.allNames
 }
 
 //////////////////////////////////////
