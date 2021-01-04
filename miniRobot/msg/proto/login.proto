@@ -71,7 +71,7 @@ message UserInfo{
   string PhoneNum = 13;     //手机
   string Email = 14;        //邮箱
   string Address = 15;      //住址
-  string Identity = 16;     //识别码(平台生成)
+  string IDentity = 16;     //识别码(平台生成)
   uint64 AgentID = 17;        //代理标识(上级代理人)
   string ReferralCode = 18;   //推荐标识(推荐码,由邀请码生成)
   string ClientAddr = 19;     //连接地址(当前实际IP)
@@ -99,6 +99,10 @@ message GoodsInfo{
   int64 Sold = 7;   //已售 (玩家单次购得的数量)
   int32 Amount = 8; //总数 (玩家已购得的总数量)
 }
+//商品列表
+message GoodsList{
+  repeated GoodsInfo AllGoods = 1;//奖励商品列表
+}
 // 背包信息(单个)
 message KnapsackInfo{
   uint64 ID = 1;    //标识
@@ -109,13 +113,13 @@ message KnapsackInfo{
 }
 //邮箱信息
 message EmailInfo {
-  int64 EmailID = 1; //邮箱ID
+  uint64 EmailID = 1; //邮箱ID
   string AcceptName = 2; //接收者
   string Sender = 3;//发送者
   string Cc = 4;//抄送给
   string Topic = 5;//主题
   string Content = 6;//内容 300字(最多)
-  repeated GoodsInfo AwardList = 7;//奖励商品列表
+  GoodsList AwardList = 7;//奖励商品列表
   int64 TimeStamp = 8; //时间戳
 }
 //桌子信息
@@ -226,7 +230,7 @@ message LoginResp{
 }
 //异地
 message AllopatricResp{
-  uint64 UserId = 1;
+  uint64 UserID = 1;
 }
 //重连
 message ReconnectReq{
@@ -240,6 +244,25 @@ message ReconnectResp{
   uint64 InGameID = 2;     //所在游戏ID(=0时,不在任何游戏中)
   uint64 InTableNum = 3;   //所在桌子ID(=0时,没有进桌)
 }
+//////////////////////签到///////////////////////////////////////////
+//签到
+message CheckInReq{
+  uint64 UserID = 1;
+  string Remark = 2;//备注
+}
+message CheckInResp{
+  uint64 UserID = 1;
+  string Remark = 2;//备注
+  int64 Timestamp = 3;//签到时间戳
+}
+//获取签到
+message GetCheckInReq{
+}
+message GetCheckInResp{
+  uint64 UserID = 1;
+  repeated CheckInResp AllCheckin = 2;//所有签到次数
+  int32 PageNum = 3;//页码 默认20条一页
+}
 //////////////////////金币///////////////////////////////////////////
 //更新余额
 message UpdateMoneyReq{
@@ -252,19 +275,29 @@ message UpdateMoneyResp{
 message RechargeReq {
   uint64 UserID = 1;
   uint64 ByUID = 2;
-  int64 Money = 3;     //金钱 (客户端统一 */100)
+  int64 Payment = 3;     //金钱 (客户端统一 */100)
   uint32 Method = 4;   //充值方式
   string Reason = 5;   //备注详情
 }
 message RechargeResp {
   uint64 UserID = 1;
   uint64 ByUID = 2;
-  int64  Money = 3;     //金钱 (客户端统一 */100)
-  uint32 Method = 4;    //充值方式
-  bool   IsSuccess = 5; //
-  string Order = 6;     //
-  int64  TimeStamp = 7; //
-  string Reason = 8;    //备注详情
+  int64  PreMoney = 3;  //充值前的金钱 (客户端统一 */100)
+  int64  Payment = 4;    // 充值金额(客户端统一 */100)
+  int64  Money = 5;     // 当前金额(客户端统一 */100)
+  uint32 Method = 6;    //充值方式
+  bool   IsSuccess = 7; //
+  string Order = 8;     //
+  int64  TimeStamp = 9; //
+  string Reason = 10;    //备注详情
+}
+//获取充值纪录
+message GetRechargesReq {
+}
+message GetRechargesResp {
+  uint64 UserID = 1;
+  repeated RechargeResp AllRecharges = 2;
+  int32 PageNum = 3;//页码 默认20条一页
 }
 /////////////////物品/////////////////////////
 //获取商品信息
@@ -281,6 +314,7 @@ message GetAllGoodsReq {
 message GetAllGoodsResp {
   uint64 UserID = 1;
   repeated GoodsInfo Info = 2;
+  int32 PageNum = 3;//页码 默认20条一页
 }
 //购买商品
 message BuyGoodsReq {
@@ -300,6 +334,12 @@ message CheckKnapsackReq {
 message CheckKnapsackResp {
   uint64 UserID = 1;
   KnapsackInfo Info = 2;
+}
+//转至商城
+message ToShoppingResp{
+  uint64 ID = 1;         // 物品ID
+  int32  Count = 2;      // 个数
+  string Reason = 3;     // 转至商城的原因(提示)
 }
 //////////////////邮箱建议////////////////////////////////////
 //邮箱信息
@@ -367,12 +407,6 @@ message ResultPopResp{
   int32 Flag = 1;      //状态:0成功 1失败
   string Title = 2;      //标题
   string Hints = 3;      //提示信息
-}
-//转至商城
-message ToShoppingResp{
-  uint64 ID = 1;         // 物品ID
-  int32  Count = 2;      // 个数
-  string Reason = 3;     // 转至商城的原因(提示)
 }
 //////////////heart//////////////////////////////////////////
 //心跳包 默认20秒 网关等待读取数据时长为35秒

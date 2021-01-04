@@ -213,7 +213,7 @@ message UpdateGoldResp{
   int64 Gold = 2;//当前玩家金币
 }
 ///////////////////游戏记录///////////////////////////////
-//获取牌局记录
+//获取牌局记录 注: 房主权限
 message GetInningsInfoReq{
   uint64 GameID = 1; //游戏标识 =0时,表示所有参与过的游戏
 }
@@ -321,13 +321,13 @@ message Call {
 }
 //下注
 message Bet {
-  int32 AreaId = 1;
+  int32 AreaID = 1;
   int64 Money = 2;
 }
 //下注结果：广播
 message BetResult {
-  uint64 UserId = 1;
-  int32 AreaId = 2;
+  uint64 UserID = 1;
+  int32 AreaID = 2;
   int64 Money = 3;
 }
 */

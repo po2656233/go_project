@@ -69,7 +69,7 @@ message QzcowcowReadyReq {
   bool IsReady = 1; // 玩家准备，可以取消准备
 }
 message QzcowcowReadyResp {
-  uint64 UserId = 1;
+  uint64 UserID = 1;
   bool IsReady = 2; // 玩家准备，可以取消准备
 }
 //喊庄
@@ -87,7 +87,7 @@ message QzcowcowBetReq {
 }
 //下注结果：广播
 message QzcowcowBetResp {
-  uint64 UserId = 1;
+  uint64 UserID = 1;
   int32 BetArea = 2;        //下注区域
   int64 BetScore = 3;        //倍数
 }

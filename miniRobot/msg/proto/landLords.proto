@@ -82,7 +82,7 @@ message LandLordsReadyReq {
 }
 message LandLordsReadyResp {
   bool IsReady = 1; // 玩家准备，可以取消准备
-  uint64 UserId = 2;
+  uint64 UserID = 2;
 }
 // 叫分
 message LandLordsCallReq {
@@ -125,6 +125,6 @@ message LandLordsOutCardResp {
 //-----------------------------
 // 结算
 message LandLordsCheckoutResp {
-  uint64 WinnerId = 1;   //赢家ID
+  uint64 WinnerID = 1;   //赢家ID
   repeated LandLordsPlayer AllPlayers = 2; // 所有玩家得分
 }

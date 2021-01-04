@@ -81,14 +81,14 @@ message ZhajinhuaReadyReq {
   bool IsReady = 1; // 玩家准备，可以取消准备
 }
 message ZhajinhuaReadyResp {
-  uint64 UserId = 1;
+  uint64 UserID = 1;
   bool IsReady = 2; // 玩家准备，可以取消准备
 }
 //跟注
 message ZhajinhuaFollowReq {
 }
 message ZhajinhuaFollowResp {
-  uint64 UserId = 1;
+  uint64 UserID = 1;
   int64 Score = 2;
 }
 //加注
@@ -96,24 +96,24 @@ message ZhajinhuaRaiseReq {
   int64 Score = 1;
 }
 message ZhajinhuaRaiseResp {
-  uint64 UserId = 1;
+  uint64 UserID = 1;
   int64 Score = 2;
 }
 //看牌
 message ZhajinhuaLookReq {
 }
 message ZhajinhuaLookResp {
-  uint64 UserId = 1;
+  uint64 UserID = 1;
   CardInfo Cards = 2;     //[只有该玩家才有牌数据]
 }
 //比牌
 message ZhajinhuaCompareReq {
-  uint64 HitId = 1;          //比牌对象ID
+  uint64 HitID = 1;          //比牌对象ID
 }
 message ZhajinhuaCompareResp {
-  uint64 AttackerId = 1;              //发起者ID
-  uint64 HitId = 2;                   //比牌对象ID
-  uint64 WinnerId = 3;                //胜利者ID
+  uint64 AttackerID = 1;              //发起者ID
+  uint64 HitID = 2;                   //比牌对象ID
+  uint64 WinnerID = 3;                //胜利者ID
   CardInfo AttackerCards = 4;       //发起者手牌
   CardInfo HitCards = 5;            //比牌对象手牌
 }
@@ -121,11 +121,11 @@ message ZhajinhuaCompareResp {
 message ZhajinhuaGiveupReq {
 }
 message ZhajinhuaGiveupResp {
-  uint64 UserId = 1;
+  uint64 UserID = 1;
   int64  Gold = 2; //该玩家的剩余金币
 }
 //结算
 message ZhajinhuaCheckoutResp {
-  uint64 WinnerId = 1;                  // 胜利者ID
+  uint64 WinnerID = 1;                  // 胜利者ID
   repeated ZhajinhuaPlayer Infos = 2;   // 各玩家输赢情况
 }

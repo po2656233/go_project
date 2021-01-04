@@ -75,7 +75,7 @@ message SangongReadyReq {
   bool IsReady = 1; // 玩家准备，可以取消准备
 }
 message SangongReadyResp {
-  uint64 UserId = 1;
+  uint64 UserID = 1;
   bool IsReady = 2; // 玩家准备，可以取消准备
 }
 //喊庄
@@ -91,14 +91,14 @@ message SangongBetReq {
   int64 BetScore = 1;         //倍数
 }
 message SangongBetResp {
-  uint64 UserId = 1;
+  uint64 UserID = 1;
   int64 BetScore = 2;         //倍数
 }
 //摊牌
 message SangongOutCardReq {
 }
 message SangongOutCardResp {
-  uint64 UserId = 1;
+  uint64 UserID = 1;
   CardInfo Cards = 2;     //
 }
 //结算

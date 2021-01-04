@@ -44,7 +44,7 @@ message BrcowcowBetReq {
 }
 //下注结果：广播
 message BrcowcowBetResp {
-  uint64 UserId = 1;
+  uint64 UserID = 1;
   int32 BetArea = 2;        //下注区域
   int64 BetScore = 3;        //下注金额
 }

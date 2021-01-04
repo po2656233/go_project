@@ -108,7 +108,7 @@ message MahjongERStateOpenResp {
   TimeInfo Times = 1;
   bool   IsFlow = 2;                        // 是否流局
   int32  HuCard = 3;                        // 胡牌,或自摸时的摸起的最后一张
-  uint64 WinnerId = 4;                      //胜利者ID（流局时为0）
+  uint64 WinnerID = 4;                      //胜利者ID（流局时为0）
   bytes Fans = 5;                           //番型列表 每个元素对应一个番型
   int32 FanCount = 6;                       //共计番数
   repeated MahjongERPlayer AllPlayers = 7;    //所有玩家得分
@@ -123,7 +123,7 @@ message MahjongERReadyReq {
   bool IsReady = 1; // 玩家准备，可以取消准备
 }
 message MahjongERReadyResp {
-  uint64 UserId = 1;
+  uint64 UserID = 1;
   bool IsReady = 2; // 玩家准备，可以取消准备
 }
 //
