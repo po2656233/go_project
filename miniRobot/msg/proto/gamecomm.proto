@@ -265,16 +265,18 @@ message NotifyGoldChange {
 //公告
 message NotifyNoticeReq {
   uint64 GameID = 1;      //游戏标识 =0大厅
-  string Content = 2;     //内容
-  NTFLevel  Level = 3;    //个人只能发送 喇叭
-  int32 Timeout = 4;      //总时长 0<= 默认一分钟
+  string Title = 2;       //标题
+  string Content = 3;     //内容
+  NTFLevel  Level = 4;    //个人只能发送 喇叭
+  int32 Timeout = 5;      //总时长 0<= 默认一分钟
 }
 message NotifyNoticeResp {
   uint64 UserID = 1;      //玩家ID =0时为所有玩家
   uint64 GameID = 2;      //游戏标识 =0大厅
   NTFLevel  Level = 3;    //公告级别
   TimeInfo TimeInfo = 4;  //时间
-  string Content = 5;     //内容
+  string Title = 5;       //标题
+  string Content = 6;     //内容
 }
 /*
 //-----------------------------------------------------------------------------------------
