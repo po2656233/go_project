@@ -157,8 +157,6 @@ func (pws *ProxyWebsocket) OnNew(w http.ResponseWriter, r *http.Request) {
         var buf = make([]byte, pws.RecvBufLen)
         for {
             serverConn.SetReadDeadline(time.Now().Add(pws.RecvBlockTime))
-
-
             nread,buf, err =  serverConn.ReadMessage()
             if err != nil {
                 wsConn.Close()
@@ -166,6 +164,8 @@ func (pws *ProxyWebsocket) OnNew(w http.ResponseWriter, r *http.Request) {
                     wsaddr, line.Remote, pws.EnableTls, err.Error())
                 break
             }
+            serverConn.SetReadDeadline(time.Time{})
+
             nread = len(buf)
             serverRecv += int64(nread)
             ConnMgr.UpdateServerInSize(int64(nread))
@@ -177,7 +177,7 @@ func (pws *ProxyWebsocket) OnNew(w http.ResponseWriter, r *http.Request) {
                     wsaddr, line.Remote, pws.EnableTls, err.Error())
                 break
             }
-
+            wsConn.SetReadDeadline(time.Time{})
             serverSend += int64(nread)
             ConnMgr.UpdateServerOutSize(int64(nread))
             log.Info("server:[%v] send-->>> <%v> MsgLen::%v", line.Remote, wsaddr, nread)
@@ -197,6 +197,7 @@ func (pws *ProxyWebsocket) OnNew(w http.ResponseWriter, r *http.Request) {
         var err error
         var message []byte
         for {
+
             err = wsConn.SetReadDeadline(time.Now().Add(pws.RecvBlockTime))
             if err != nil {
                 log.Info("Session(%s -> %s, TLS: %v) Closed, Client ReadMessage Err: %s",
@@ -209,7 +210,7 @@ func (pws *ProxyWebsocket) OnNew(w http.ResponseWriter, r *http.Request) {
                     wsaddr, line.Remote, pws.EnableTls, err.Error())
                 break
             }
-
+            wsConn.SetReadDeadline(time.Time{})
             // 建立连接
             if serverConn == nil {
                 // 校验第一个数据包是否有效
@@ -271,7 +272,7 @@ func (pws *ProxyWebsocket) OnNew(w http.ResponseWriter, r *http.Request) {
                     wsaddr, line.Remote, pws.EnableTls, nwrite, err.Error())
                 break
             }
-
+            serverConn.SetReadDeadline(time.Time{})
             clientSend += int64(nwrite)
             ConnMgr.UpdateClientOutSize(int64(nwrite))
 
