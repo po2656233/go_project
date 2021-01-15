@@ -119,8 +119,9 @@ message EmailInfo {
   string Cc = 4;//抄送给
   string Topic = 5;//主题
   string Content = 6;//内容 300字(最多)
-  GoodsList AwardList = 7;//奖励商品列表
-  int64 TimeStamp = 8; //时间戳
+  bool  IsRead = 7;
+  GoodsList AwardList = 8;//奖励商品列表
+  int64 TimeStamp = 9; //时间戳
 }
 //桌子信息
 message TableInfo{
@@ -335,6 +336,16 @@ message CheckKnapsackResp {
   uint64 UserID = 1;
   KnapsackInfo Info = 2;
 }
+//物品转换 仅支持通用房卡和超级房卡的转换,游戏房卡之间不能置换
+message BarterReq{
+  uint64 ID = 1;         // 物品ID
+  uint64 ToID = 2;       // 目标商品ID
+  int32 Amount = 3;      // 置换的个数
+}
+message BarterResp{
+  uint64 UserID = 1;
+  KnapsackInfo Info = 2; //返回最新包裹信息
+}
 //转至商城
 message ToShoppingResp{
   uint64 ID = 1;         // 物品ID
@@ -353,11 +364,11 @@ message EmailResp {
 }
 //领取奖励
 message ClaimReq {
-  int64 EmailID = 1;//邮箱ID
+  uint64 EmailID = 1;//邮箱ID
 }
 message ClaimResp {
   uint64 UserID = 1;   //玩家ID
-  int64 EmailID = 2;   //邮箱ID
+  uint64 EmailID = 2;   //邮箱ID
 }
 //建议
 message SuggestReq {
@@ -366,6 +377,22 @@ message SuggestReq {
 message SuggestResp {
   uint64 UserID = 1;   //玩家ID
   EmailInfo Feedback = 2;//反馈
+}
+//读取邮件
+message EmailReadReq {
+  uint64 EmailID = 1;//邮箱ID
+}
+message EmailReadResp {
+  uint64 UserID = 1;   //玩家ID
+  uint64 EmailID = 2;   //邮箱ID
+}
+//删除邮件
+message EmailDelReq {
+  uint64 EmailID = 1;//邮箱ID
+}
+message EmailDelResp {
+  uint64 UserID = 1;   //玩家ID
+  uint64 EmailID = 2;   //邮箱ID
 }
 /////////////////选择操作///////////////////////////////////
 //选择分类

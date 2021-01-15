@@ -1166,7 +1166,7 @@ func handleMahjongXZDDHintResp(args []interface{}) {
     if person.UserID == m.UserID {
         //删除pass
         for _, v := range m.Hints {
-            if v.Code == protoMsg.MJOperate_Pass {
+            if v.Code == protoMsg.MJOperate_Pass || v.Code == protoMsg.MJOperate_Ting {
                 m.Hints = DeleteValue(m.Hints, v).([]*protoMsg.MahjongXZDDHint)
                 break
             }
