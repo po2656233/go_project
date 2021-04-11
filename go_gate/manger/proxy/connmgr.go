@@ -123,7 +123,7 @@ func (mgr *ConnManger) StartDataFlowRecord(interval time.Duration) {
 	go func() {
 		for {
 			time.Sleep(interval)
-			log.Info(mgr.LogDataFlowRecord())
+			log.Warn(mgr.LogDataFlowRecord())
 			/*log.Info("ConnManger DataInfo(CR: %d M, CW: %d M, SR: %d M, SW: %d M)",
 			mgr.GetClientInSize()/(1024*1024), mgr.GetClientOutSize()/(1024*1024),
 			mgr.GetServerInSize()/(1024*1024), mgr.GetServerOutSize()/(1024*1024))*/
