@@ -1,6 +1,7 @@
 syntax = "proto3";
 package go;
 import "gamecomm.proto";
+// kindID 3005
 //    牌型    倍数
 //    (0~6点)  1
 //    (7~9点)  2

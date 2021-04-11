@@ -1,6 +1,7 @@
 syntax = "proto3";
 package go;
 import "gamecomm.proto";
+// kindID 2002
 //场景
 message BrtoubaoSceneResp{
   int64 TimeStamp = 1;            //时间戳

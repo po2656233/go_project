@@ -1,6 +1,7 @@
 syntax = "proto3";
 package go;
 import "gamecomm.proto";
+// kindID 1005
 //通比牛牛玩家信息
 message TbcowcowPlayer {
   PlayerInfo  MyInfo = 1;  //

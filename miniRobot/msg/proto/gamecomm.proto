@@ -35,7 +35,7 @@ enum NTFLevel{
   ServeStopNTF = 3;//停服公告
   PraiseNTF = 4;    //表扬公告
   //个人公告
-  STrumpetNTF = 5;  //小喇叭
+  STrumpetNTF = 5;  // 小喇叭
   MTrumpetNTF = 6;  // 银喇叭
   BTrumpetNTF = 7;  // 金喇叭
 }
@@ -64,6 +64,16 @@ enum MJOperate {
   Ting = 8;       // 听
   Hu = 9;         // 胡牌
   ZiMo = 10;      // 自摸
+}
+//跑胡子
+enum PHZOperate {
+  PHZ_NULL = 0;       //用于校验
+  PHZ_Ti = 1;         // 提
+  PHZ_Wei = 2;        // 偎
+  PHZ_He = 3;         // 和
+  PHZ_Pao = 4;        // 跑
+  PHZ_Pong = 5;       // 碰
+  PHZ_Chi = 6;        // 吃
 }
 //玩家信息
 message PlayerInfo {

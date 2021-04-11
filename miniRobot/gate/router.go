@@ -569,6 +569,30 @@ func init() {
     msg.ProcessorProto.SetRouter(&protoMsg.PaoDeKuaiOutCardReq{}, game.ChanRPC)
     msg.ProcessorProto.SetRouter(&protoMsg.PaoDeKuaiOutCardResp{}, game.ChanRPC)
     msg.ProcessorProto.SetRouter(&protoMsg.PaoDeKuaiCheckoutResp{}, game.ChanRPC)
+
+    //paohuzi文件生成的代码
+    msg.ProcessorProto.SetRouter(&protoMsg.PaohuziKeZi{}, game.ChanRPC)
+    msg.ProcessorProto.SetRouter(&protoMsg.PaohuziHint{}, game.ChanRPC)
+    msg.ProcessorProto.SetRouter(&protoMsg.PaohuziPlayer{}, game.ChanRPC)
+    msg.ProcessorProto.SetRouter(&protoMsg.EnterGamePHZResp{}, game.ChanRPC)
+    msg.ProcessorProto.SetRouter(&protoMsg.PaohuziSceneResp{}, game.ChanRPC)
+    msg.ProcessorProto.SetRouter(&protoMsg.PaohuziStateFreeResp{}, game.ChanRPC)
+    msg.ProcessorProto.SetRouter(&protoMsg.PaohuziStateDrawResp{}, game.ChanRPC)
+    msg.ProcessorProto.SetRouter(&protoMsg.PaohuziStateDecideResp{}, game.ChanRPC)
+    msg.ProcessorProto.SetRouter(&protoMsg.PaohuziStateStartResp{}, game.ChanRPC)
+    msg.ProcessorProto.SetRouter(&protoMsg.PaohuziStatePlayingResp{}, game.ChanRPC)
+    msg.ProcessorProto.SetRouter(&protoMsg.PaohuziStateWaitOperateResp{}, game.ChanRPC)
+    msg.ProcessorProto.SetRouter(&protoMsg.PaohuziStateOpenResp{}, game.ChanRPC)
+    msg.ProcessorProto.SetRouter(&protoMsg.PaohuziStateOverResp{}, game.ChanRPC)
+    msg.ProcessorProto.SetRouter(&protoMsg.PaohuziReadyReq{}, game.ChanRPC)
+    msg.ProcessorProto.SetRouter(&protoMsg.PaohuziReadyResp{}, game.ChanRPC)
+    msg.ProcessorProto.SetRouter(&protoMsg.PaohuziShowDrawResp{}, game.ChanRPC)
+    msg.ProcessorProto.SetRouter(&protoMsg.PaohuziOutCardReq{}, game.ChanRPC)
+    msg.ProcessorProto.SetRouter(&protoMsg.PaohuziOutCardResp{}, game.ChanRPC)
+    msg.ProcessorProto.SetRouter(&protoMsg.PaohuziOperateReq{}, game.ChanRPC)
+    msg.ProcessorProto.SetRouter(&protoMsg.PaohuziOperateResp{}, game.ChanRPC)
+    msg.ProcessorProto.SetRouter(&protoMsg.PaohuziDealResp{}, game.ChanRPC)
+    msg.ProcessorProto.SetRouter(&protoMsg.PaohuziHintResp{}, game.ChanRPC)
 }
 
 

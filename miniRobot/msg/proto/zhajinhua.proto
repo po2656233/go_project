@@ -1,6 +1,7 @@
 syntax = "proto3";
 package go;
 import "gamecomm.proto";
+// kindID 1003
 //玩家信息
 //未准备 	PlayerSitDown = 1;
 //已准备 	PlayerAgree = 2;

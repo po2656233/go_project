@@ -1,7 +1,7 @@
 {
 	"logLevel": "debug",
 	"logPath": "",
-	"wsAddr": "ws://127.0.0.1:9950",
+	"wsAddr": "ws://8.129.175.179:9950",
 	"maxConnNum": 2000000,
 	"profilePath":"../msg/go",
 	"tcpRedis":"127.0.0.1:6379",

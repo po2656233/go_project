@@ -1,6 +1,7 @@
 syntax = "proto3";
 package go;
 import "gamecomm.proto";
+// kindID 2005
 //36个筒子加4个白板 白板算半点
 //白板 = 10 
 // 1~9筒 = 1~9

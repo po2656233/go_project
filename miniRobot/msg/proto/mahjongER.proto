@@ -1,6 +1,7 @@
 syntax = "proto3";
 package go;
 import "gamecomm.proto";
+// kindID 3004
 //二人麻将
 ////////////////////牌值定义/////////////////////////////
 //		1 ~ 9 : 一万 ~ 9万

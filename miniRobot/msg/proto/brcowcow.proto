@@ -1,6 +1,7 @@
 syntax = "proto3";
 package go;
 import "gamecomm.proto";
+// kindID 2003
 //入场
 message BrcowcowSceneResp {
   int64 TimeStamp = 1;        //时间戳

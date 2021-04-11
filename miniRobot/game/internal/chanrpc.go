@@ -9,6 +9,7 @@ import (
     . "miniRobot/base"
     protoMsg "miniRobot/msg/go"
     "os"
+    "strconv"
     "sync"
     "sync/atomic"
     "time"
@@ -58,15 +59,16 @@ func register() {
     defer node.Unlock()
     size := len(node.allNames)
     curCount:=atomic.LoadInt32(&count)
-    if size <= int(curCount) {
+    log.Release("注册索引:%v 名字总数：%v",curCount,size)
+    if size <= int(curCount)+1 {
         atomic.CompareAndSwapInt32(&count, count, 0)
         logins()
         return
     }
 
-
+    log.Release("注册索引:%v",curCount)
     if 0 <= curCount &&  int(curCount) < size  {
-        node.Lock()
+
         msg := &protoMsg.RegisterReq{
             Name:       node.allNames[curCount],
             Gender: 0x0F,
@@ -74,7 +76,6 @@ func register() {
             PlatformID: 1,
         }
         agentReg.WriteMsg(msg)
-        node.Unlock()
         log.Debug("正在注册")
         atomic.AddInt32(&count,1)
 
@@ -89,30 +90,33 @@ func logins() {
     size := len(node.allNames)
     curCount:=atomic.LoadInt32(&count)
     if size <= int(curCount) {
-        return
+       return
     }
     if 0 <= curCount && int(curCount) < size {
-        msg := &protoMsg.LoginReq{
-            Account:    node.allNames[curCount],
-            Password:   "rob",
-            PlatformID: 1,
-        }
-        agentReg.WriteMsg(msg)
-        atomic.AddInt32(&count,1)
+       msg := &protoMsg.LoginReq{
+           Account:    node.allNames[curCount],
+           Password:   "rob",
+           PlatformID: 1,
+       }
+       agentReg.WriteMsg(msg)
+       atomic.AddInt32(&count,1)
     }
 
-    //time.AfterFunc(100*time.Millisecond, logins)
+    time.AfterFunc(100*time.Millisecond, logins)
 }
 
 func rpcNewAgent(args []interface{}) {
     agent := args[0].(gate.Agent) //【模块间通信】跟路由之间的通信
     _ = agent
-    //fmt.Println("-成功創建-")
+
     agentReg = agent
     //注册或登录
     if !isRegister {
+
+        fmt.Println("-注册中-")
         register()
     } else {
+        //fmt.Println("-登录中-")
         logins()
     }
 
@@ -127,15 +131,18 @@ func rpcCloseAgent(args []interface{}) {
             curCount = 0
         }
     }
-  //  log.Debug("当前count:%v",curCount)
+
+  //  msg.GetClientManger().DeleteAll()
+   log.Debug("当前count:%v",curCount)
     if curCount == 0{
         log.Debug("重置了")
         MangerPerson.Range(func(k, v interface{}) bool {
             MangerPerson.Delete(k)
             return true
         })
+      //  os.Exit(0)
     }
-    //a.Close()
+   a.Close()
 
     _ = a
 }
@@ -211,7 +218,7 @@ func CreateRobot(num int) []string {
     //获取名字列表
     somethings := ""
     for i := 0; i < num; i++ {
-        name = GetFullName()
+        name = GetFullName() + strconv.Itoa(i)
         node.allNames = append(node.allNames, name)
         somethings += name + "\n"
     }

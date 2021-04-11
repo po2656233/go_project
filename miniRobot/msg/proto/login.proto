@@ -255,6 +255,7 @@ message CheckInResp{
   uint64 UserID = 1;
   string Remark = 2;//备注
   int64 Timestamp = 3;//签到时间戳
+  GoodsList AwardList = 4;//签到奖励
 }
 //获取签到
 message GetCheckInReq{

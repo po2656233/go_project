@@ -1,7 +1,6 @@
 package main
 
 import (
-    "fmt"
     _ "github.com/go-sql-driver/mysql"
     "github.com/name5566/leaf"
     lconf "github.com/name5566/leaf/conf" //该包的init函数会被调用
@@ -47,14 +46,15 @@ func checkFileIsExist(filename string) bool {
 }
 
 func main() {
+
+
+    //// 返回当前处理器的数量
+    //fmt.Println(runtime.GOMAXPROCS(0))
+    //// 返回当前机器的逻辑处理器或者核心的数量
+    //fmt.Println(runtime.NumCPU())
+
     //确保并发执行
-    runtime.GOMAXPROCS(runtime.NumCPU() * 64)
-
-    // 返回当前处理器的数量
-    fmt.Println(runtime.GOMAXPROCS(0))
-    // 返回当前机器的逻辑处理器或者核心的数量
-    fmt.Println(runtime.NumCPU())
-
+    runtime.GOMAXPROCS(runtime.NumCPU())
 
     lconf.LogLevel = conf.Server.LogLevel
     lconf.LogPath = conf.Server.LogPath

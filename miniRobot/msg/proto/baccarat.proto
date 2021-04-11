@@ -1,6 +1,7 @@
 syntax = "proto3";
 package go;
 import "gamecomm.proto";
+// kindID 2001
 //场景
 message BaccaratSceneResp{
   int64 TimeStamp = 1;            //时间戳
