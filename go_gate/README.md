@@ -59,7 +59,10 @@
 </setting>
 ```
 ```
-http://网关IP:10001/register
+http://网关IP:10001/register  [服务注册]   
+http://网关IP:10001/info      [网关信息] 
+http://网关IP:10001/reload    [重新加载配置] 
+http://网关IP:10001/enableLine [线路启用/停用] 关联control.xml
 post方式
 HEAD
 Authorization: Basic IyNzc3NeXl46KFM/U1MmXi4xNA==
