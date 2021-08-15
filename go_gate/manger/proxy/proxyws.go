@@ -46,7 +46,7 @@ type ProxyWebsocket struct {
 	linelay       bool
 	ConnCount     uint64
 	RealIpMode    string
-	Certs         []config.XMLCert
+	Certs         []*config.XMLCert
 	Routes        map[string]func(w http.ResponseWriter, r *http.Request)
 }
 
@@ -428,7 +428,7 @@ func (pws *ProxyWebsocket) Stop() {
 	}
 }
 
-func NewWebsocketProxy(name string, local string, realIpModel string, paths []string, tls bool, certs []config.XMLCert) *ProxyWebsocket {
+func NewWebsocketProxy(name string, local string, realIpModel string, paths []string, tls bool, certs []*config.XMLCert) *ProxyWebsocket {
 	pws := &ProxyWebsocket{
 		Running:       false,
 		EnableTls:     tls,

@@ -153,7 +153,7 @@ func (h *httpHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 		//log.Info("HTTP API:Read data line ok:\n%v", string(readData))
 		//节点信息比对
-		var busLine config.XMLBusLine
+		var busLine *config.XMLBusLine
 		var line *config.XMLLine
 		var pLine *Line
 		var proxy IProxy

@@ -47,24 +47,24 @@ type XMLHttpApi struct {
 
 //代理
 type XMLProxy struct {
-	XMLName  xml.Name     `xml:"proxy"`
-	BusLines []XMLBusLine `xml:"busline"`
+	XMLName  xml.Name      `xml:"proxy"`
+	BusLines []*XMLBusLine `xml:"busline"`
 	//Lines   []XMLLine `xml:"line"`
 }
 
 //---------------------------------------------//
 //总线(相当于每条线路的默认配置)
 type XMLBusLine struct {
-	XMLName    xml.Name   `xml:"busline"`
-	Name       string     `xml:"name,attr"`
-	Addr       string     `xml:"addr,attr"`
-	Type       string     `xml:"type,attr"`
-	Redirect   string     `xml:"redirect,attr"`
-	TLS        bool       `xml:"tls,attr"`
-	RealIpMode string     `xml:"realipmode,attr"` //真实ip
-	Routes     []XMLRoute `xml:"route"`
-	Certs      []XMLCert  `xml:"cert,attr"`
-	Lines      []*XMLLine `xml:"line"`
+	XMLName    xml.Name    `xml:"busline"`
+	Name       string      `xml:"name,attr"`
+	Addr       string      `xml:"addr,attr"`
+	Type       string      `xml:"type,attr"`
+	Redirect   string      `xml:"redirect,attr"`
+	TLS        bool        `xml:"tls,attr"`
+	RealIpMode string      `xml:"realipmode,attr"` //真实ip
+	Routes     []*XMLRoute `xml:"route"`
+	Certs      []*XMLCert  `xml:"cert,attr"`
+	Lines      []*XMLLine  `xml:"line"`
 }
 
 //线路

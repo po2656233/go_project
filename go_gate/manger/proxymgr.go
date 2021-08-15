@@ -3,10 +3,10 @@ package manger
 import (
 	"fmt"
 	"github.com/nothollyhigh/kiss/log"
+	"go_gate/config"
 	. "go_gate/manger/proxy"
 	"strings"
 	"time"
-	 "go_gate/config"
 )
 
 var (
@@ -25,7 +25,7 @@ func (mgr *ProxyManger) addProxy(name string, proxy IProxy) {
 	mgr.Proxys[name] = proxy
 }
 
-func (mgr *ProxyManger)AddProxy(busline config.XMLBusLine){
+func (mgr *ProxyManger) AddProxy(busline *config.XMLBusLine) {
 	//校验有效地址
 	var addrs []string
 	isLineValid := func(port string, lineaddr string) bool {
@@ -39,15 +39,15 @@ func (mgr *ProxyManger)AddProxy(busline config.XMLBusLine){
 	}
 
 	/* 创建并启动一个TcpLine */
-	newOneTcpLine := func(proxy *ProxyTcp, serverID, addr string,  redictip bool, nodes []config.XMLNode) {
+	newOneTcpLine := func(proxy *ProxyTcp, serverID, addr string, redictip bool, nodes []config.XMLNode) {
 		port := strings.Split(addr, ":")[1]
 		for _, node := range nodes {
 			node.Addr = fmt.Sprintf("%s:%s", node.Ip, node.Port)
 			//地址是否有效
 			if !isLineValid(port, node.Addr) {
-				log.Fatal("Proxy(%s, %s) AddLine Error: Recursive, Shouldn't Use The Proxy Self's Addr(%s) As Target Addr",serverID,  node.Addr, node.Addr)
+				log.Fatal("Proxy(%s, %s) AddLine Error: Recursive, Shouldn't Use The Proxy Self's Addr(%s) As Target Addr", serverID, node.Addr, node.Addr)
 			}
-			log.Info("WebSocket:current ->addr:%v serverID:%v ",node.Addr, serverID )		//node.Addr真实IP
+			log.Info("WebSocket:current ->addr:%v serverID:%v ", node.Addr, serverID) //node.Addr真实IP
 			proxy.AddLine(serverID, node.Addr, DEFAULT_TCP_CHECKLINE_TIMEOUT, DEFAULT_TCP_CHECKLINE_INTERVAL, node.Maxload, redictip)
 		}
 	}
@@ -60,7 +60,7 @@ func (mgr *ProxyManger)AddProxy(busline config.XMLBusLine){
 			if !isLineValid(port, node.Addr) {
 				log.Fatal("Proxy(%s, %s) AddLine Error: Recursive, Shouldn't Use The Proxy Self's Addr(%s) As Target Addr", serverID, node.Addr, node.Addr)
 			}
-			log.Info("WebSocket:current ->addr:%v serverID:%v  ",node.Addr, serverID)
+			log.Info("WebSocket:current ->addr:%v serverID:%v  ", node.Addr, serverID)
 			proxy.AddLine(serverID, node.Addr, DEFAULT_TCP_CHECKLINE_TIMEOUT, DEFAULT_TCP_CHECKLINE_INTERVAL, node.Maxload, redictip)
 		}
 	}
@@ -73,37 +73,36 @@ func (mgr *ProxyManger)AddProxy(busline config.XMLBusLine){
 	case PT_TCP:
 		proxy = NewTcpProxy(name, busline.Addr)
 	case PT_WEBSOCKET:
-		paths := make([]string,0)
+		paths := make([]string, 0)
 		for _, route := range busline.Routes {
 			paths = append(paths, route.Path)
 		}
-		proxy = NewWebsocketProxy( name, busline.Addr, busline.RealIpMode, paths, busline.TLS, busline.Certs)
+		proxy = NewWebsocketProxy(name, busline.Addr, busline.RealIpMode, paths, busline.TLS, busline.Certs)
 	}
-
 
 	//集成线路
 	for _, line := range busline.Lines {
-		if "" == name{
+		if "" == name {
 			name = line.ServerID
 		}
-		if "" == line.Addr{
+		if "" == line.Addr {
 			line.Addr = busline.Addr
 		}
-		if "" == line.RealIpMode{
+		if "" == line.RealIpMode {
 			line.RealIpMode = busline.RealIpMode
 		}
-		if "" == line.Type{
+		if "" == line.Type {
 			line.Type = busline.Type
 		}
-		if "" != line.Redirect{
+		if "" != line.Redirect {
 			isRedirect = line.Redirect == "true"
 		}
 
 		switch line.Type {
 		case PT_TCP:
-			newOneTcpLine(proxy.(*ProxyTcp),  line.ServerID, line.Addr, isRedirect, line.Nodes)
+			newOneTcpLine(proxy.(*ProxyTcp), line.ServerID, line.Addr, isRedirect, line.Nodes)
 		case PT_WEBSOCKET:
-			newOneWSLine(proxy.(*ProxyWebsocket),line.ServerID, line.Addr, isRedirect,  line.Nodes)
+			newOneWSLine(proxy.(*ProxyWebsocket), line.ServerID, line.Addr, isRedirect, line.Nodes)
 		}
 	}
 
@@ -117,13 +116,12 @@ func (mgr *ProxyManger)AddProxy(busline config.XMLBusLine){
 	mgr.addProxy(name, proxy)
 }
 
-func (mgr *ProxyManger)GetProxy(name string)(IProxy,bool){
+func (mgr *ProxyManger) GetProxy(name string) (IProxy, bool) {
 	if _, ok := mgr.Proxys[name]; ok {
-		return mgr.Proxys[name],true
+		return mgr.Proxys[name], true
 	}
-	return nil,false
+	return nil, false
 }
-
 
 func (mgr *ProxyManger) InitProxy() {
 	options := config.GlobalXmlConfig.Options
@@ -132,11 +130,7 @@ func (mgr *ProxyManger) InitProxy() {
 	DEFAULT_TCP_CHECKLINE_INTERVAL = time.Second * time.Duration(options.Heartbeat.Interval)
 	DEFAULT_TCP_CHECKLINE_TIMEOUT = time.Second * time.Duration(options.Heartbeat.Timeout)
 
-	for _, busLine := range proxy.BusLines{
+	for _, busLine := range proxy.BusLines {
 		mgr.AddProxy(busLine)
 	}
 }
-
-
-
-
