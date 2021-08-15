@@ -60,9 +60,6 @@
 ```
 ```
 http://网关IP:10001/register  [服务注册]   
-http://网关IP:10001/info      [网关信息] 
-http://网关IP:10001/reload    [重新加载配置] 
-http://网关IP:10001/enableLine [线路启用/停用] 关联control.xml
 post方式
 HEAD
 Authorization: Basic IyNzc3NeXl46KFM/U1MmXi4xNA==
@@ -74,6 +71,11 @@ port:9000      //指定的服务地址
 maxload:1       //负载量
 servername:HALL1 //服务ID
 ```
+````
+http://网关IP:10001/info      [网关信息] get
+http://网关IP:10001/reload    [重新加载配置] post
+http://网关IP:10001/enableLine [线路启用/停用] post 关联control.xml
+````
 ## 示例
 
 -  使用上面示例的配置启动网关
