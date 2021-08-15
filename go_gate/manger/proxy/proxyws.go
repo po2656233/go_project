@@ -182,7 +182,7 @@ func (pws *ProxyWebsocket) OnNew(w http.ResponseWriter, r *http.Request) {
 			serverRecv += int64(nread)
 			ConnMgr.UpdateServerInSize(int64(nread))
 
-			if err = serverConn.SetWriteDeadline(time.Now().Add(pws.SendBlockTime)); err != nil {
+			if err = wsConn.SetWriteDeadline(time.Now().Add(pws.SendBlockTime)); err != nil {
 				log.Info("Session(%s -> %s, TLS: %v) Closed, Server SetWriteDeadline Err: %s",
 					wsaddr, line.Remote, pws.EnableTls, err.Error())
 				break
@@ -193,7 +193,7 @@ func (pws *ProxyWebsocket) OnNew(w http.ResponseWriter, r *http.Request) {
 					wsaddr, line.Remote, pws.EnableTls, err.Error())
 				break
 			}
-			if err = wsConn.SetReadDeadline(time.Time{}); err != nil {
+			if err = wsConn.SetWriteDeadline(time.Time{}); err != nil {
 				log.Info("Session(%s -> %s, TLS: %v) Closed, Server SetWriteDeadline Err: %s",
 					wsaddr, line.Remote, pws.EnableTls, err.Error())
 				break
@@ -278,11 +278,15 @@ func (pws *ProxyWebsocket) OnNew(w http.ResponseWriter, r *http.Request) {
 				log.Info("Session(%s -> %s, TLS: %v) Established", wsaddr, line.Remote, pws.EnableTls)
 
 				//传真实IP
-				if err = line.HandleRedirectC(serverConn, wsaddr); err != nil {
+				if err = line.HandleRedirectWeb(serverConn, wsaddr); err != nil {
 					log.Info("Session(%s -> %s) HandleRedirect Failed: %s", wsaddr, line.Remote, err.Error())
 					return
 				}
-
+				if err = serverConn.SetWriteDeadline(time.Time{}); err != nil {
+					log.Info("Session(%s -> %s, TLS: %v) Closed, Client SetReadDeadline Err: %s",
+						wsaddr, line.Remote, pws.EnableTls, err.Error())
+					break
+				}
 				util.Go(s2c)
 			}
 
@@ -328,13 +332,15 @@ func (pws *ProxyWebsocket) Start() {
 	}
 
 	// 监听数据
-	//if pws.Listener == nil {
-	//    var err error
-	//    pws.Listener, err = knet.NewListener(pws.local, DefaultSocketOpt)
-	//    if err != nil {
-	//        log.Fatal("ProxyWebsocket(%v TLS: %v) NewListener Failed: %v", pws.name, pws.EnableTls, err)
-	//    }
-	//}
+	if pws.Listener == nil {
+		var err error
+		pws.Listener, err = knet.NewListener(pws.local, DefaultSocketOpt)
+		if err != nil {
+			log.Fatal("ProxyWebsocket(%v TLS: %v) NewListener Failed: %v", pws.name, pws.EnableTls, err)
+		} else {
+			log.Info(" Listen:%v local:%v", pws.name, pws.local)
+		}
+	}
 
 	util.Go(func() {
 		pws.Lock()
@@ -344,12 +350,12 @@ func (pws *ProxyWebsocket) Start() {
 			util.Go(func() {
 
 				//由于部分线路共用busline的端口,故牵至goroutine外
-				l, err := knet.NewListener(pws.local, DefaultSocketOpt)
-				if err != nil {
-					log.Fatal("ProxyWebsocket(%v TLS: %v) NewListener Failed: %v", pws.name, pws.EnableTls, err)
-				} else {
-					log.Info(" Listen:%v local:%v", pws.name, pws.local)
-				}
+				//l, err := knet.NewListener(pws.local, DefaultSocketOpt)
+				//if err != nil {
+				//	log.Fatal("ProxyWebsocket(%v TLS: %v) NewListener Failed: %v", pws.name, pws.EnableTls, err)
+				//} else {
+				//	log.Info(" Listen:%v local:%v", pws.name, pws.local)
+				//}
 
 				s := &http.Server{
 					Addr:              pws.local,
@@ -383,14 +389,14 @@ func (pws *ProxyWebsocket) Start() {
 						s.TLSConfig.Certificates = append(s.TLSConfig.Certificates, cert)
 					}
 
-					//  tlsListener := tls.NewListener(pws.Listener, s.TLSConfig)
+					tlsListener := tls.NewListener(pws.Listener, s.TLSConfig)
 
-					//if err := s.Serve(tlsListener); err != nil {
-					//    log.Fatal("ProxyWebsocket(%v TLS: %v) Serve Error: %v", pws.name, pws.EnableTls, err)
-					//}
-					if err := s.Serve(l); err != nil {
+					if err := s.Serve(tlsListener); err != nil {
 						log.Fatal("ProxyWebsocket(%v TLS: %v) Serve Error: %v", pws.name, pws.EnableTls, err)
 					}
+					//if err := s.Serve(l); err != nil {
+					//	log.Fatal("ProxyWebsocket(%v TLS: %v) Serve Error: %v", pws.name, pws.EnableTls, err)
+					//}
 				} else {
 					if len(pws.Routes) == 0 {
 						pws.Routes["/gate/ws"] = pws.OnNew
@@ -402,12 +408,12 @@ func (pws *ProxyWebsocket) Start() {
 					pws.StartCheckLines()
 					defer pws.StopCheckLines()
 
-					//if err := s.Serve(pws.Listener); err != nil {
-					//    log.Fatal("ProxyWebsocket(TLS: %v) Serve Error: %v", pws.EnableTls, err)
-					//}
-					if err := s.Serve(l); err != nil {
+					if err := s.Serve(pws.Listener); err != nil {
 						log.Fatal("ProxyWebsocket(TLS: %v) Serve Error: %v", pws.EnableTls, err)
 					}
+					//if err := s.Serve(l); err != nil {
+					//	log.Fatal("ProxyWebsocket(TLS: %v) Serve Error: %v", pws.EnableTls, err)
+					//}
 				}
 			})
 		}

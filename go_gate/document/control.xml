@@ -1,10 +1,12 @@
-<control>    
-<uniline name="busline_name"  serverID="line_serverID"  ip="node_ip"  port="node_port"  enable="false"/>
-<uniline name="busline_name"  serverID="line_serverID"  ip="node_ip"  port="node_port"  enable="false"/>
-<uniline name="busline_name"  serverID="line_serverID"  ip="node_ip"  port="node_port"  enable="false"/>
-<uniline name="busline_name"  serverID="line_serverID"  ip="node_ip"  port="node_port"  enable="false"/>
-<uniline name="busline_name"  serverID="line_serverID"  ip="node_ip"  port="node_port"  enable="true"/>
-<uniline name="busline_name"  serverID="line_serverID"  ip="node_ip"  port="node_port"  enable="true"/>
-<uniline name="busline_name"  serverID="line_serverID"  ip="node_ip"  port="node_port"  enable="true"/>
-<uniline name="busline_name"  serverID="line_serverID"  ip="node_ip"  port="node_port"  enable="true"/>
+<control>
+    <username>superMan</username>
+    <password>F31C221D01AE4ACBB40B557EDC5D84B7</password>
+    <line name="busline_name" serverID="line_serverID" ip="node_ip" port="node_port" enable="false"/>
+    <line name="busline_name" serverID="line_serverID" ip="node_ip" port="node_port" enable="false"/>
+    <line name="busline_name" serverID="line_serverID" ip="node_ip" port="node_port" enable="false"/>
+    <line name="busline_name" serverID="line_serverID" ip="node_ip" port="node_port" enable="false"/>
+    <line name="busline_name" serverID="line_serverID" ip="node_ip" port="node_port" enable="true"/>
+    <line name="busline_name" serverID="line_serverID" ip="node_ip" port="node_port" enable="true"/>
+    <line name="busline_name" serverID="line_serverID" ip="node_ip" port="node_port" enable="true"/>
+    <line name="busline_name" serverID="line_serverID" ip="node_ip" port="node_port" enable="true"/>
 </control>    

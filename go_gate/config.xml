@@ -6,7 +6,7 @@
         <heartbeat interval="10" timeout="50"/>
     </options>
     <!--HTTP接口配置:查询、reload、启动线路、停用线路-->
-    <api addr=":10001" type="http" querypath="/info" reloadpath="/reload" enablepath="/enableLine"/>
+    <api addr=":10001" type="http" registerpath="/register" querypath="/info" reloadpath="/reload" enablepath="/enableLine"/>
     <enable name="busLine_name" serverID="line_serverID" ip="node_ip" port="node_port" enable="true"/>
     <proxy>
         <!-- busline: 例如:所有line统一走20000端口 -->
@@ -34,23 +34,23 @@
         <busline name="ws" addr=":9950" type="websocket" tls="false" realipmode="http">
             <route path="/"/>
             <line serverid="HALL">
-<!--                <node ip="8.129.175.179" port="9650" maxload="3"/>-->
-<!--                <node ip="8.129.175.179" port="9950" maxload="5000"/>-->
+                <!--                <node ip="8.129.175.179" port="9650" maxload="3"/>-->
+                <!--                <node ip="8.129.175.179" port="9950" maxload="5000"/>-->
                 <node ip="127.0.0.1" port="9958" maxload="5000"/>
 
-<!--                <node ip="172.18.11.248" port="30104" maxload="50000"/>-->
-<!--                <node ip="172.18.11.222" port="16666" maxload="50000"/>-->
+                <!--                <node ip="172.18.11.248" port="30104" maxload="50000"/>-->
+                <!--                <node ip="172.18.11.222" port="16666" maxload="50000"/>-->
                 <!--<node ip="172.18.11.191" port="16666" maxload="50000"/>-->
             </line>
         </busline>
 
         <!-- tcp总线 -->
-<!--        <busline name="tcp" addr=":20002" type="tcp" realipmode="tcp">-->
-<!--            <line serverid="HALL">-->
-<!--                <node ip="127.0.0.1" port="10021" maxload="50000"/>-->
-<!--                <node ip="127.0.0.1" port="10022" maxload="50000"/>-->
-<!--            </line>-->
-<!--        </busline>-->
+        <busline name="tcp" addr=":20002" type="tcp" realipmode="tcp">
+            <line serverid="HALL">
+                <node ip="127.0.0.1" port="10021" maxload="50000"/>
+                <!--                <node ip="127.0.0.1" port="10022" maxload="50000"/>-->
+            </line>
+        </busline>
     </proxy>
 </setting>
 

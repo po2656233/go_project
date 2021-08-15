@@ -10,20 +10,22 @@ import (
 	"github.com/nothollyhigh/kiss/log"
 	tnet "github.com/nothollyhigh/kiss/net"
 	"github.com/nothollyhigh/kiss/util"
-	 "go_gate/proto"
+	"go_gate/proto"
 	"net"
 	"strings"
 	"sync"
 	"sync/atomic"
 	"time"
 )
-var BornTime   = time.Now() /* 进程启动时间 */
+
+var BornTime = time.Now() /* 进程启动时间 */
 const (
 	defaultTimeout  = time.Second * 5
 	UnreachableTime = time.Duration(-1)
 	Unpausecheck    = time.Second * 0
 	COUNT_MINUTES   = 60
-	MsgUserIP		= 20010
+	MsgUserIP       = 88888888
+	MsgRegServer    = 88888889
 )
 
 type FailedInMunite struct {
@@ -31,9 +33,8 @@ type FailedInMunite struct {
 	FailedNum int64
 }
 type Head struct {
-	Length      int32
-	MsgId       int32
-	ErrorCode   int32
+	Length int32
+	MsgId  int32
 }
 
 var (
@@ -43,23 +44,23 @@ var (
 /* 线路 */
 type Line struct {
 	sync.RWMutex
-	LineID string 	   	  `json:"lineID"` /* LineID==服务ID */
-	Running  bool          `json:"running"` /* 线路检测是否在进行的标志 */
-	Born     time.Time     `json:"_"`/* 线路出生时间 */
-	Remote   string        `json:"remote"`/* 线路指向的服务器地址 */
-	Delay    time.Duration `json:"delay"`/* 线路延迟 */
-	Timeout  time.Duration `json:"timeout"`/* 进行线路检测时的超时时间 */
-	Interval time.Duration `json:"interval"`/* 线路检测的时间周期 */
-	Timer    *time.Timer   `json:"_"`/* 用于定时进行线路检测的定时器 */
-	CurLoad  int64         `json:"curload"`/* 当前线路负载 */
-	MaxLoad  int64         `json:"maxload"`/* 线路最大负载 */
-	IsPaused bool 		   `json:"ispaused"`/* 线路暂停使用的标志 */
-	Redirect bool 		   `json:"redirect"`/* 线路是否需要向服务器发送客户端真实IP的标志 */
+	LineID   string        `json:"lineID"`   /* LineID==服务ID */
+	Running  bool          `json:"running"`  /* 线路检测是否在进行的标志 */
+	Born     time.Time     `json:"_"`        /* 线路出生时间 */
+	Remote   string        `json:"remote"`   /* 线路指向的服务器地址 */
+	Delay    time.Duration `json:"delay"`    /* 线路延迟 */
+	Timeout  time.Duration `json:"timeout"`  /* 进行线路检测时的超时时间 */
+	Interval time.Duration `json:"interval"` /* 线路检测的时间周期 */
+	Timer    *time.Timer   `json:"_"`        /* 用于定时进行线路检测的定时器 */
+	CurLoad  int64         `json:"curload"`  /* 当前线路负载 */
+	MaxLoad  int64         `json:"maxload"`  /* 线路最大负载 */
+	IsPaused bool          `json:"ispaused"` /* 线路暂停使用的标志 */
+	Redirect bool          `json:"redirect"` /* 线路是否需要向服务器发送客户端真实IP的标志 */
 
-	ChUpdateDelay chan time.Duration 	`json:"_"`/* 用于外部更新线路当前延迟的channel，外部进行更新后本线路的线路检测reset计时周期避免浪费 */
+	ChUpdateDelay chan time.Duration `json:"_"` /* 用于外部更新线路当前延迟的channel，外部进行更新后本线路的线路检测reset计时周期避免浪费 */
 
-	FailedRecord     [COUNT_MINUTES]FailedInMunite `json:"_"`/* 环形队列，记录过去COUNT_MINUTES分钟内连接失败次数 */
-	FailedRecordHead int                           `json:"_"`/* 环形队列头 */
+	FailedRecord     [COUNT_MINUTES]FailedInMunite `json:"_"` /* 环形队列，记录过去COUNT_MINUTES分钟内连接失败次数 */
+	FailedRecordHead int                           `json:"_"` /* 环形队列头 */
 }
 
 /* 线路分数，小于0为线路不可用 */
@@ -71,7 +72,7 @@ func (line *Line) Score() int64 {
 }
 
 func (line *Line) CheckLine(now time.Time) {
-	if line.IsPaused{
+	if line.IsPaused {
 		log.Info("CheckLine (Addr: %s, lineID: %v is paused!)", line.Remote, line.LineID)
 		return
 	}
@@ -143,7 +144,10 @@ func (line *Line) Stop() {
 
 	line.Running = false
 
-	line.Timer.Stop()
+	if line.Timer != nil {
+		line.Timer.Stop()
+	}
+
 	close(line.ChUpdateDelay)
 }
 
@@ -169,46 +173,46 @@ func (line *Line) UnPause() {
 }
 
 /* 根据线路配置决定是否向服务器发送重定向包，应在刚建立与服务器的连接时首先进行然后再发送其他包 */
-func (line *Line) HandleRedirect(conn *net.TCPConn, addr string) error {
+func (line *Line) HandleRedirectTcp(conn *net.TCPConn, addr string) error {
 	if line.Redirect {
 		// 消息头
-		head := &Head{MsgId:MsgUserIP,}
+		head := &Head{MsgId: MsgUserIP}
 		// 消息体
-		addrstr := strings.Split(addr, ":")[0]
-		msg := &gate.MsgSetUserAddrReq{Addr:addrstr}
+		addrStr := strings.Split(addr, ":")[0]
+		msg := &gate.MsgSetUserAddrReq{Addr: addrStr}
 
-		log.Info("RemoteAddr: %v realIP: %v", conn.RemoteAddr(),  addrstr)
-		if buffer,err:= makeBuf(head, msg); err == nil{
+		log.Info("RemoteAddr: %v realIP: %v", conn.RemoteAddr(), addrStr)
+		if buffer, err := makeBuf(head, msg); err == nil {
 			if err = conn.SetWriteDeadline(time.Now().Add(time.Second * 5)); err != nil {
 				return err
 			}
 			// 向conn传输buf
 			_, err = conn.Write(buffer)
 			return err
-		}else{
+		} else {
 			return err
 		}
 	}
 
 	return nil
 }
-func (line *Line) HandleRedirectC(conn *websocket.Conn, addr string) error {
+func (line *Line) HandleRedirectWeb(conn *websocket.Conn, addr string) error {
 	if line.Redirect {
 		// 消息头
-		head := &Head{MsgId:MsgUserIP,}
+		head := &Head{MsgId: MsgUserIP}
 		// 消息体
 		addrstr := strings.Split(addr, ":")[0]
-		msg := &gate.MsgSetUserAddrReq{Addr:addrstr}
+		msg := &gate.MsgSetUserAddrReq{Addr: addrstr}
 
-		log.Info("RemoteAddr: %v realIP: %v", conn.RemoteAddr(),  addrstr)
-		if buffer,err:= makeBuf(head, msg); err == nil{
+		log.Info("RemoteAddr: %v realIP: %v", conn.RemoteAddr(), addrstr)
+		if buffer, err := makeBuf(head, msg); err == nil {
 			if err = conn.SetWriteDeadline(time.Now().Add(time.Second * 5)); err != nil {
 				return err
 			}
 			// 向conn传输buf
 			err = conn.WriteMessage(websocket.BinaryMessage, buffer)
 			return err
-		}else{
+		} else {
 			return err
 		}
 	}
@@ -255,7 +259,6 @@ func (line *Line) GetFailedInLastNMinutes(n int) int64 {
 
 /* 获取线路负载量 */
 
-
 /*字节转换*/
 func makeBuf(head *Head, msg proto.Message) ([]byte, error) {
 	var body []byte
@@ -266,20 +269,20 @@ func makeBuf(head *Head, msg proto.Message) ([]byte, error) {
 		}
 	}
 
-	btHead := make([]byte,HEAD_LEN)
-	head.Length =  int32(len(body))
+	btHead := make([]byte, HEAD_LEN)
+	head.Length = int32(len(body))
 	binary.BigEndian.PutUint16(btHead[:HEAD_LEN], uint16(head.Length))
 
 	var buffer bytes.Buffer
 	buffer.Write(btHead)
 	buffer.Write(body)
-	return buffer.Bytes(),nil
+	return buffer.Bytes(), nil
 }
 
 /* 创建新线路 */
 func NewLine(id, remote string, timeout time.Duration, interval time.Duration, maxLoad int64, redirect bool) *Line {
 	line := &Line{
-		LineID:	   	   id,
+		LineID:        id,
 		Remote:        remote,
 		Delay:         UnreachableTime,
 		Timeout:       timeout,
@@ -299,7 +302,3 @@ func NewLine(id, remote string, timeout time.Duration, interval time.Duration, m
 	}
 	return line
 }
-
-
-
-

@@ -52,6 +52,8 @@ func init() {
     handlerMsg(&protoMsg.MahjongXZDDStateFreeResp{}, handleMahjongXZDDStateFreeResp)     //反馈--->主页信息
     handlerMsg(&protoMsg.ZhajinhuaStateFreeResp{}, handleZhajinhuaStateFreeResp)         //反馈--->主页信息
     handlerMsg(&protoMsg.ZhajinhuaJiSuStateFreeResp{}, handleZhajinhuaJiSuStateFreeResp) //反馈--->主页信息
+    handlerMsg(&protoMsg.TuitongziStateFreeResp{}, handleTuitongziStateFreeResp) //反馈--->主页信息
+
 
     handlerMsg(&protoMsg.SangongStateFreeResp{}, handleSangongStateFreeResp)     //反馈--->主页信息
     handlerMsg(&protoMsg.LandLordsStateFreeResp{}, handleLandLordsStateFreeResp) //反馈--->主页信息
@@ -495,6 +497,20 @@ func handleZhajinhuaJiSuStateFreeResp(args []interface{}) {
     })
 }
 
+//
+func handleTuitongziStateFreeResp(args []interface{}) {
+    m := args[0].(*protoMsg.TuitongziStateFreeResp)
+    a := args[1].(gate.Agent)
+    second, _ := rand.Int(rand.Reader, big.NewInt(int64(m.Times.TotalTime)))
+    time.AfterFunc(time.Duration(second.Int64())*time.Second, func() {
+        msg := &protoMsg.TuitongziReadyReq{
+            IsReady: true,
+        }
+        a.WriteMsg(msg)
+    })
+}
+
+
 func handleSangongStateFreeResp(args []interface{}) {
     m := args[0].(*protoMsg.SangongStateFreeResp)
     a := args[1].(gate.Agent)
@@ -882,8 +898,8 @@ func handlePaoDeKuaiStatePlayingResp(args []interface{}) {
 func handleTuitongziStatePlayingResp(args []interface{}) {
     m := args[0].(*protoMsg.TuitongziStatePlayingResp)
     a := args[1].(gate.Agent)
-    person := a.UserData().(*protoMsg.UserInfo)
-    log.Debug("推筒子机器人:%v", person.UserID)
+    //person := a.UserData().(*protoMsg.UserInfo)
+    //log.Debug("推筒子机器人:%v", person.UserID)
     msg := &protoMsg.LandLordsTrusteeReq{IsTrustee: true}
     a.WriteMsg(msg)
     second, _ := rand.Int(rand.Reader, big.NewInt(int64(m.Times.TotalTime/2)))
@@ -997,7 +1013,6 @@ func handleMahjongERHintResp(args []interface{}) {
                     })
                 }
             }
-
         }
 
     }

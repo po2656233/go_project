@@ -1,6 +1,8 @@
 package manger
 
 import (
+	"crypto/md5"
+	"encoding/base64"
 	"encoding/json"
 	"encoding/xml"
 	"fmt"
@@ -16,11 +18,15 @@ import (
 	"io/ioutil"
 	shnet "net"
 	"net/http"
-	"time"
+	"os"
 	"reflect"
+	"strconv"
+	"strings"
+	"time"
 )
 
 type httpHandler struct {
+	Register   string // 注册服务
 	Query      string
 	Reload     string
 	Enableline string
@@ -73,11 +79,68 @@ type InterfaceInfo struct {
 	ByteRecv uint64
 }
 
+func SaveConfig() bool {
+	// 保存当前配置
+	oldPath := fmt.Sprintf("config_%v.xml", time.Now().Unix())
+	os.Rename("config.xml", oldPath)
+	newConfig, err := xml.Marshal(config.GlobalXmlConfig)
+	if err != nil {
+		log.Info("SaveConfig finish! but not save err:%v", err)
+		return false
+	}
+	log.Info("SaveConfig finish! ok")
+	//清空后写入 ModeAppend 也会清空
+	ioutil.WriteFile("config.xml", newConfig, os.ModeAppend)
+	return true
+}
+
 func (h *httpHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	//权限校验
+	checkAuth := func() bool {
+		auth := r.Header.Get("Authorization")
+		if auth == "" {
+			w.Header().Set("WWW-Authenticate", `Basic realm="Dotcoo User Login"`)
+			return false
+		}
+		auths := strings.SplitN(auth, " ", 2)
+		if len(auths) != 2 {
+			fmt.Println("error")
+			return false
+		}
+		authMethod := auths[0]
+		authB64 := auths[1]
+		switch authMethod {
+		case "Basic":
+			authstr, err := base64.StdEncoding.DecodeString(authB64)
+			if err != nil {
+				fmt.Println(err)
+				return false
+			}
+			log.Info("鉴权成功:%s", authstr)
+			userPwd := strings.SplitN(string(authstr), ":", 2)
+			if len(userPwd) != 2 {
+				fmt.Println("error")
+				return false
+			}
+			username := userPwd[0]
+			password := userPwd[1]
+			// 先写死了
+			if username != "##sss^^^" || password != "(S?SS&^.14" {
+				fmt.Println("Username:", username)
+				fmt.Println("Password:", password)
+				return false
+			}
+		default:
+			fmt.Println("error")
+			return false
+		}
+		return true
+	}
+
 	reload := func() {
 		var readData []byte
 		var err error
-		if readData,err=ioutil.ReadAll(r.Body);err != nil{
+		if readData, err = ioutil.ReadAll(r.Body); err != nil {
 			w.Write([]byte("please check if the document(config.xml) is valid."))
 			log.Error("Reload Error when xml.Unmarshal from xml config file:len:%v, data:%v", r.ContentLength, err.Error())
 			return
@@ -91,7 +154,7 @@ func (h *httpHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		//log.Info("HTTP API:Read data line ok:\n%v", string(readData))
 		//节点信息比对
 		var busLine config.XMLBusLine
-		var line config.XMLLine
+		var line *config.XMLLine
 		var pLine *Line
 		var proxy IProxy
 		var node config.XMLNode
@@ -105,7 +168,7 @@ func (h *httpHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			if proxy, _ = ProxyMgr.GetProxy(busLine.Name); nil != proxy { //[1 获取到的值不能为空，否则新增处理
 				// 查找线路
 				for _, line = range busLine.Lines { //[2
-					for _, node = range line.Nodes {//[3
+					for _, node = range line.Nodes { //[3
 						node.Addr = fmt.Sprintf("%s:%s", node.Ip, node.Port)
 						if pLine = proxy.GetLine(line.ServerID, node.Addr); pLine != nil {
 							continue
@@ -119,9 +182,9 @@ func (h *httpHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 						} //4]
 						// 日志
 						log.Info("Reload id:%v addr:%v", line.ServerID, node.Addr)
-					}//3]
+					} //3]
 				} //2]
-
+				ProxyMgr.Proxys[busLine.Name] = proxy
 				//保留有效线路
 				proxy.ReserveLines(busLine.Lines)
 
@@ -130,12 +193,106 @@ func (h *httpHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 					proxy.(*ProxyTcp).StartCheckLines()
 				case PT_WEBSOCKET:
 					proxy.(*ProxyWebsocket).StartCheckLines()
-				}//2']
+				} //2']
 			} else { //1] [1'
 				// 新增 busline
 				ProxyMgr.AddProxy(busLine)
 			} //1']
 		} //0]
+		if SaveConfig() {
+			w.Write([]byte("update config finish! ok!"))
+		} else {
+			w.Write([]byte("warning: update config finish! But cannot save config!"))
+		}
+	}
+
+	register := func() {
+
+		if err := r.ParseMultipartForm(32 << 20); err != nil {
+			w.Write([]byte("warning: Parameter is empty!"))
+			return
+		}
+		strType := r.Form.Get("type")
+		strServerName := r.Form.Get("servername")
+		strIp := r.Form.Get("ip")
+		strPort := r.Form.Get("port")
+		strMaxLoad := r.Form.Get("maxload")
+		address := shnet.ParseIP(strIp)
+		maxload, _ := strconv.ParseInt(strMaxLoad, 10, 64)
+		_, err1 := strconv.Atoi(strPort)
+		if strType == "" || strServerName == "" || address == nil || err1 != nil || maxload <= 0 {
+			w.Write([]byte("warning: Parameter is invalid!"))
+			return
+		}
+		isOk := false
+		for _, busLine := range config.GlobalXmlConfig.Proxy.BusLines { //[0
+			if busLine.Type == strType {
+				if proxy, _ := ProxyMgr.GetProxy(busLine.Name); nil != proxy { //[1 获取到的值不能为空，否则新增处理
+					// 查找线路
+					var pline *config.XMLLine = nil
+					addr := fmt.Sprintf("%s:%s", strIp, strPort)
+					for _, line := range busLine.Lines { //[2
+						if line.ServerID == strServerName {
+							if pLine := proxy.GetLine(line.ServerID, addr); pLine != nil {
+								isOk = true
+								continue
+							}
+							pline = line
+						}
+					} //2]
+					// 已经有了的,就不让注册了
+					if isOk {
+						w.Write([]byte("warning: the service already exists! register"))
+						return
+					}
+
+					// 新增线路
+					switch busLine.Type { //[4
+					case PT_TCP:
+						proxy.(*ProxyTcp).AddLine(strServerName, addr, DEFAULT_TCP_CHECKLINE_TIMEOUT, DEFAULT_TCP_CHECKLINE_INTERVAL, maxload, config.GlobalXmlConfig.Options.Redirect)
+					case PT_WEBSOCKET:
+						proxy.(*ProxyWebsocket).AddLine(strServerName, addr, DEFAULT_TCP_CHECKLINE_TIMEOUT, DEFAULT_TCP_CHECKLINE_INTERVAL, maxload, config.GlobalXmlConfig.Options.Redirect)
+					} //4]
+					// 日志
+					log.Info("register serverId:%v addr:%v", strServerName, addr)
+					switch busLine.Type { //[2'
+					case PT_TCP:
+						proxy.(*ProxyTcp).StartCheckLines()
+					case PT_WEBSOCKET:
+						proxy.(*ProxyWebsocket).StartCheckLines()
+					} //2']
+					if pline == nil {
+						pline = &config.XMLLine{
+							ServerID:   strServerName,
+							Type:       strType,
+							RealIpMode: strType,
+							Nodes:      make([]config.XMLNode, 0),
+						}
+						busLine.Lines = append(busLine.Lines, pline)
+					}
+					pline.Nodes = append(pline.Nodes, config.XMLNode{
+						Ip:      strIp,
+						Port:    strPort,
+						Maxload: maxload,
+						Enable:  true,
+					})
+
+					isOk = true
+				}
+			}
+		}
+		// 开一条线
+		if !isOk {
+			log.Info("register type:%v serverId:%v addr:%v port:%v maxload:%v  failed!", strType, strServerName, strIp, strPort, maxload)
+			w.Write([]byte("register failed! "))
+		} else {
+			log.Info("register type:%v serverId:%v addr:%v port:%v maxload:%v   successful!", strType, strServerName, strIp, strPort, maxload)
+			w.Write([]byte("register successful! "))
+			if !SaveConfig() {
+				w.Write([]byte("warning: update config finish! But cannot save config!"))
+			}
+		}
+		return
 	}
 
 	//查询信息
@@ -145,17 +302,21 @@ func (h *httpHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			w.Write(proxy.LinesForJSON())
 		}
 		w.Write([]byte("\n"))
-		w.Write([]byte( ConnMgr.LogDataFlowRecord() ))
+		w.Write([]byte(ConnMgr.LogDataFlowRecord()))
 	}
 
 	//启用
 	enable := func() {
 		//格式:<enable name=  serverID=  ip=  port=  enable=\>
+		if r.Method != "POST" {
+			fmt.Fprintf(w, "Invalid request mode.")
+			return
+		}
 		var readData []byte
 		var err error
 		xmlControl := &config.XMLControl{}
-		if readData,err = ioutil.ReadAll(r.Body); err != nil{
-			w.Write([]byte("please check if the document(control.xml) is valid."))
+		if readData, err = ioutil.ReadAll(r.Body); err != nil {
+			fmt.Fprintf(w, "please check if the document(control.xml) is valid.")
 			log.Error("Reload Error when xml.Unmarshal from xml config file:len:%v, data:%v", r.ContentLength, err.Error())
 			return
 		}
@@ -164,7 +325,12 @@ func (h *httpHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			log.Error("Reload Error unable to parse the XML file", err.Error())
 			return
 		}
-
+		// 二次鉴权
+		ss := md5.Sum([]byte("^^*SDASD)A)$%"))
+		if 0 != strings.Compare(fmt.Sprintf("%X", ss), xmlControl.PassWord) {
+			w.WriteHeader(http.StatusUnauthorized)
+			return
+		}
 		var proxy IProxy
 		var addr string
 		var pLine *Line
@@ -172,35 +338,59 @@ func (h *httpHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		for _, enable := range xmlControl.Enables {
 			if proxy, _ = ProxyMgr.GetProxy(enable.Name); nil != proxy { //[1 获取到的值不能为空，否则新增处理
 				addr = fmt.Sprintf("%s:%s", enable.IP, enable.Port)
-				addrs,_ := shnet.LookupHost(addr)
-				if 0 < len(addrs){
+				addrs, _ := shnet.LookupHost(addr)
+				if 0 < len(addrs) {
 					addr = addrs[0]
 				}
 				// 查找线路
-				if pLine = proxy.GetLine(enable.ID, addr); nil != pLine{
-					if enable.Enable{
+				if pLine = proxy.GetLine(enable.ID, addr); nil != pLine {
+					if enable.Enable {
 						pLine.UnPause()
-					}else{
+					} else {
 						pLine.Pause()
 					}
 				}
+
 			}
 		}
+		fmt.Fprintf(w, "finish-> %v", xmlControl.Enables)
 	}
+
+	//鉴权
+	if !checkAuth() {
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
 	// 接口解析调用
-	switch r.URL.Path {
-	case h.Reload:
-		reload()
-		log.Info("HTTP API:Reload ok.")
-	case h.Query:
-		query()
-		log.Info("HTTP API:query ok.")
-	case h.Enableline:
-		enable()
-		log.Info("HTTP API:enable line ok.")
+	switch r.Method {
+	case "GET":
+		switch r.URL.Path {
+		case h.Query:
+			query()
+			log.Info("HTTP API:query ok.")
+		default:
+			http.NotFound(w, r)
+		}
+	case "POST":
+		// Call ParseForm() to parse the raw query and update r.PostForm and r.Form.
+		switch r.URL.Path {
+		case h.Register:
+			register()
+			log.Info("HTTP API:register server ok.")
+		case h.Reload:
+			reload()
+			log.Info("HTTP API:Reload ok.")
+		case h.Enableline:
+			enable()
+			log.Info("HTTP API:enable line ok.")
+		}
+
 	default:
+		fmt.Fprintf(w, "Sorry, only GET and POST methods are supported.")
 		http.NotFound(w, r)
 	}
+
 }
 
 func getInfosJSON() []byte {
@@ -264,18 +454,18 @@ func info(i interface{}) {
 	for i := 0; i < t.NumField(); i++ {
 		f := t.Field(i)
 		val := v.Field(i).Interface()
-		fmt.Printf("%6s: %v = %v\n",f.Name,f.Type,val)
+		fmt.Printf("%6s: %v = %v\n", f.Name, f.Type, val)
 	}
 }
 
 func InitApi() {
 	mux := http.NewServeMux()
 	hh := &httpHandler{
+		Register:   config.GlobalXmlConfig.HttpApi.RegisterPath,
 		Query:      config.GlobalXmlConfig.HttpApi.QueryPath,
 		Reload:     config.GlobalXmlConfig.HttpApi.ReloadPath,
 		Enableline: config.GlobalXmlConfig.HttpApi.EnablePath,
 	}
-
 
 	v := reflect.ValueOf(*hh)
 
@@ -286,7 +476,6 @@ func InitApi() {
 			mux.Handle(f.String(), hh)
 		}
 	}
-
 
 	go func() {
 		if err := http.ListenAndServe(config.GlobalXmlConfig.HttpApi.Addr, mux); nil != err {

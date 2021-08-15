@@ -19,8 +19,8 @@ type ProxyTcp struct {
 	SendBlockTime time.Duration
 	SendBufLen    int
 	Nodelay       bool
-	ServerID  string
-	ConnCount uint64
+	ServerID      string
+	ConnCount     uint64
 }
 
 func (ptcp *ProxyTcp) InitConn(conn *net.TCPConn) bool {
@@ -89,6 +89,10 @@ func (ptcp *ProxyTcp) OnNew(clientConn *net.TCPConn) {
 				log.Info("Session(%s -> %s) Closed, Server Read Err: %s", clientAddr, line.Remote, err.Error())
 				break
 			}
+			if err = serverConn.SetReadDeadline(time.Time{}); err != nil {
+				log.Info("SetReadDeadline(%s -> %s) Closed, Client Write Err: %s", clientAddr, line.Remote, err.Error())
+				break
+			}
 
 			serverRecv += int64(nread)
 			ConnMgr.UpdateServerInSize(int64(nread))
@@ -99,6 +103,10 @@ func (ptcp *ProxyTcp) OnNew(clientConn *net.TCPConn) {
 			nwrite, err = clientConn.Write(buf[:nread])
 			if nwrite != nread || err != nil {
 				log.Info("Session(%s -> %s) Closed, Server Write Err: %s", clientAddr, line.Remote, err.Error())
+				break
+			}
+			if err = clientConn.SetWriteDeadline(time.Time{}); err != nil {
+				log.Info("SetReadDeadline(%s -> %s) Closed, Client Write Err: %s", clientAddr, line.Remote, err.Error())
 				break
 			}
 
@@ -130,7 +138,10 @@ func (ptcp *ProxyTcp) OnNew(clientConn *net.TCPConn) {
 				log.Info("Session(%s -> %s) Closed, Client Read Err: %s", clientAddr, line.Remote, err.Error())
 				break
 			}
-
+			if err = serverConn.SetReadDeadline(time.Time{}); err != nil {
+				log.Info("SetReadDeadline(%s -> %s) Closed, Client Write Err: %s", clientAddr, line.Remote, err.Error())
+				break
+			}
 			if serverConn == nil {
 				// 校验第一个数据包是否有效
 				nReadLen := len(buf)
@@ -148,7 +159,7 @@ func (ptcp *ProxyTcp) OnNew(clientConn *net.TCPConn) {
 				//}
 
 				// 获取serverID
-				line = ptcp.AssignLine(string(buf[HEAD_LEN:nReadLen - HEAD_LEN]))
+				line = ptcp.AssignLine(string(buf[HEAD_LEN : nReadLen-HEAD_LEN]))
 				if line == nil {
 					log.Info("Session(%s -> null) Failed, GetBestLine Failed", clientAddr)
 					clientConn.Close()
@@ -196,9 +207,13 @@ func (ptcp *ProxyTcp) OnNew(clientConn *net.TCPConn) {
 				//	log.Info("Session(%s -> %s) HandleRedirect Failed: %s", clientAddr, line.Remote, err.Error())
 				//	return
 				//}
-				if err = line.HandleRedirect(serverConn, line.Remote); err != nil {
+				if err = line.HandleRedirectTcp(serverConn, line.Remote); err != nil {
 					log.Info("Session(%s -> %s) HandleRedirect Failed: %s", clientAddr, line.Remote, err.Error())
 					return
+				}
+				if err = serverConn.SetWriteDeadline(time.Time{}); err != nil {
+					log.Info("SetReadDeadline(%s -> %s) Closed, Client Write Err: %s", clientAddr, line.Remote, err.Error())
+					break
 				}
 				util.Go(s2cCor)
 			}
@@ -215,9 +230,13 @@ func (ptcp *ProxyTcp) OnNew(clientConn *net.TCPConn) {
 				log.Info("Session(%s -> %s) Closed, Client Write Err: %s", clientAddr, line.Remote, err.Error())
 				break
 			}
+			if err = serverConn.SetWriteDeadline(time.Time{}); err != nil {
+				log.Info("SetReadDeadline(%s -> %s) Closed, Client Write Err: %s", clientAddr, line.Remote, err.Error())
+				break
+			}
 			clientSend += int64(nwrite)
 			ConnMgr.UpdateClientOutSize(int64(nwrite))
-			log.Info("client:[%v] send-->> <%v> MsgLen:%v",clientAddr, line.Remote, nwrite)
+			log.Info("client:[%v] send-->> <%v> MsgLen:%v", clientAddr, line.Remote, nwrite)
 		}
 	}
 
@@ -247,14 +266,13 @@ func (ptcp *ProxyTcp) start() {
 		return
 	}
 
-	if ptcp.Listener == nil{
+	if ptcp.Listener == nil {
 		ptcp.Listener, err = net.ListenTCP("tcp", tcpAddr)
 		if err != nil {
 			log.Fatal("ProxyTcp(%v) ListenAndServe() ListenTCP Err: %v", ptcp.name, err)
 			return
 		}
 	}
-
 
 	ptcp.Running = true
 	ptcp.ConnCount = 0

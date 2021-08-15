@@ -4,5 +4,16 @@ package gate;
 
 // 设置用户地址(ip)req  消息ID 20010
 message MsgSetUserAddrReq {
-    string Addr	   = 1;  // 用户地址
+  string Addr = 1;  // 用户地址
+}
+
+message RegisterReq {
+  int32 SType = 1; //   服务类型 1:tcp 2:web
+  string SName = 2; //  服务类型
+  string Addr = 3;  //  用户地址
+  int32 MaxLoad = 4;   // 最大承载数(分流过去的数量)
+}
+message RegisterResp {
+  int32 Code = 1;  // 0:成功 1:失败
+  string Msg = 2;  // 提示信息
 }
