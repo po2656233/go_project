@@ -26,33 +26,51 @@
 
 ## 配置
 
+
 ```xml
 <setting>
-    <!-- debug: 设置日志是否输出到控制台 -->
+     <!-- debug: 设置日志是否输出到控制台 -->
     <!-- logdir: 日志目录 -->
     <!-- redirect: 是否开启全局tcp重定向 -->
-    <options debug="true" logdir="./logs/" redirect="true">
-        <heartbeat interval="60" timeout="50"/>
+    <!-- heartbeat: 心跳设置 -->
+    <options debug="true" logdir="./logs/" redirect="false">
+        <heartbeat interval="10" timeout="50"></heartbeat>
     </options>
-
     <proxy>
         <!-- tcp 10000 端口 反代到 tcp 10001 10002 端口 -->
-        <line name="tcp" addr=":10000" type="tcp">
-            <node addr="127.0.0.1:10001" maxload="50000"/>
-            <node addr="127.0.0.1:10002" maxload="50000"/>
-        </line>
-
-        <!-- websocket 20000 端口, 路由 /gate/ws, 反代到 tcp 20001 20002 端口 -->
-        <line name="ws" addr=":20000" type="websocket" tls="false">
-            <route path="/gate/ws"/>
-            <node addr="127.0.0.1:20001" maxload="50000"/>
-            <node addr="127.0.0.1:20002" maxload="50000"/>
-        </line>
+        <busline name="ws" addr=":9950" type="websocket" redirect="" tls="false" realipmode="http">
+            <route path="/"></route>
+            <line serverid="HALL" addr=":9950" type="websocket" redirect="" tls="false" realipmode="http">
+                <node addr="" ip="127.0.0.1" port="9958" maxload="5000" enable="false"></node>
+            </line>
+            <line serverid="HALL1" addr="" type="websocket" redirect="" tls="false" realipmode="websocket">
+                <node addr="" ip="127.0.0.1" port="9000" maxload="1" enable="true"></node>
+            </line>
+        </busline>
+        <!-- tcp 10000 端口 反代到 tcp 10001 10002 端口 -->
+        <busline name="tcp" addr=":20002" type="tcp" redirect="" tls="false" realipmode="tcp">
+            <line serverid="HALL" addr=":20002" type="tcp" redirect="" tls="false" realipmode="tcp">
+                <node addr="" ip="127.0.0.1" port="10021" maxload="50000" enable="false"></node>
+            </line>
+        </busline>
     </proxy>
+    <!-- 对外服务端口 register:服务注册-->
+    <api addr=":10001" type="http" registerpath="/register" querypath="/info" reloadpath="/reload" enablepath="/enableLine" disablepath=""></api>
 </setting>
 ```
-
-
+```
+http://网关IP:10001/register
+post方式
+HEAD
+Authorization: Basic IyNzc3NeXl46KFM/U1MmXi4xNA==
+Content-Type: multipart/form-data;
+form-data数据
+type:websocket //tcp websocket
+ip:127.0.0.1   //指定的服务地址
+port:9000      //指定的服务地址
+maxload:1       //负载量
+servername:HALL1 //服务ID
+```
 ## 示例
 
 -  使用上面示例的配置启动网关
