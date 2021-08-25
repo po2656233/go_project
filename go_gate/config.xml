@@ -1,1 +1,28 @@
-<setting><options debug="true" logdir="./logs/" redirect="false"><heartbeat interval="10" timeout="50"></heartbeat></options><proxy><busline name="ws" addr=":9950" type="websocket" redirect="" tls="false" realipmode="http"><route path="/"></route><line serverid="HALL" addr=":9950" type="websocket" redirect="" tls="false" realipmode="http"><node addr="" ip="127.0.0.1" port="9958" maxload="5000" enable="false"></node></line><line serverid="HALL1" addr="" type="websocket" redirect="" tls="false" realipmode="websocket"><node addr="" ip="127.0.0.1" port="9000" maxload="1" enable="true"></node></line></busline><busline name="tcp" addr=":20002" type="tcp" redirect="" tls="false" realipmode="tcp"><line serverid="HALL" addr=":20002" type="tcp" redirect="" tls="false" realipmode="tcp"><node addr="" ip="127.0.0.1" port="10021" maxload="50000" enable="false"></node></line></busline></proxy><api addr=":10001" type="http" registerpath="/register" querypath="/info" reloadpath="/reload" enablepath="/enableLine" disablepath=""></api></setting>
+<setting>
+	<options debug="true" logdir="./logs/" redirect="false">
+		<heartbeat interval="10" timeout="50"></heartbeat>
+	</options>
+	<proxy>
+		<busline name="ws" addr=":9950" type="websocket" redirect="" tls="false" realipmode="http">
+			<route path="/"></route>
+			<line serverid="HALL">
+				<node ip="127.0.0.1" port="9958" maxload="5000" enable="false"></node>
+			</line>
+			<line serverid="zjh2">
+				<node ip="0.0.0.0" port="8751" maxload="3000" enable="true"></node>
+			</line>
+			<line serverid="zjh3">
+				<node ip="0.0.0.0" port="8752" maxload="3000" enable="true"></node>
+				<node ip="0.0.0.0" port="8754" maxload="3000" enable="true"></node>
+				<node ip="0.0.0.0" port="87599" maxload="3000" enable="true"></node>
+				<node ip="0.0.0.0" port="8758" maxload="3000" enable="true"></node>
+			</line>
+		</busline>
+		<busline name="tcp" addr=":20002" type="tcp" redirect="" tls="false" realipmode="tcp">
+			<line serverid="HALL">
+				<node ip="127.0.0.1" port="10021" maxload="50000" enable="false"></node>
+			</line>
+		</busline>
+	</proxy>
+	<api addr=":10001" type="http" registerpath="/register" querypath="/info" reloadpath="/reload" enablepath="/enableLine" disablepath=""></api>
+</setting>

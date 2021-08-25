@@ -71,11 +71,11 @@ type XMLBusLine struct {
 type XMLLine struct {
 	XMLName    xml.Name   `xml:"line"`
 	ServerID   string     `xml:"serverid,attr"` //ServerID
-	Addr       string     `xml:"addr,attr"`
-	Type       string     `xml:"type,attr"`
-	Redirect   string     `xml:"redirect,attr"`
-	TLS        bool       `xml:"tls,attr"`
-	RealIpMode string     `xml:"realipmode,attr"` //真实ip
+	Addr       string     `xml:"-"`
+	Type       string     `xml:"-"`
+	Redirect   string     `xml:"-"`
+	TLS        bool       `xml:"-"`
+	RealIpMode string     `xml:"-"` //真实ip
 	Routes     []XMLRoute `xml:"route"`
 	Certs      []XMLCert  `xml:"cert"`
 	Nodes      []XMLNode  `xml:"node"`
@@ -84,7 +84,7 @@ type XMLLine struct {
 //节点
 type XMLNode struct {
 	XMLName xml.Name `xml:"node"`
-	Addr    string   `xml:"addr,attr"` // 实际使用的IP地址
+	Addr    string   `xml:"-"`         // 实际使用的IP地址
 	Ip      string   `xml:"ip,attr"`   // 配置上使用的IP
 	Port    string   `xml:"port,attr"` // 配置上使用的端口
 	Maxload int64    `xml:"maxload,attr"`

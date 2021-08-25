@@ -64,12 +64,13 @@ post方式
 HEAD
 Authorization: Basic IyNzc3NeXl46KFM/U1MmXi4xNA==
 Content-Type: multipart/form-data;
-form-data数据
-type:websocket //tcp websocket
-ip:127.0.0.1   //指定的服务地址
-port:9000      //指定的服务地址
-maxload:1       //负载量
-servername:HALL1 //服务ID
+以下是form-data格式数据
+[key]:[value]
+type:   websocket   //  tcp websocket
+name:   HALL1       //  服务ID
+ip  :   127.0.0.1   //  指定的服务IP
+port:   9000        //  指定的服务端口
+maxload:1           //  负载量
 ```
 ````
 http://网关IP:10001/info      [网关信息] get

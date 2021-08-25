@@ -124,7 +124,7 @@ func (mgr *ProxyBase) ReserveLines(lines []*config.XMLLine) bool {
 	have := false
 	for i := len(mgr.lines) - 1; i > 0; i-- {
 		for j := 0; j < len(lines); j++ {
-			if strings.EqualFold(mgr.lines[i].LineID, lines[j].ServerID) && mgr.lines[i].Remote == lines[j].Addr {
+			if strings.EqualFold(mgr.lines[i].LineID, lines[j].ServerID) { //&& mgr.lines[i].Remote == lines[j].Addr
 				have = true
 				break
 			}

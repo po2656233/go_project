@@ -83,7 +83,7 @@ func SaveConfig() bool {
 	// 保存当前配置
 	oldPath := fmt.Sprintf("config_%v.xml", time.Now().Unix())
 	os.Rename("config.xml", oldPath)
-	newConfig, err := xml.Marshal(config.GlobalXmlConfig)
+	newConfig, err := xml.MarshalIndent(config.GlobalXmlConfig, "", "\t")
 	if err != nil {
 		log.Info("SaveConfig finish! but not save err:%v", err)
 		return false
@@ -213,7 +213,7 @@ func (h *httpHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		strType := r.Form.Get("type")
-		strServerName := r.Form.Get("servername")
+		strServerName := r.Form.Get("name")
 		strIp := r.Form.Get("ip")
 		strPort := r.Form.Get("port")
 		strMaxLoad := r.Form.Get("maxload")
@@ -232,10 +232,15 @@ func (h *httpHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 					var pline *config.XMLLine = nil
 					addr := fmt.Sprintf("%s:%s", strIp, strPort)
 					for _, line := range busLine.Lines { //[2
+						pLine := proxy.GetLine(line.ServerID, addr)
+						if pLine != nil && pLine.Remote == addr {
+							isOk = true
+							break
+						}
 						if line.ServerID == strServerName {
-							if pLine := proxy.GetLine(line.ServerID, addr); pLine != nil {
+							if pLine != nil {
 								isOk = true
-								continue
+								break
 							}
 							pline = line
 						}
@@ -263,10 +268,10 @@ func (h *httpHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 					} //2']
 					if pline == nil {
 						pline = &config.XMLLine{
-							ServerID:   strServerName,
-							Type:       strType,
-							RealIpMode: strType,
-							Nodes:      make([]config.XMLNode, 0),
+							Addr:     busLine.Addr,
+							ServerID: strServerName,
+							Type:     strType,
+							Nodes:    make([]config.XMLNode, 0),
 						}
 						busLine.Lines = append(busLine.Lines, pline)
 					}
@@ -276,6 +281,11 @@ func (h *httpHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 						Maxload: maxload,
 						Enable:  true,
 					})
+					if strType == "websocket" {
+						pline.RealIpMode = "http"
+					} else {
+						pline.RealIpMode = "tcp"
+					}
 
 					isOk = true
 				}
