@@ -1,6 +1,6 @@
 <setting>
 	<options debug="true" logdir="./logs/" redirect="false">
-		<heartbeat interval="10" timeout="50"></heartbeat>
+		<heartbeat interval="20" timeout="50"></heartbeat>
 	</options>
 	<proxy>
 		<busline name="ws" addr=":9950" type="websocket" redirect="" tls="false" realipmode="http">
@@ -11,8 +11,11 @@
 			<line serverid="zjh2">
 				<node ip="0.0.0.0" port="8751" maxload="3000" enable="true"></node>
 			</line>
-			<line serverid="zjh3">
+			<line serverid="chat">
 				<node ip="0.0.0.0" port="8752" maxload="3000" enable="true"></node>
+			</line>
+			<line serverid="zjh3">
+				<node ip="0.0.0.0" port="8753" maxload="3000" enable="true"></node>
 				<node ip="0.0.0.0" port="8754" maxload="3000" enable="true"></node>
 				<node ip="0.0.0.0" port="87599" maxload="3000" enable="true"></node>
 				<node ip="0.0.0.0" port="8758" maxload="3000" enable="true"></node>

@@ -1,0 +1,80 @@
+{
+	"info": {
+		"_postman_id": "1718b7b1-34ac-4851-b48b-ace9cd0b0df0",
+		"name": "网关注册服务",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "注册服务",
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "password",
+							"value": "(S?SS&^.14",
+							"type": "string"
+						},
+						{
+							"key": "username",
+							"value": "##sss^^^",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "type",
+							"value": "websocket",
+							"type": "text"
+						},
+						{
+							"key": "ip",
+							"value": "0.0.0.0",
+							"type": "text"
+						},
+						{
+							"key": "port",
+							"value": "8755",
+							"type": "text"
+						},
+						{
+							"key": "maxload",
+							"value": "3000",
+							"type": "text"
+						},
+						{
+							"key": "name",
+							"value": "cat",
+							"type": "text"
+						}
+					],
+					"options": {
+						"raw": {
+							"language": "xml"
+						}
+					}
+				},
+				"url": {
+					"raw": "127.0.0.1:10001/register",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "10001",
+					"path": [
+						"register"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
