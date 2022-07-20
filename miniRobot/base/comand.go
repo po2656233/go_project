@@ -1,9 +1,10 @@
 package base
 
-//MainID 200+ || SubID 100+
+// MainID 200+ || SubID 100+
 const (
-	WaitTime        = 5
-	ALLCount      	= 500
+	WaitTime       = 5
+	ALLCount       = 1000
+	TablePeopleMax = 100
 	//注册
 	//登录
 	MainLogin          = 201 //-> 登录
@@ -44,7 +45,7 @@ const (
 	MainPlayerState = 500 //玩家状态
 	PlayerSitDown   = 1   //坐下
 	PlayerAgree     = 2   //同意
-	PlayerPlaying    = 3   //游戏
+	PlayerPlaying   = 3   //游戏
 	PlayerStandUp   = 4   //站起
 	PlayerLookOn    = 5   //旁观
 
@@ -60,8 +61,8 @@ const (
 
 	//源码中重要标识
 	INVALID = 0 //无效(切记有效初始化,不要从零开始)
-	FAILD   = 0  //失败
-	SUCCESS = 1  //成功
+	FAILD   = 0 //失败
+	SUCCESS = 1 //成功
 
 	//房间级别
 	RoomGeneral = 0 //普通

@@ -11,7 +11,7 @@ var (
 
 	// gate conf
 	PendingWriteNum        = 13000 //挂起数目
-	MaxMsgLen       uint32 = 4096 //包体最大长度
+	MaxMsgLen       uint32 = 4096  //包体最大长度
 	MinMsgLen              = 1
 	HTTPTimeout            = 10 * time.Second //HTTP网络延迟10秒
 	LenMsgLen              = 2                //所占字节长度

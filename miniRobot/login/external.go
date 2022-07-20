@@ -9,3 +9,7 @@ var (
 	Module  = new(internal.Module)
 	ChanRPC = internal.ChanRPC
 )
+
+func InitData() {
+	//atomic.StoreInt32(&internal.IndexGames,0)
+}

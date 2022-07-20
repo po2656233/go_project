@@ -1,0 +1,178 @@
+syntax = "proto3";
+package go;
+import "gamecomm.proto";
+// kindID 3006
+////////////////////牌值定义/////////////////////////////
+//		1 ~ 9 : 一万 ~ 9万
+//		11 ~ 19 : 一条 ~ 9条
+//		21 ~ 29 : 一筒 ~ 9筒
+//		31 ~ 34 : 东、南、西、北风
+//		41 : 发财
+//		42 : 红中
+//		43 : 白板
+//		51 ~ 54 : 春夏秋冬
+//		61 ~ 64 : 四种花色(梅兰竹菊)
+/////////////////////玩家座位//////////////////////////////
+//        骰子方位转换(弃用)
+//    东 : 1,5,9  代表东
+//    南 : 2,6,10 代表南
+//    西 : 3,7,11 代表西
+//    北 : 4,8,12 代表北
+//    通过摸东、南、西、北风决定方位
+/////////////////////风圈解义//////////////////////////////
+// 一场麻将里有4个风圈（第一圈为东风圈、第二圈为南风圈、第三圈为西风圈、第四圈为北风圈）
+// 每个风圈里有4局（第一局为东风局、第二局为南风局、第三局为西风局、第四局为北风局）
+// 国标麻将，轮流坐庄，没有连续坐庄一说。
+/////////////////////门风解义//////////////////////////////
+// 门前发牌的那一家,门风为东，然后依照逆时钟方向计算
+/////////////////////番型解义(请看文件末部)///////////////////
+//刻子
+message MahjongGDKeZi {
+  repeated int32 Cards = 1;
+  MJOperate Code = 2;
+  uint64 ByUid = 3;           // 由谁提供
+}
+//提示
+message MahjongGDHint{
+  MJOperate Code = 1;       // 操作码
+  repeated int32 Cards = 2; // 听哪几张牌| 胡牌和自摸皆为一张
+  uint64 ByUid = 3;         // 由谁提供
+}
+//麻将玩家信息
+message MahjongGDPlayer {
+  PlayerInfo  MyInfo = 1;       //
+  repeated int32 HandCards = 2; //手牌
+  repeated MahjongGDKeZi KeZiCards = 3; // 吃牌 桌牌:明在桌面上的牌,即碰、吃、杠后的牌
+  repeated int32 TableCards = 4; //玩家的桌面牌值
+  bool   IsTing = 5;            //是否听牌
+  int64  GainScore = 6;         //输赢分值
+  int64  TotalScore = 7;        //总积分(当不为系统房时,该分值可以为负分)
+  Direct MenFeng = 8;           //门风(庄家==东风)
+  Direct SitDirect = 9;         //座位方位
+  repeated MahjongGDHint OpHints = 10; //玩家可操作(恢复场景)
+}
+//入场
+message EnterGameMJGDResp {
+  uint64 GameID = 1;            //游戏标识
+  uint32 ChairNum = 2;          //椅子编号(不满足req的此项时,将由系统分配,并返回提示)
+  MahjongGDPlayer Player = 3;
+}
+//场景
+message MahjongGDSceneResp {
+  int64  TimeStamp = 1;         // 时间戳
+  int32  RunCount = 2;          // 当前局数
+  int32  RemainCount = 3;       // 剩余张数
+  uint64 BankerID = 4;          // 庄家ID
+  uint64 CurrentID = 5;         // 当前玩家ID
+  string Inning = 6;            // 牌局号
+  int32  HuCard = 7;            // 胡牌,或自摸时的摸起的最后一张
+  Direct QuanFeng = 8;          // 当前局的圈风
+  int32  StartPos = 9;           // 抓牌起始位置(即保留不抓取的牌墙)
+  repeated MahjongGDPlayer AllPlayers = 10;      //玩家列表(吃碰杠)
+}
+//状态
+// 服务端推送
+//(空闲 - Free)
+message MahjongGDStateFreeResp {
+  TimeInfo Times = 1;
+  string Inning = 2;               // 牌局号
+}
+//方位 - Direct (调整座位:仅在第一局开始需决定所座方位,或座位替换新玩家)
+message MahjongGDStateDirectResp {
+  TimeInfo Times = 1;
+  Direct MyDirect = 2;       //东南西北(系统决定)
+}
+//定庄 - Decide 系统定庄
+message MahjongGDStateDecideResp {
+  TimeInfo Times = 1;
+  uint64 BankerID = 2;            // 首局默认座位东方的为庄家
+  Direct QuanFeng = 3;            // 当前局的圈风
+  Direct MenFeng = 4;             // 玩家的门风
+}
+//开始掷骰子 - RollDice 注:决定牌堆的起始位置
+message MahjongGDStateRollDiceResp {
+  TimeInfo Times = 1;
+}
+//(开始游戏) - Start
+message MahjongGDStateStartResp {
+  TimeInfo Times = 1;
+  int32 StartPos = 2;             //抓牌起始位置(即保留不抓取的牌墙)
+}
+//(游戏中) - Playing
+message MahjongGDStatePlayingResp {
+  TimeInfo Times = 1;
+  uint64 UserID = 2;            // 轮到谁
+  int32 Card = 3;               // 只有UserID的玩家有牌值
+}
+//等待操作(仅对有提示的玩家提供)
+message MahjongGDStateWaitOperateResp {
+  TimeInfo Times = 1;
+}
+//(开奖) - Opening
+message MahjongGDStateOpenResp {
+  TimeInfo Times = 1;
+  bool   IsFlow = 2;                        // 是否流局
+  int32  HuCard = 3;                        // 胡牌,或自摸时的摸起的最后一张
+  uint64 WinnerID = 4;                      //胜利者ID（流局时为0）
+  bytes Fans = 5;                           //番型列表 每个元素对应一个番型
+  int32 FanCount = 6;                       //共计番数
+  repeated MahjongGDPlayer AllPlayers = 7;    //所有玩家得分
+}
+//(结束) - Over
+message MahjongGDStateOverResp {
+  TimeInfo Times = 1;
+}
+//////////////////////////////////////////////
+//准备
+message MahjongGDReadyReq {
+  bool IsReady = 1; // 玩家准备，可以取消准备
+}
+message MahjongGDReadyResp {
+  uint64 UserID = 1;
+  bool IsReady = 2; // 玩家准备，可以取消准备
+}
+//
+//庄家扔骰子
+message MahjongGDRollReq {
+}
+message MahjongGDRollResp {
+  uint64 UserID = 1;
+  bytes  Dice = 2;           //骰子决定,起抓牌位置
+}
+// 玩家打出去的牌
+message MahjongGDOutCardReq{
+  int32 Card = 1; //
+}
+message MahjongGDOutCardResp{
+  uint64 UserID = 1;        // 玩家ID
+  int32 Card = 2; //
+}
+// 操作
+message MahjongGDOperateReq{
+  MJOperate Code = 1;       // 操作码 pass表示弃牌
+  repeated int32 Cards = 2; // 吃|碰|杠 时的手牌
+}
+message MahjongGDOperateResp{
+  uint64 UserID = 1;        // 玩家ID
+  MJOperate Code = 2;       // 操作码
+  repeated int32 Cards = 3; // 吃|碰|杠 时的组合牌
+}
+////////////////////////////////
+//
+//发牌
+message MahjongGDDealResp {
+  uint64 UserID = 1;              // 玩家ID
+  int32 CurPos = 2;               // 抓牌起始位置
+  repeated int32 HandCards = 3;   // 玩家的手牌(座位上的玩家才有,且只能拿到自己的牌值)
+}
+//
+// 玩家只能收到自己的
+message MahjongGDHintResp{
+  uint64 UserID = 1;        // 玩家ID
+  repeated MahjongGDHint Hints = 2; //提示 注意:吃牌时,有多种组合 cards仅提供玩家手牌牌值
+}
+//番种()
+enum FanGD_t {
+  FAN_GD_INVALID = 0;       //无效番种
+  //========88番========
+};

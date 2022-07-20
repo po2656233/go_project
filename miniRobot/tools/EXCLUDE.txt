@@ -1,0 +1,4 @@
+./go
+.git
+.idea
+.gitattributes

@@ -1,0 +1,246 @@
+syntax = "proto3";
+package go;
+import "gamecomm.proto";
+// kindID 3008
+////////////////////血流成河介绍/////////////////////////////
+//    血战到底：玩家胡了并不结束这局，继续打,直至所有牌摸完。这样先胡的不一定获利最多，点炮的也能翻身，提高了博弈性和趣味性。牌局结束，一并结算。
+//    刮风下雨：杠在结算时算钱。
+//    庄家：第一局随意，以后每一局由上一局第一个胡牌者当庄，若是一炮双响或一炮三响，由放炮者当庄。
+//    甩色子：由庄家掷两枚骰子以确定端牌的起始位置。12换右 34换对家 56换左
+//    跳牌：庄家摸第14张牌时需隔一沓牌摸上面一张，此谓跳牌。
+//    定张：在一局的开始定下不要哪门牌，以后不能改。一般将一张此颜色的牌面朝下摆放，第一轮打出。
+//    缺（天缺）：一局开始摸上牌后就只有两门牌甚至一门牌，此时报缺。
+//    搭子（坎）：三张数字连续的牌或三张相同的牌称为一个搭子或一坎牌。
+//    堂子：牌桌上打出的牌堆
+//    将：胡牌时的一对牌。
+//    下叫：听牌。缺一门，四个搭子加一对将即可胡牌。
+//    死叫：下的叫实际上不能胡（所有能胡的牌都已经现出）
+//    根（音gēn，通常儿化为gēr，某些地方念成guī）：杠，或者四张相同未成杠（四归一）。
+//    张子：指某张特定的牌。如：二条这个张子怎么能松哦？
+//    绝张（金张）：四张牌已经现了三张，最后一张称为绝张。
+//    自抠（自逮，自摸）：胡自己摸上的牌。
+//    放炮（点炮）：打出的牌被他人胡了。
+//    格：指牌型的大小。
+//    满格（极品）：实际中基础牌型一般8倍封顶，为满格。
+//    查叫：一局结束时，有两家或以上未胡牌，此时查叫。无叫的给有叫的赔叫（赔大或赔小需自行商定，死叫算不算叫需自行商定）。若无叫，杠不计算。
+//    花猫（花猪）：查叫时手中还有三色牌。花猫给所有未胡且非花猫的人赔满格。
+//    ----牌值由万 筒 条组成---
+/////////////////////番型解义(请看文件末部)///////////////////
+//刻子
+message MahjongXLCHKeZi {
+  repeated int32 Cards = 1;
+  MJOperate Code = 2;
+  int32 Gen = 3;  //带根
+  uint64 ByUid = 4;           // 由谁提供
+}
+//提示
+message MahjongXLCHHint{
+  MJOperate Code = 1;       // 操作码
+  repeated int32 Cards = 2; // 听哪几张牌| 胡牌和自摸皆为一张
+  uint64 ByUid = 3;         // 由谁提供
+}
+//结算
+message MahjongXLCHSettle {
+  XLCHFan Fan = 1;        // 番型
+  XLCHJFan JFan = 2;      // 加番
+  int32 Gen = 3;            // 带根数目
+  int64  GainScore = 4;     // 输赢分值
+  uint64 WinID = 5;         // 赢家ID
+}
+//麻将玩家信息
+message MahjongXLCHPlayer {
+  PlayerInfo  MyInfo = 1;       //
+  repeated int32 HandCards = 2; //手牌
+  repeated MahjongXLCHKeZi KeZiCards = 3; // 桌牌:明在桌面上的牌,即碰、杠、胡的牌
+  repeated int32 TableCards = 4;// 玩家的桌面牌值
+  bool   IsHu = 5;              // 是否胡牌
+  bool   IsHuaZhu = 6;          // 是否花猪 查花猪
+  bool   IsTing = 7;            // 是否听牌 查叫
+  int32  QueMen = 8;         // 定张 0:无效 1:万 2:筒 3:条
+  repeated MahjongXLCHSettle Settles = 9; // 每次结算记录
+  int64  TotalScore = 10;        // 总积分(当不为系统房时,该分值可以为负分)
+  Direct SitDirect = 11;         // 座位方位
+  repeated MahjongXLCHHint OpHints = 12; //玩家可操作(恢复场景)
+}
+//入场
+message EnterGameMJXLCHResp {
+  uint64 GameID = 1;            //游戏标识
+  uint32 ChairNum = 2;          //椅子编号(不满足req的此项时,将由系统分配,并返回提示)
+  MahjongXLCHPlayer Player = 3;
+}
+//场景
+message MahjongXLCHSceneResp {
+  int64  TimeStamp = 1;         // 时间戳
+  int32  RunCount = 2;          // 当前局数
+  int32  RemainCount = 3;       // 剩余张数
+  uint64 BankerID = 4;          // 庄家ID
+  uint64 CurrentID = 5;         // 当前玩家ID
+  string Inning = 6;            // 牌局号
+  int32  HuCard = 7;            // 胡牌,或自摸时的摸起的最后一张
+  int32 StartPos = 8;           // 抓牌起始位置(即保留不抓取的牌墙)
+  repeated MahjongXLCHPlayer AllPlayers = 9;      //玩家列表
+}
+//状态
+// 服务端推送
+//(空闲 - Free)
+message MahjongXLCHStateFreeResp {
+  TimeInfo Times = 1;
+  string Inning = 2;               // 牌局号
+}
+//定庄 - Decide系统 定庄 定座次
+message MahjongXLCHDecideResp {
+  uint64 BankerID = 1;            // 首局默认座位东方的为庄家
+}
+message MahjongXLCHSitDirectResp {
+  uint64 UserID = 1;            //
+  Direct SitDirect = 2;          // 玩家方位
+}
+//开始掷骰子 - RollDice 注:决定牌堆的起始位置
+message MahjongXLCHStateRollDiceResp {
+  TimeInfo Times = 1;
+}
+//发牌(开始游戏) - Start
+message MahjongXLCHStateStartResp {
+  TimeInfo Times = 1;
+  int32 StartPos = 2;             //抓牌起始位置(即保留不抓取的牌墙)
+}
+//换三张 骰子之和取6余数+1  换右:12  换对家:34  换左56
+message MahjongXLCHStateExchangeThreeResp {
+  TimeInfo Times = 1;
+}
+//定缺门
+message MahjongXLCHStateDingQueResp {
+  TimeInfo Times = 1;
+  repeated int32 MyCards = 2;       // 提供给别人
+  repeated int32 OtherCards = 3;    // 从别人中获取的
+}
+//(游戏中) - Playing
+message MahjongXLCHStatePlayingResp {
+  TimeInfo Times = 1;
+  uint64 UserID = 2;            // 轮到谁
+  int32 Card = 3;               // 只有UserID的玩家有牌值
+}
+//等待操作(仅对有提示的玩家提供)
+message MahjongXLCHStateWaitOperateResp {
+  TimeInfo Times = 1;
+}
+//(开奖) - Opening
+message MahjongXLCHStateOpenResp {
+  TimeInfo Times = 1;
+  int32  OpCard = 2;                        //下雨 胡牌,或自摸时的摸起的最后一张
+  int32  Fan = 3;                           //番型
+  int64  GainScore = 4;                     //收益
+  uint64 WinnerID = 5;
+  repeated MahjongXLCHPlayer AllPlayers = 6;    //所有玩家得分
+}
+//(结束) - Over
+message MahjongXLCHStateOverResp {
+  TimeInfo Times = 1;
+  repeated MahjongXLCHPlayer AllPlayers = 2;    //所有玩家得分 包含是否听 或花猪
+}
+//查叫 没有听牌 等待退款
+message MahjongXLCHStateTingResp {
+  TimeInfo Times = 1;
+  repeated uint64 NoTings = 2;
+}
+//查花猪 手牌中仍有三种花色 等待结算
+message MahjongXLCHStateHuaZhuResp {
+  TimeInfo Times = 1;
+  repeated uint64 HuaZhu = 2;
+}
+//////////////////////////////////////////////
+//发牌
+message MahjongXLCHDealResp {
+  uint64 UserID = 1;              // 玩家ID
+  int32 CurPos = 2;               // 抓牌起始位置
+  repeated int32 HandCards = 3;   // 玩家的手牌(座位上的玩家才有,且只能拿到自己的牌值)
+}
+//////////////////////////////////////////////
+//准备
+message MahjongXLCHReadyReq {
+  bool IsReady = 1; // 玩家准备，可以取消准备
+}
+message MahjongXLCHReadyResp {
+  uint64 UserID = 1;
+  bool IsReady = 2; // 玩家准备，可以取消准备
+}
+//扔骰子
+message MahjongXLCHRollReq {
+}
+message MahjongXLCHRollResp {
+  uint64 UserID = 1;
+  bytes  Dice = 2;           //骰子决定,起抓牌位置
+}
+//请求换三张
+message MahjongXLCHExchangeReq {
+  repeated int32 HandCards = 1;   // 玩家请求换的三张牌
+}
+message MahjongXLCHExchangeResp {
+  uint64 UserID = 1;              // 玩家ID
+  repeated int32 HandCards = 2;   // 玩家的手牌(座位上的玩家才有,且只能拿到自己的牌值)
+}
+//定缺门
+message MahjongXLCHQueMenReq {
+  int32 QueMen = 1;   //0:默认 1:万 2:筒 3:条
+}
+message MahjongXLCHQueMenResp {
+  uint64 UserID = 1;              // 玩家ID
+  int32 QueMen = 2;   //0:默认 1:万 2:筒 3:条
+}
+// 玩家打出去的牌
+message MahjongXLCHOutCardReq{
+  int32 Card = 1; //
+}
+message MahjongXLCHOutCardResp{
+  uint64 UserID = 1;        // 玩家ID
+  int32 Card = 2; //
+}
+// 操作
+message MahjongXLCHOperateReq{
+  MJOperate Code = 1;       // 操作码 pass表示弃牌
+  repeated int32 Cards = 2; // 碰|杠|胡|自摸 时的手牌
+}
+message MahjongXLCHOperateResp{
+  uint64 UserID = 1;        // 玩家ID
+  MJOperate Code = 2;       // 操作码
+  repeated int32 Cards = 3; // 碰|杠|胡|自摸 时的组合牌
+}
+// 玩家只能收到自己的
+message MahjongXLCHHintResp{
+  uint64 UserID = 1;        // 玩家ID
+  repeated MahjongXLCHHint Hints = 2; //提示 注意:吃牌时,有多种组合 cards仅提供玩家手牌牌值
+}
+//番种
+enum XLCHFan {
+  F_XLCH_INVALID = 0;       //无效番种
+  //一番（x1）
+  F_XLCH_PINGHU = 1;        //平胡
+  F_XLCH_XIAYU = 2;        //下雨 (杠)
+  F_XLCH_GUAFENG = 3;       //刮风(明杠)
+  F_XLCH_BAOYU = 4;        //下暴雨(暗杠)
+  //两番（x2）
+  F_XLCH_DUIDUIHU = 5;       //对对胡
+  //三番（x4）
+  F_XLCH_QINGYISE = 6;        //清一色
+  F_XLCH_DAIYAOJIU = 7;       //带幺九
+  F_XLCH_QIDUI = 8;           //七对
+  //四番（x8）
+  F_XLCH_QINGDUI = 9;       //清对
+  F_XLCH_JIANGDUI = 10;       //将对
+  //五番（x16）
+  F_XLCH_LONGQIDUI = 11;      //龙七对
+  F_XLCH_QINGQIDUI = 12;      //清七对
+  F_XLCH_QINGYAOJIU = 13;     //清幺九
+  // 六番（x32）
+  F_XLCH_TIANHU = 14;          //天胡
+  F_XLCH_DIHU = 15;            //地胡
+  F_XLCH_QINGLONGQIDUI = 16;      //清龙七对
+};
+//加番
+enum XLCHJFan {
+  JF_XLCH_INVALID = 0;      //无效加番
+  //加番
+  JF_XLCH_GANGSHANGHUA = 1;      //杠上花
+  JF_XLCH_GANGSHANGPAO = 2;      //杠上炮
+  JF_XLCH_HAIDILAOYUE = 3;       //海底捞月
+}

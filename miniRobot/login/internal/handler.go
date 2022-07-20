@@ -3,17 +3,15 @@ package internal
 import (
 	"github.com/name5566/leaf/gate"
 	"github.com/name5566/leaf/log"
+	"math/rand"
 	. "miniRobot/base"
-	"miniRobot/msg"
 	protoMsg "miniRobot/msg/go"
 	"reflect"
-	"sync/atomic"
+	"sync"
+	"time"
 )
 
-var clsID uint32
-var tableKey = ""
 var allgames = make([]*protoMsg.GameItem, 0)
-var twiceCount = 0
 
 func init() {
 
@@ -26,12 +24,12 @@ func init() {
 	handleMsg(&protoMsg.ChooseGameResp{}, handleChooseGame)   //反馈--->主页信息
 	handleMsg(&protoMsg.ResultResp{}, handleResultResp)       //反馈--->主页信息
 	handleMsg(&protoMsg.ResultPopResp{}, handleResultPopResp) //反馈--->主页信息
-
+	//充值
 	handleMsg(&protoMsg.PongResp{}, handlePongResp) //反馈--->主页信息
 
 }
 
-//注册模块间的通信
+// 注册模块间的通信
 func handleMsg(m interface{}, h interface{}) {
 	skeleton.RegisterChanRPC(reflect.TypeOf(m), h)
 }
@@ -40,21 +38,10 @@ func handleMsg(m interface{}, h interface{}) {
 
 func handlePongResp(args []interface{}) {
 	_ = args[0].(*protoMsg.PongResp)
-	//a := args[1].(gate.Agent)
-	//player := a.UserData().(*protoMsg.UserInfo)
-	//uid := player.UserID
-	//if player != nil {
-	//	time.AfterFunc(time.Second*5, func() {
-	//		if proxy, ok := msg.GetClientManger().Get(player.UserID); ok {
-	//			proxy.WriteMsg(&protoMsg.PingReq{})
-	//			log.Debug("发送心跳:%v", uid)
-	//		}
-	//	})
-	//}
-
+	//log.Debug("收到心跳")
 }
 
-//-----------------消息处理-----------------
+// -----------------消息处理-----------------
 func handleRegister(args []interface{}) {
 	m := args[0].(*protoMsg.RegisterResp)
 	log.Debug("注册成功:%v", m)
@@ -63,43 +50,27 @@ func handleRegister(args []interface{}) {
 func handleLogin(args []interface{}) {
 	m := args[0].(*protoMsg.LoginResp)
 	a := args[1].(gate.Agent)
-	if msg.GetClientManger().Append(m.MainInfo.UserInfo.UserID, a) == false{
-		return
-	}
+	//if msg.GetClientManger().Append(m.MainInfo.UserInfo.UserID, a) == false{
+	//	return
+	//}
 	a.SetUserData(m.MainInfo.UserInfo)
 	log.Debug("机器人:%v-%v  登录成功!", m.MainInfo.UserInfo.UserID, m.MainInfo.UserInfo.Account)
 
-	//go func(uid uint64) {
-	//	for{
-	//		ticker := time.NewTicker(20*time.Second)
-	//		<-ticker.C
-	//		if proxy,ok:=msg.GetClientManger().Get(uid);ok{
-	//			log.Debug("玩家:%v  发送心跳信息!", uid)
-	//			proxy.WriteMsg(&protoMsg.PingReq{})
-	//		}
-	//	}
-	//}(m.MainInfo.UserInfo.UserID)
-
 	//获取游戏分类列表
 	for _, cls := range m.MainInfo.Classes.Classify {
-	   log.Debug("%v-%v 进入房间%v", m.MainInfo.UserInfo.UserID, m.MainInfo.UserInfo.Account,cls)
-	   msg := &protoMsg.ChooseClassReq{
-	       ID:uint32(cls.ID),
-	       TableKey: cls.Key,
-	   }
-	   a.WriteMsg(msg)
-	   break
-
+		log.Debug("%v-%v 进入房间%v", m.MainInfo.UserInfo.UserID, m.MainInfo.UserInfo.Account, cls)
+		msg := &protoMsg.ChooseClassReq{
+			ID:       uint32(cls.ID),
+			TableKey: cls.Key,
+		}
+		a.WriteMsg(msg)
+		//break
 
 	}
 
 }
 
-func reqClass(a gate.Agent) {
-
-}
-
-//获取房间列表
+// 获取房间列表
 func handleChooseClass(args []interface{}) {
 	m := args[0].(*protoMsg.ChooseClassResp)
 	a := args[1].(gate.Agent)
@@ -119,24 +90,31 @@ func handleChooseClass(args []interface{}) {
 		}
 	}
 
-	if atomic.LoadInt32(&IndexGames) < 0 {
-		atomic.CompareAndSwapInt32(&IndexGames, IndexGames, 0)
-	}
-	size := len(allgames)
-	if 0 < size && 0 <= atomic.LoadInt32(&IndexGames) && atomic.LoadInt32(&IndexGames) < int32(size) {
+	for _, game := range allgames {
 		msg := &protoMsg.ChooseGameReq{
-			Info:    allgames[int(atomic.LoadInt32(&IndexGames))].Info,
+			Info:    game.Info,
 			PageNum: 1,
 		}
 		// log.Debug("共有游戏%v个",len(allgames))
 		// log.Debug("玩家'%v(ID:%v)' GameSize:%v 请求游戏详情:ID:%v  %v", person.Account, person.UserID,len(allgames),allgames[atomic.LoadInt32(&IndexGames)].ID, msg.Info)
 		a.WriteMsg(msg)
 	}
+	//if atomic.LoadInt32(&IndexGames) < 0 {
+	//	atomic.CompareAndSwapInt32(&IndexGames, IndexGames, 0)
+	//}
+	//size := len(allgames)
+	//if 0 < size && 0 <= atomic.LoadInt32(&IndexGames) && atomic.LoadInt32(&IndexGames) < int32(size) {
+	//
+	//}
 
 }
 
-//选择游戏
+// 选择游戏
+var lock = sync.Mutex{}
+
 func handleChooseGame(args []interface{}) {
+	lock.Lock()
+	defer lock.Unlock()
 	m := args[0].(*protoMsg.ChooseGameResp)
 	a := args[1].(gate.Agent)
 	person := a.UserData().(*protoMsg.UserInfo)
@@ -150,17 +128,30 @@ func handleChooseGame(args []interface{}) {
 		if person.Age == 300 {
 			return
 		}
+		if item.GameID == 0 {
+			continue
+		}
 		//  log.Debug("[进前]桌子名称:%v 游戏ID:%v 当前人数:%v ", item.Info.Name, item.GameID, item.Info.MaxOnline)
-		if int64(item.Info.EnterScore) < person.Money && item.Info.HostID == 0 && (val.(uint32)+1 < item.Info.MaxChair || (0 == item.Info.MaxChair && val.(uint32)+1 < 30)) {
+		chair := val.(uint32) + 1
+		if int64(item.Info.EnterScore) < person.Money && item.Info.HostID == 0 &&
+			(chair < item.Info.MaxChair || (0 == item.Info.MaxChair && chair < uint32(TablePeopleMax))) {
 			//不能坐满，留个座位给真实玩家
 			msg := &protoMsg.EnterGameReq{
 				GameID:   item.GameID,
 				Password: item.Info.Password,
 			}
+			//将游戏ID保存至玩家信息
 			person.Age = 300
-			a.WriteMsg(msg)
-			MangerPerson.Store(item.GameID, val.(uint32)+1)
-			log.Debug("[坐下]桌子名称:%v 游戏ID:%v 机器人ID:%v 当前人数:%v 机器人数:%v 最大可容纳:%v", item.Info.Name, item.GameID, person.GetUserID(), item.Info.MaxOnline+val.(uint32)+1, val.(uint32)+1, item.Info.MaxChair)
+			person.AgentID = msg.GameID
+			person.ReferralCode = msg.Password
+			a.SetUserData(person)
+
+			MangerPerson.Store(item.GameID, chair)
+			waitTime := rand.Int() % 20
+			time.AfterFunc(time.Duration(waitTime)*time.Second, func() {
+				a.WriteMsg(msg)
+			})
+			log.Debug("[坐下]桌子名称:%v 游戏ID:%v 机器人ID:%v 当前人数:%v 机器人数:%v 最大可容纳:%v", item.Info.Name, item.GameID, person.GetUserID(), item.Info.MaxOnline+chair, chair, item.Info.MaxChair)
 			return
 		}
 	}
@@ -168,98 +159,45 @@ func handleChooseGame(args []interface{}) {
 	if person.Age == 300 {
 		return
 	}
-	if 1000 < twiceCount {
-		return
-	}
-	atomic.AddInt32(&IndexGames, 1)
-	if int32(len(allgames)) <= atomic.LoadInt32(&IndexGames) {
-		atomic.CompareAndSwapInt32(&IndexGames, IndexGames, 0)
-		twiceCount++
-	}
-	if 0 <= atomic.LoadInt32(&IndexGames) && atomic.LoadInt32(&IndexGames) < int32(len(allgames)) {
-		msg := &protoMsg.ChooseGameReq{
-			Info:    allgames[atomic.LoadInt32(&IndexGames)].Info,
-			PageNum: 0,
-		}
-		// log.Debug("玩家'%v(ID:%v)' twiceCount:%v 请求游戏详情:ID:%v  ", person.Account, person.UserID,twiceCount,allgames[atomic.LoadInt32(&IndexGames)].ID)
-		a.WriteMsg(msg)
-	}
+
+	//atomic.AddInt32(&IndexGames, 1)
+	//if int32(len(allgames)) <= atomic.LoadInt32(&IndexGames) {
+	//	atomic.CompareAndSwapInt32(&IndexGames, IndexGames, 0)
+	//	return
+	//}
+	//if 0 <= atomic.LoadInt32(&IndexGames) && atomic.LoadInt32(&IndexGames) < int32(len(allgames)) {
+	//	msg := &protoMsg.ChooseGameReq{
+	//		Info:    allgames[atomic.LoadInt32(&IndexGames)].Info,
+	//		PageNum: 0,
+	//	}
+	//	// log.Debug("玩家'%v(ID:%v)' twiceCount:%v 请求游戏详情:ID:%v  ", person.Account, person.UserID,twiceCount,allgames[atomic.LoadInt32(&IndexGames)].ID)
+	//	a.WriteMsg(msg)
+	//}
 }
 
-//
 func handleResultResp(args []interface{}) {
-	// m := args[0].(*protoMsg.ResultResp)
+	m := args[0].(*protoMsg.ResultResp)
 	//a := args[1].(gate.Agent)
+	if m.Hints == "下注失败: 无效金额!" {
+		//msg := &protoMsg.RechargeReq{
+		//	Info:    allgames[atomic.LoadInt32(&IndexGames)].Info,
+		//	PageNum: 0,
+		//}
+		//a.WriteMsg(msg)
+		log.Debug("提示:%v", m)
+	}
 	// log.Debug("提示:%v", m)
 }
 
-//选择游戏
+// 弹窗提示
 func handleResultPopResp(args []interface{}) {
 	m := args[0].(*protoMsg.ResultPopResp)
-
 	log.Debug("弹窗提示:%v", m)
 	//	a := args[1].(gate.Agent)
 	//	person := a.UserData().(*protoMsg.UserInfo)
 	//if m.Hints == "您的账号已经在异地登录了!" {
 	//	game.ChanRPC.Go("Broadcast", a, person)
 	//}
-
 }
 
-/////////////////json-->测试用/////////////////////////////
-// 消息处理
-//func handleLoginJson(args []interface{}) {
-//	// 收到的 Test 消息
-//	m := args[0].(jsonMsg.UserLogin)
-//	// 消息的发送者
-//	a := args[1].(gate.Agent)
-//	// 1 查询数据库--判断用户是不是合法
-//	// 2 如果数据库返回查询正确--保存到缓存或者内存
-//	// 输出收到的消息的内容
-//	log.Debug("Test login %v", m.LoginName)
-//	// 给发送者回应一个 Test 消息
-//	a.WriteMsg(&jsonMsg.UserLogin{
-//		LoginName: "client",
-//	})
-//}
-
-//func handleRequestRoomInfoJson(args []interface{})  {
-//	m := args[0].(jsonMsg.RequestRoomInfo)
-//	// 消息的发送者
-//	//a := args[1].(gate.Agent)
-//	// 1 查询数据库--判断用户是不是合法
-//	// 2 如果数据库返回查询正确--保存到缓存或者内存
-//	// 输出收到的消息的内容
-//	log.Debug("Test handleRequestRoomInfoJson %v", m)
-//	// 给发送者回应一个 Test 消息
-//	//a.WriteMsg(&jsonMsg.UserLogin{
-//	//	LoginName: "client",
-//	//})
-//}
-
-//////////////////数据库查询////////////////////////////
-
-//[测试用]
-//a := args[1].(gate.Agent)
-//a.WriteMsg(&protoT.TestPro{
-//	Name:*proto.String("kaile"),
-//	Password:*proto.String("doo"),
-//})
-//Processor.Unmarshal(args[0].([]byte))
-//
-//buf := make([]byte, 32)
-//// 接收消息
-//n:=len(args)
-//m := &proto.TestPro{}
-//proto.Unmarshal(buf[4:n], m)
-//
-//// 消息的发送者
-//a := args[1].(gate.Agent)
-//defer a.Close()
-//
-//// 输出收到的消息的内容
-//log.Debug("name:%v password:%v", m.GetName(), m.GetPassword())
-//
-//
-//// 给发送者回应一个 Hello 消息
-//a.WriteMsg(proto.UserLogin{})
+// ///////////////////////////////////////////////////////////////////////////
