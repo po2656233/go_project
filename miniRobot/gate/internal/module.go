@@ -54,11 +54,8 @@ func (m *Module) OnInit() {
         Processor:       msg.ProcessorProto, //消息处理器对象(proto|json)
         AgentChanRPC:    game.ChanRPC,
     }
-
-
-
 }
-
+var ClientIsRunning[]net.Addr
 func (m *Module) OnDestroy() {
 
     log.Release("清空客户端:%v", len(m.Gate.listWS))
@@ -71,7 +68,7 @@ func (m *Module) OnDestroy() {
 func (gate *Gate) Run(closeSig chan bool) {
     gate.listWS = make([]*network.WSClient, 0)
     log.Debug("---开始")
-    var ClientIsRunning[]net.Addr
+
 
     for i := 0; i < base.ALLCount; i++ {
         var client *network.WSClient
@@ -83,7 +80,7 @@ func (gate *Gate) Run(closeSig chan bool) {
             client.ConnectInterval = 10 * time.Second
             client.PendingWriteNum = conf.PendingWriteNum
             //client.LenMsgLen = 4
-            client.AutoReconnect = false
+            client.AutoReconnect = true
             client.MaxMsgLen = math.MaxUint32
             client.NewAgent = func(conn *network.WSConn) network.Agent {
                 //for _,addr:=range ClientIsRunning{
@@ -91,7 +88,7 @@ func (gate *Gate) Run(closeSig chan bool) {
                 //       return nil
                 //   }
                 //}
-                //ClientIsRunning = append(ClientIsRunning,conn.LocalAddr())
+                ClientIsRunning = append(ClientIsRunning,conn.LocalAddr())
                 a := &agent{conn: conn, gate: gate}
                 if gate.AgentChanRPC != nil {
                     gate.AgentChanRPC.Go("NewAgent", a)

@@ -1,0 +1,270 @@
+syntax = "proto3";
+package go;
+import "gamecomm.proto";
+// kindID 3009
+////////////////////血战到底介绍/////////////////////////////
+//    血战到底：一家胡了并不结束这局，而是未胡的玩家继续打，直到有三家都胡或者余下的玩家摸完牌。这样先胡的不一定获利最多，点炮的也能翻身，提高了博弈性和趣味性。牌局结束，一并结算。
+//    刮风下雨：杠在结算时算钱。
+//    庄家：第一局随意，以后每一局由上一局第一个胡牌者当庄，若是一炮双响或一炮三响，由放炮者当庄。
+//    甩色子：由庄家掷两枚骰子以确定端牌的起始位置。12换右 34换对家 56换左
+//    跳牌：庄家摸第14张牌时需隔一沓牌摸上面一张，此谓跳牌。
+//    定张：在一局的开始定下不要哪门牌，以后不能改。一般将一张此颜色的牌面朝下摆放，第一轮打出。
+//    缺（天缺）：一局开始摸上牌后就只有两门牌甚至一门牌，此时报缺。
+//    搭子（坎）：三张数字连续的牌或三张相同的牌称为一个搭子或一坎牌。
+//    堂子：牌桌上打出的牌堆
+//    将：胡牌时的一对牌。
+//    下叫：听牌。缺一门，四个搭子加一对将即可胡牌。
+//    死叫：下的叫实际上不能胡（所有能胡的牌都已经现出）
+//    根（音gēn，通常儿化为gēr，某些地方念成guī）：杠，或者四张相同未成杠（四归一）。
+//    张子：指某张特定的牌。如：二条这个张子怎么能松哦？
+//    绝张（金张）：四张牌已经现了三张，最后一张称为绝张。
+//    自抠（自逮，自摸）：胡自己摸上的牌。
+//    放炮（点炮）：打出的牌被他人胡了。
+//    格：指牌型的大小。
+//    满格（极品）：实际中基础牌型一般8倍封顶，为满格。
+//    查叫：一局结束时，有两家或以上未胡牌，此时查叫。无叫的给有叫的赔叫（赔大或赔小需自行商定，死叫算不算叫需自行商定）。若无叫，杠不计算。
+//    花猫（花猪）：查叫时手中还有三色牌。花猫给所有未胡且非花猫的人赔满格。
+//    ----牌值由万 筒 条组成---
+/////////////////////番型解义(请看文件末部)///////////////////
+//刻子
+message MahjongXZDDKeZi {
+  repeated int32 Cards = 1;
+  MJOperate Code = 2;
+  int32 Gen = 3;              // 带根
+  uint64 ByUid = 4;           // 由谁提供
+}
+//提示
+message MahjongXZDDHint{
+  MJOperate Code = 1;       // 操作码
+  repeated int32 Cards = 2; // 听哪几张牌| 胡牌和自摸皆为一张
+  uint64 ByUid = 3;         // 由谁提供
+}
+//结算
+message MahjongXZDDSettle {
+  XZDDFan Fan = 1;        // 番型
+  XZDDJFan JFan = 2;      // 加番
+  int32 Gen = 3;            // 带根数目
+  int64  GainScore = 4;     // 输赢分值
+  uint64 WinID = 5;         // 赢家ID
+}
+//麻将玩家信息
+message MahjongXZDDPlayer {
+  PlayerInfo  MyInfo = 1;       //
+  repeated int32 HandCards = 2; //手牌
+  repeated MahjongXZDDKeZi KeZiCards = 3; // 桌牌:明在桌面上的牌,即碰、杠、胡的牌
+  repeated int32 TableCards = 4;// 玩家的桌面牌值
+  bool   IsHu = 5;              // 是否胡牌
+  bool   IsHuaZhu = 6;          // 是否花猪 查花猪
+  bool   IsTing = 7;            // 是否听牌 查叫
+  int32  QueMen = 8;            // 定张 0:无效 1:万 2:筒 3:条
+  repeated MahjongXZDDSettle Settles = 9; // 每次结算记录
+  int64  TotalScore = 10;        // 总积分(当不为系统房时,该分值可以为负分)
+  Direct SitDirect = 11;         // 座位方位
+  repeated MahjongXZDDHint OpHints = 12; //玩家可操作(恢复场景)
+}
+//入场
+message EnterGameMJXZDDResp {
+  uint64 GameID = 1;            //游戏标识
+  uint32 ChairNum = 2;          //椅子编号(不满足req的此项时,将由系统分配,并返回提示)
+  MahjongXZDDPlayer Player = 3;
+}
+//场景
+message MahjongXZDDSceneResp {
+  int64  TimeStamp = 1;         // 时间戳
+  int32  RunCount = 2;          // 当前局数
+  int32  RemainCount = 3;       // 剩余张数
+  uint64 BankerID = 4;          // 庄家ID
+  uint64 CurrentID = 5;         // 当前玩家ID
+  string Inning = 6;            // 牌局号
+  int32  HuCard = 7;            // 胡牌,或自摸时的摸起的最后一张
+  int32 StartPos = 8;           // 抓牌起始位置(即保留不抓取的牌墙)
+  repeated MahjongXZDDPlayer AllPlayers = 9;      //玩家列表
+}
+//状态
+// 服务端推送
+//(空闲 - Free)
+message MahjongXZDDStateFreeResp {
+  TimeInfo Times = 1;
+  string Inning = 2;               // 牌局号
+}
+//定庄 - Decide系统 定庄 定座次
+message MahjongXZDDDecideResp {
+  uint64 BankerID = 1;            // 首局默认座位东方的为庄家
+}
+message MahjongXZDDSitDirectResp {
+  uint64 UserID = 1;            //
+  Direct SitDirect = 2;          // 玩家方位
+}
+//开始掷骰子 - RollDice 注:决定牌堆的起始位置
+message MahjongXZDDStateRollDiceResp {
+  TimeInfo Times = 1;
+}
+//发牌(开始游戏) - Start
+message MahjongXZDDStateStartResp {
+  TimeInfo Times = 1;
+  int32 StartPos = 2;             //抓牌起始位置(即保留不抓取的牌墙)
+}
+//换三张 骰子之和取6余数+1  换右:12  换对家:34  换左56
+message MahjongXZDDStateExchangeThreeResp {
+  TimeInfo Times = 1;
+}
+//定缺门
+message MahjongXZDDStateDingQueResp {
+  TimeInfo Times = 1;
+  repeated int32 MyCards = 2;       // 提供给别人
+  repeated int32 OtherCards = 3;    // 从别人中获取的
+}
+//(游戏中) - Playing
+message MahjongXZDDStatePlayingResp {
+  TimeInfo Times = 1;
+  uint64 UserID = 2;            // 轮到谁
+  int32 Card = 3;               // 只有UserID的玩家有牌值
+}
+//等待操作(仅对有提示的玩家提供)
+message MahjongXZDDStateWaitOperateResp {
+  TimeInfo Times = 1;
+}
+//(开奖) - Opening
+message MahjongXZDDStateOpenResp {
+  TimeInfo Times = 1;
+  int32  OpCard = 2;                        //下雨 胡牌,或自摸时的摸起的最后一张
+  int32  Fan = 3;                           //番型
+  int64  GainScore = 4;                     //收益
+  uint64 WinnerID = 5;
+}
+//(结束) - Over
+message MahjongXZDDStateOverResp {
+  TimeInfo Times = 1;
+  repeated MahjongXZDDPlayer AllPlayers = 2;    //所有玩家得分 包含是否听 或花猪
+}
+//查叫 没有听牌 等待退款
+message MahjongXZDDStateTingResp {
+  TimeInfo Times = 1;
+  repeated uint64 NoTings = 2;
+}
+//查花猪 手牌中仍有三种花色 等待结算
+message MahjongXZDDStateHuaZhuResp {
+  TimeInfo Times = 1;
+  repeated uint64 HuaZhu = 2;
+}
+//////////////////////////////////////////////
+//发牌
+message MahjongXZDDDealResp {
+  uint64 UserID = 1;              // 玩家ID
+  int32 CurPos = 2;               // 抓牌起始位置
+  repeated int32 HandCards = 3;   // 玩家的手牌(座位上的玩家才有,且只能拿到自己的牌值)
+}
+//////////////////////////////////////////////
+//准备
+message MahjongXZDDReadyReq {
+  bool IsReady = 1; // 玩家准备，可以取消准备
+}
+message MahjongXZDDReadyResp {
+  uint64 UserID = 1;
+  bool IsReady = 2; // 玩家准备，可以取消准备
+}
+//扔骰子
+message MahjongXZDDRollReq {
+}
+message MahjongXZDDRollResp {
+  uint64 UserID = 1;
+  bytes  Dice = 2;           //骰子决定,起抓牌位置
+}
+//请求换三张
+message MahjongXZDDExchangeReq {
+  repeated int32 HandCards = 1;   // 玩家请求换的三张牌
+}
+message MahjongXZDDExchangeResp {
+  uint64 UserID = 1;              // 玩家ID
+  repeated int32 HandCards = 2;   // 玩家的手牌(座位上的玩家才有,且只能拿到自己的牌值)
+}
+//定缺门
+message MahjongXZDDQueMenReq {
+  int32 QueMen = 1;   //0:默认 1:万 2:筒 3:条
+}
+message MahjongXZDDQueMenResp {
+  uint64 UserID = 1;              // 玩家ID
+  int32 QueMen = 2;   //0:默认 1:万 2:筒 3:条
+}
+// 玩家打出去的牌
+message MahjongXZDDOutCardReq{
+  int32 Card = 1; //
+}
+message MahjongXZDDOutCardResp{
+  uint64 UserID = 1;        // 玩家ID
+  int32 Card = 2; //
+}
+// 操作
+message MahjongXZDDOperateReq{
+  MJOperate Code = 1;       // 操作码 pass表示弃牌
+  repeated int32 Cards = 2; // 碰|杠|胡|自摸 时的手牌
+}
+message MahjongXZDDOperateResp{
+  uint64 UserID = 1;        // 玩家ID
+  MJOperate Code = 2;       // 操作码
+  repeated int32 Cards = 3; // 碰|杠|胡|自摸 时的组合牌
+}
+// 玩家只能收到自己的
+message MahjongXZDDHintResp{
+  uint64 UserID = 1;        // 玩家ID
+  repeated MahjongXZDDHint Hints = 2; //提示 注意:吃牌时,有多种组合 cards仅提供玩家手牌牌值
+}
+//    　基本番: (注意以下番型均不重复计算，只按最大番算。)
+//    　　一番（x1）：
+//    　　平胡（基本胡），一番，四坎牌加一对将。如23445677筒345789条。
+//    　　两番（x2）：
+//    　　对对胡（大对子）， 玩家手牌除了一对对牌以外，剩下的都是三张一对的，一共四对。如111222444万33399筒。
+//    　　三番（x4）：
+//    　　清一色，玩家胡牌的手牌全部都是一门花色。如11333222456999条。
+//    　　带幺九，玩家手牌中，全部是用1的连牌或者9的连牌组成的牌。如111222333万78999筒。
+//    　　七对，玩家的手牌全部是两张一对的，没有碰过和杠过，如2244552299万1199筒。
+//    　　四番（x8）
+//    　　清对，四番，玩家手上的牌是清一色的对对胡。如99887755221166筒。
+//    　　将对，玩家手上的牌是带二、五、八的对对胡。如222555888条88855万。
+//    　　五番（x16）
+//    　　龙七对，玩家手牌为暗七对牌型，没有碰过或者杠过，并且有四张牌是一样的，叫龙七对。不再计七对，同时减1根。如
+//    　　11222244筒557799万
+//    　　清七对，玩家手上的牌是清一色的七对。如11334466778899条。
+//    　　清幺九，清一色的幺九，如11123777888999铜。
+//    　　六番（x32）
+//    　　天胡，打牌的过程中，庄家在第一次模完牌后，就胡牌，叫天胡。
+//    　　地胡，在打牌过程中，非庄家在第一次摸完牌后就可以下叫，第一轮摸牌后就胡牌，叫地胡。
+//    　　青龙七对，玩家手牌是清一色的龙七对，叫清龙七对，如11224444557799万。算番时减 1根。
+//    　　另加番：
+//    　　杠上花，1番，杠后自模胡牌（杠了之后补牌而胡） 。
+//    　　杠上炮，1番，玩家在杠牌时，先杠一张牌，再打掉一张牌，而打出的这张牌正好时其他玩家胡牌所需要的叫牌时，这种情况叫杠上炮。即玩家杠了后补牌，打出，然后给其他玩家胡了。
+//    　　根，1番，四张同样的牌不作杠算1根，胡牌时1根加1番。
+//番种
+enum XZDDFan {
+  F_XZDD_INVALID = 0;       //无效番种
+  //一番（x1）
+  F_XZDD_PINGHU = 1;        //平胡
+  F_XZDD_XIAYU = 2;        //下雨 (杠)
+  F_XZDD_GUAFENG = 3;       //刮风(明杠)
+  F_XZDD_BAOYU = 4;        //下暴雨(暗杠)
+  //两番（x2）
+  F_XZDD_DUIDUIHU = 5;       //对对胡
+  //三番（x4）
+  F_XZDD_QINGYISE = 6;        //清一色
+  F_XZDD_DAIYAOJIU = 7;       //带幺九
+  F_XZDD_QIDUI = 8;           //七对
+  //四番（x8）
+  F_XZDD_QINGDUI = 9;         //清对
+  F_XZDD_JIANGDUI = 10;       //将对【注：由于有些地区无此胡法 暂不纳入算番】
+  //五番（x16）
+  F_XZDD_LONGQIDUI = 11;      //龙七对
+  F_XZDD_QINGQIDUI = 12;      //清七对
+  F_XZDD_QINGYAOJIU = 13;     //清幺九
+  // 六番（x32）
+  F_XZDD_TIANHU = 14;          //天胡
+  F_XZDD_DIHU = 15;            //地胡
+  F_XZDD_QINGLONGQIDUI = 16;      //清龙七对
+};
+//加番
+enum XZDDJFan {
+  JF_XZDD_INVALID = 0;      //无效加番
+  //加番
+  JF_XZDD_GANGSHANGHUA = 1;      //杠上花
+  JF_XZDD_GANGSHANGPAO = 2;      //杠上炮
+  JF_XZDD_HAIDILAOYUE = 3;       //海底捞月
+}

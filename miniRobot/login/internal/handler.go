@@ -4,7 +4,6 @@ import (
 	"github.com/name5566/leaf/gate"
 	"github.com/name5566/leaf/log"
 	. "miniRobot/base"
-	"miniRobot/msg"
 	protoMsg "miniRobot/msg/go"
 	"reflect"
 	"sync/atomic"
@@ -40,18 +39,7 @@ func handleMsg(m interface{}, h interface{}) {
 
 func handlePongResp(args []interface{}) {
 	_ = args[0].(*protoMsg.PongResp)
-	//a := args[1].(gate.Agent)
-	//player := a.UserData().(*protoMsg.UserInfo)
-	//uid := player.UserID
-	//if player != nil {
-	//	time.AfterFunc(time.Second*5, func() {
-	//		if proxy, ok := msg.GetClientManger().Get(player.UserID); ok {
-	//			proxy.WriteMsg(&protoMsg.PingReq{})
-	//			log.Debug("发送心跳:%v", uid)
-	//		}
-	//	})
-	//}
-
+	//log.Debug("收到心跳")
 }
 
 //-----------------消息处理-----------------
@@ -63,22 +51,13 @@ func handleRegister(args []interface{}) {
 func handleLogin(args []interface{}) {
 	m := args[0].(*protoMsg.LoginResp)
 	a := args[1].(gate.Agent)
-	if msg.GetClientManger().Append(m.MainInfo.UserInfo.UserID, a) == false{
-		return
-	}
+	//if msg.GetClientManger().Append(m.MainInfo.UserInfo.UserID, a) == false{
+	//	return
+	//}
 	a.SetUserData(m.MainInfo.UserInfo)
 	log.Debug("机器人:%v-%v  登录成功!", m.MainInfo.UserInfo.UserID, m.MainInfo.UserInfo.Account)
 
-	//go func(uid uint64) {
-	//	for{
-	//		ticker := time.NewTicker(20*time.Second)
-	//		<-ticker.C
-	//		if proxy,ok:=msg.GetClientManger().Get(uid);ok{
-	//			log.Debug("玩家:%v  发送心跳信息!", uid)
-	//			proxy.WriteMsg(&protoMsg.PingReq{})
-	//		}
-	//	}
-	//}(m.MainInfo.UserInfo.UserID)
+
 
 	//获取游戏分类列表
 	for _, cls := range m.MainInfo.Classes.Classify {
@@ -151,7 +130,7 @@ func handleChooseGame(args []interface{}) {
 			return
 		}
 		//  log.Debug("[进前]桌子名称:%v 游戏ID:%v 当前人数:%v ", item.Info.Name, item.GameID, item.Info.MaxOnline)
-		if int64(item.Info.EnterScore) < person.Money && item.Info.HostID == 0 && (val.(uint32)+1 < item.Info.MaxChair || (0 == item.Info.MaxChair && val.(uint32)+1 < 30)) {
+		if int64(item.Info.EnterScore) < person.Money && item.Info.HostID == 0 && (val.(uint32)+1 < item.Info.MaxChair || (0 == item.Info.MaxChair && val.(uint32)+1 < 10)) {
 			//不能坐满，留个座位给真实玩家
 			msg := &protoMsg.EnterGameReq{
 				GameID:   item.GameID,
@@ -168,13 +147,15 @@ func handleChooseGame(args []interface{}) {
 	if person.Age == 300 {
 		return
 	}
-	if 1000 < twiceCount {
-		return
-	}
+	//if 1000 < twiceCount {
+	//	return
+	//}
 	atomic.AddInt32(&IndexGames, 1)
 	if int32(len(allgames)) <= atomic.LoadInt32(&IndexGames) {
 		atomic.CompareAndSwapInt32(&IndexGames, IndexGames, 0)
-		twiceCount++
+		//twiceCount++
+
+		return
 	}
 	if 0 <= atomic.LoadInt32(&IndexGames) && atomic.LoadInt32(&IndexGames) < int32(len(allgames)) {
 		msg := &protoMsg.ChooseGameReq{
