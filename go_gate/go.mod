@@ -17,7 +17,7 @@ require (
 	github.com/stretchr/testify v1.4.0 // indirect
 	github.com/tomasen/realip v0.0.0-20180522021738-f0c99a92ddce
 	github.com/vmihailenco/msgpack v4.0.4+incompatible // indirect
-	golang.org/x/sys v0.0.0-20200202164722-d101bd2416d5 // indirect
+	golang.org/x/sys v0.1.0 // indirect
 	google.golang.org/appengine v1.6.5 // indirect
 	google.golang.org/protobuf v1.27.1
 )
