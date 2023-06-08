@@ -22,4 +22,5 @@ var (
 	TimerDispatcherLen = 10000 //定时器分配数
 	AsynCallLen        = 10000 //异步调用的数目
 	ChanRPCLen         = 10000 //信道RPC的数目
+
 )

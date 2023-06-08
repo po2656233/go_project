@@ -10,5 +10,7 @@
 	"dbPassword":"741963",
 	"dbAddress":"127.0.0.1",
 	"dbPort":"3306",
-	"dbName":"minigame"
+	"dbName":"minigame",
+	"robotCount": 800,
+	"tablePeopleMax": 100
 }

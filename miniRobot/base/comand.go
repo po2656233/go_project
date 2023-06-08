@@ -5,8 +5,7 @@ const (
 	WaitTime       = 5
 	ALLCount       = 800
 	TablePeopleMax = 100
-	//注册
-	//登录
+	// 注册 登录
 	MainLogin          = 201 //-> 登录
 	SubLoginResult     = 101 //-> 登录结果
 	SubMasterInfo      = 102 //-> 主页信息

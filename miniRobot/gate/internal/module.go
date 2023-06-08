@@ -5,7 +5,6 @@ import (
 	"github.com/name5566/leaf/log"
 	"github.com/name5566/leaf/network"
 	"math"
-	"miniRobot/base"
 	"miniRobot/conf"
 	"miniRobot/game"
 	"miniRobot/msg"
@@ -69,7 +68,7 @@ func (gate *Gate) Run(closeSig chan bool) {
 	gate.listWS = make([]*network.WSClient, 0)
 	log.Debug("---开始")
 
-	for i := 0; i < base.ALLCount; i++ {
+	for i := 0; i < conf.Server.TablePeopleMax; i++ {
 		var client *network.WSClient
 		if gate.WSAddr != "" {
 			client = new(network.WSClient)

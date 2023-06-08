@@ -5,6 +5,7 @@ import (
 	"github.com/name5566/leaf/log"
 	"math/rand"
 	. "miniRobot/base"
+	"miniRobot/conf"
 	protoMsg "miniRobot/msg/go"
 	"reflect"
 	"sync"
@@ -134,7 +135,7 @@ func handleChooseGame(args []interface{}) {
 		//  log.Debug("[进前]桌子名称:%v 游戏ID:%v 当前人数:%v ", item.Info.Name, item.GameID, item.Info.MaxOnline)
 		chair := val.(uint32) + 1
 		if int64(item.Info.EnterScore) < person.Money && item.Info.HostID == 0 &&
-			(chair < item.Info.MaxChair || (0 == item.Info.MaxChair && chair < uint32(TablePeopleMax))) {
+			(chair < item.Info.MaxChair || (0 == item.Info.MaxChair && chair < uint32(conf.Server.TablePeopleMax))) {
 			//不能坐满，留个座位给真实玩家
 			msg := &protoMsg.EnterGameReq{
 				GameID:   item.GameID,

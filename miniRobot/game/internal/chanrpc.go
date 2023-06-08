@@ -7,6 +7,7 @@ import (
 	"github.com/name5566/leaf/log"
 	"io"
 	. "miniRobot/base"
+	"miniRobot/conf"
 	"miniRobot/login"
 	protoMsg "miniRobot/msg/go"
 	"os"
@@ -29,7 +30,7 @@ var node = nodeType{allNames: make([]string, 0), Mutex: &sync.Mutex{}}
 // 广播消息
 // 这里是对所有玩家进行通知，通知单个游戏的所有玩家，请在单个游戏里实现
 func init() {
-	CreateRobot(ALLCount)
+	CreateRobot(conf.Server.TablePeopleMax)
 	skeleton.RegisterChanRPC("NewAgent", rpcNewAgent)
 	skeleton.RegisterChanRPC("CloseAgent", rpcCloseAgent)
 	AsyncChan.Register("Broadcast", rpcBroadcast)
