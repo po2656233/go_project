@@ -3,16 +3,14 @@ package internal
 import (
 	"github.com/name5566/leaf/gate"
 	"github.com/name5566/leaf/log"
-	"math/rand"
 	. "miniRobot/base"
 	"miniRobot/conf"
 	protoMsg "miniRobot/msg/go"
 	"reflect"
-	"sync"
-	"time"
 )
 
 var allgames = make([]*protoMsg.GameItem, 0)
+var count int = 0
 
 func init() {
 
@@ -51,11 +49,9 @@ func handleRegister(args []interface{}) {
 func handleLogin(args []interface{}) {
 	m := args[0].(*protoMsg.LoginResp)
 	a := args[1].(gate.Agent)
-	//if msg.GetClientManger().Append(m.MainInfo.UserInfo.UserID, a) == false{
-	//	return
-	//}
+	count++
 	a.SetUserData(m.MainInfo.UserInfo)
-	log.Debug("机器人:%v-%v  登录成功!", m.MainInfo.UserInfo.UserID, m.MainInfo.UserInfo.Account)
+	log.Debug("机器人:%v-%v  登录成功! 总人数:%v", m.MainInfo.UserInfo.UserID, m.MainInfo.UserInfo.Account, count)
 
 	//获取游戏分类列表
 	for _, cls := range m.MainInfo.Classes.Classify {
@@ -77,7 +73,6 @@ func handleChooseClass(args []interface{}) {
 	a := args[1].(gate.Agent)
 
 	//person := a.UserData().(*protoMsg.UserInfo)
-
 	for _, item := range m.Games.Items {
 		have := false
 		for _, game := range allgames {
@@ -100,35 +95,24 @@ func handleChooseClass(args []interface{}) {
 		// log.Debug("玩家'%v(ID:%v)' GameSize:%v 请求游戏详情:ID:%v  %v", person.Account, person.UserID,len(allgames),allgames[atomic.LoadInt32(&IndexGames)].ID, msg.Info)
 		a.WriteMsg(msg)
 	}
-	//if atomic.LoadInt32(&IndexGames) < 0 {
-	//	atomic.CompareAndSwapInt32(&IndexGames, IndexGames, 0)
-	//}
-	//size := len(allgames)
-	//if 0 < size && 0 <= atomic.LoadInt32(&IndexGames) && atomic.LoadInt32(&IndexGames) < int32(size) {
-	//
-	//}
-
 }
 
 // 选择游戏
-var lock = sync.Mutex{}
-
 func handleChooseGame(args []interface{}) {
-	lock.Lock()
-	defer lock.Unlock()
 	m := args[0].(*protoMsg.ChooseGameResp)
 	a := args[1].(gate.Agent)
 	person := a.UserData().(*protoMsg.UserInfo)
 
 	for _, item := range m.Tables.Items {
+		if person.Age == 300 {
+			return
+		}
 		val, ok := MangerPerson.Load(item.GameID)
 		if !ok {
 			MangerPerson.Store(item.GameID, uint32(0))
 			val, _ = MangerPerson.Load(item.GameID)
 		}
-		if person.Age == 300 {
-			return
-		}
+
 		if item.GameID == 0 {
 			continue
 		}
@@ -148,32 +132,12 @@ func handleChooseGame(args []interface{}) {
 			a.SetUserData(person)
 
 			MangerPerson.Store(item.GameID, chair)
-			waitTime := rand.Int() % 20
-			time.AfterFunc(time.Duration(waitTime)*time.Second, func() {
-				a.WriteMsg(msg)
-			})
+			a.WriteMsg(msg)
 			log.Debug("[坐下]桌子名称:%v 游戏ID:%v 机器人ID:%v 当前人数:%v 机器人数:%v 最大可容纳:%v", item.Info.Name, item.GameID, person.GetUserID(), item.Info.MaxOnline+chair, chair, item.Info.MaxChair)
 			return
 		}
 	}
 
-	if person.Age == 300 {
-		return
-	}
-
-	//atomic.AddInt32(&IndexGames, 1)
-	//if int32(len(allgames)) <= atomic.LoadInt32(&IndexGames) {
-	//	atomic.CompareAndSwapInt32(&IndexGames, IndexGames, 0)
-	//	return
-	//}
-	//if 0 <= atomic.LoadInt32(&IndexGames) && atomic.LoadInt32(&IndexGames) < int32(len(allgames)) {
-	//	msg := &protoMsg.ChooseGameReq{
-	//		Info:    allgames[atomic.LoadInt32(&IndexGames)].Info,
-	//		PageNum: 0,
-	//	}
-	//	// log.Debug("玩家'%v(ID:%v)' twiceCount:%v 请求游戏详情:ID:%v  ", person.Account, person.UserID,twiceCount,allgames[atomic.LoadInt32(&IndexGames)].ID)
-	//	a.WriteMsg(msg)
-	//}
 }
 
 func handleResultResp(args []interface{}) {

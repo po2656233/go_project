@@ -2,9 +2,9 @@ package base
 
 // MainID 200+ || SubID 100+
 const (
-	WaitTime       = 5
-	ALLCount       = 800
-	TablePeopleMax = 100
+	WaitTime = 5
+	//ALLCount       = 800
+	//TablePeopleMax = 100
 	// 注册 登录
 	MainLogin          = 201 //-> 登录
 	SubLoginResult     = 101 //-> 登录结果

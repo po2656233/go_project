@@ -68,32 +68,34 @@ func (gate *Gate) Run(closeSig chan bool) {
 	gate.listWS = make([]*network.WSClient, 0)
 	log.Debug("---开始")
 
-	for i := 0; i < conf.Server.TablePeopleMax; i++ {
-		var client *network.WSClient
-		if gate.WSAddr != "" {
-			client = new(network.WSClient)
-			client.Addr = gate.WSAddr
-			client.ConnNum = 1
-			client.HandshakeTimeout = 10 * time.Second
-			client.ConnectInterval = 10 * time.Second
-			client.PendingWriteNum = conf.PendingWriteNum
-			//client.LenMsgLen = 4
-			client.AutoReconnect = true
-			client.MaxMsgLen = math.MaxUint32
-			client.NewAgent = func(conn *network.WSConn) network.Agent {
-				ClientIsRunning = append(ClientIsRunning, conn.LocalAddr())
-				a := &agent{conn: conn, gate: gate}
-				if gate.AgentChanRPC != nil {
-					gate.AgentChanRPC.Go("NewAgent", a)
+	for i := 0; i < conf.Server.RobotCount; i++ {
+		go func() {
+			var client *network.WSClient
+			if gate.WSAddr != "" {
+				client = new(network.WSClient)
+				client.Addr = gate.WSAddr
+				client.ConnNum = 1
+				client.HandshakeTimeout = 10 * time.Second
+				client.ConnectInterval = 10 * time.Second
+				client.PendingWriteNum = conf.PendingWriteNum
+				//client.LenMsgLen = 4
+				client.AutoReconnect = true
+				client.MaxMsgLen = math.MaxUint32
+				client.NewAgent = func(conn *network.WSConn) network.Agent {
+					ClientIsRunning = append(ClientIsRunning, conn.LocalAddr())
+					a := &agent{conn: conn, gate: gate}
+					if gate.AgentChanRPC != nil {
+						gate.AgentChanRPC.Go("NewAgent", a)
+					}
+					log.Release("new client:%v\treal count:%v", conn.LocalAddr(), len(ClientIsRunning))
+					return a
 				}
-				log.Release("new client:%v\treal count:%v", conn.LocalAddr(), len(ClientIsRunning))
-				return a
 			}
-		}
-		if client != nil {
-			client.Start()
-			gate.listWS = append(gate.listWS, client)
-		}
+			if client != nil {
+				client.Start()
+				gate.listWS = append(gate.listWS, client)
+			}
+		}()
 
 	}
 	//开启的客户端数

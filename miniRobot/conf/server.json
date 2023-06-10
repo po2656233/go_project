@@ -1,7 +1,7 @@
 {
 	"logLevel": "debug",
 	"logPath": "",
-	"wsAddr": "ws://127.0.0.1:9950",
+	"wsAddr": "ws://121.37.211.227:9950",
 	"maxConnNum": 2000000,
 	"profilePath":"../msg/go",
 	"tcpRedis":"127.0.0.1:6379",
@@ -12,5 +12,5 @@
 	"dbPort":"3306",
 	"dbName":"minigame",
 	"robotCount": 800,
-	"tablePeopleMax": 100
+	"tablePeopleMax": 130
 }

@@ -10,7 +10,7 @@ var (
 	LogFlag = log.LstdFlags | log.Lshortfile ////Lshortfile:输出文件名和行号 LstdFlags：标准输出
 
 	// gate conf
-	PendingWriteNum        = 13000 //挂起数目
+	PendingWriteNum        = 20000 //挂起数目
 	MaxMsgLen       uint32 = 4096  //包体最大长度
 	MinMsgLen              = 1
 	HTTPTimeout            = 10 * time.Second //HTTP网络延迟10秒
